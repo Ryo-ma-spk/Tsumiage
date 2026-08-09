@@ -82,12 +82,30 @@ export interface StudyState {
 export interface PointStatus {
   point: KnowledgePoint;
   level: MasteryLevel;
-  /** 定着していたが日が空いて復習が必要な状態 */
+  /**
+   * 一度でも定着に到達したか。すごろくの「通過したマス」にあたる。
+   * 忘れても取り消されない（踏破率が後退しないのはこの値を使うから）。
+   */
+  everMastered: boolean;
+  /** 初めて定着に到達した日。実績ペースの計測に使う */
+  firstMasteredAt: string | null;
+  /**
+   * 鮮度が切れると予測される日（ISO 8601）。
+   * いま定着していない観点は null。
+   */
+  staleAt: string | null;
+  /** いまの鮮度 0〜1。1 = 直後、0 = 切れている */
+  freshness: number;
+  /** 鮮度が切れていて復習が要る状態 */
   needsReview: boolean;
   /** 先行観点が未達でまだ開放されていない */
   locked: boolean;
   /** 志望校の重み補正を適用したあとの重み */
   weight: number;
+  /** 依存グラフ上の深さ。0 は先行観点を持たない出発点 */
+  depth: number;
+  /** その観点を踏むことで先に進める観点の数 */
+  descendants: number;
   correctCount: number;
   lastAttemptAt: string | null;
 }

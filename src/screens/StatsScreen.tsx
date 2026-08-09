@@ -1,9 +1,9 @@
-import { AlertTriangle, CheckCircle2, Settings } from "lucide-react";
-import type { PointStatus } from "../types";
+import { AlertTriangle, CheckCircle2, Settings, TrendingDown } from "lucide-react";
+import type { PointStatus, Target } from "../types";
 import type { PaceSummary } from "../logic/pace";
-import { riskyPoints, settledPoints } from "../logic/pace";
+import { examRiskPoints, settledPoints, weakPoints } from "../logic/pace";
+import { daysBetween } from "../logic/mastery";
 import { SUBJECTS, SUBJECT_BY_ID, findFaculty } from "../data/curriculum";
-import type { Target } from "../types";
 
 interface Props {
   statuses: PointStatus[];
@@ -21,14 +21,13 @@ export function StatsScreen({
   onReset,
 }: Props) {
   const { uni, faculty } = findFaculty(target.universityId, target.facultyId);
-  const risky = riskyPoints(statuses);
+  const atRisk = examRiskPoints(statuses, target.examDate);
+  const weak = weakPoints(statuses);
   const settled = settledPoints(statuses);
 
   const bySubject = SUBJECTS.map((s) => {
     const items = statuses.filter((st) => st.point.subjectId === s.id);
-    const done = items.filter(
-      (st) => st.level === "mastered" && !st.needsReview
-    ).length;
+    const done = items.filter((st) => st.everMastered).length;
     return { subject: s, done, total: items.length };
   }).filter((row) => row.total > 0);
 
@@ -44,7 +43,7 @@ export function StatsScreen({
         </button>
       </header>
 
-      <Ring pct={summary.progressPct} />
+      <Ring pct={summary.progressPct} condition={summary.conditionPct} />
 
       <div className="pace-grid">
         <div className="pace-item">
@@ -53,7 +52,7 @@ export function StatsScreen({
         </div>
         <div className="pace-item">
           <span className="pace-value">{summary.remainingPoints}</span>
-          <span className="pace-label">残りの観点</span>
+          <span className="pace-label">まだ踏んでいない</span>
         </div>
         <div className="pace-item">
           <span className="pace-value">
@@ -71,6 +70,7 @@ export function StatsScreen({
 
       <section className="block">
         <h3>科目ごと</h3>
+        <p className="block-note">一度でも定着させた観点の数。ここは減りません</p>
         {bySubject.map(({ subject, done, total }) => (
           <div key={subject.id} className="subject-row">
             <span className="subject-name">{subject.name}</span>
@@ -92,14 +92,16 @@ export function StatsScreen({
 
       <section className="block">
         <h3>
-          <AlertTriangle size={16} /> ここが不安
+          <TrendingDown size={16} /> 本番までに薄れる観点
         </h3>
-        <p className="block-note">よく出るのに、まだ定着していない観点</p>
-        {risky.length === 0 ? (
+        <p className="block-note">
+          一度は解けた観点。薄れるのが近い順に、この並びで復習に戻ってきます
+        </p>
+        {atRisk.length === 0 ? (
           <p className="empty">いまのところなし</p>
         ) : (
           <ul className="point-list">
-            {risky.map((s) => (
+            {atRisk.map((s) => (
               <li key={s.point.id}>
                 <span
                   className="pill"
@@ -108,9 +110,7 @@ export function StatsScreen({
                   }}
                 />
                 <span className="point-name">{s.point.name}</span>
-                <span className="point-tag">
-                  {s.needsReview ? "要復習" : s.level === "touched" ? "あやしい" : "未着手"}
-                </span>
+                <span className="point-tag">{staleLabel(s)}</span>
               </li>
             ))}
           </ul>
@@ -119,10 +119,35 @@ export function StatsScreen({
 
       <section className="block">
         <h3>
-          <CheckCircle2 size={16} /> もう見なくていい
+          <AlertTriangle size={16} /> つまずいている
+        </h3>
+        <p className="block-note">まだ一度も定着していない観点</p>
+        {weak.length === 0 ? (
+          <p className="empty">いまのところなし</p>
+        ) : (
+          <ul className="point-list">
+            {weak.map((s) => (
+              <li key={s.point.id}>
+                <span
+                  className="pill"
+                  style={{
+                    background: SUBJECT_BY_ID.get(s.point.subjectId)?.color,
+                  }}
+                />
+                <span className="point-name">{s.point.name}</span>
+                <span className="point-tag">頻出度 {"★".repeat(s.weight)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="block">
+        <h3>
+          <CheckCircle2 size={16} /> いま見なくていい
         </h3>
         <p className="block-note">
-          間隔をあけて2回以上正答した観点。{settled.length}個ぶんの時間が浮いています。
+          まだ覚えている見込みの観点。{settled.length}個ぶんの時間が浮いています。
         </p>
         {settled.length === 0 ? (
           <p className="empty">まだありません</p>
@@ -147,10 +172,23 @@ export function StatsScreen({
   );
 }
 
-function Ring({ pct }: { pct: number }) {
+function staleLabel(status: PointStatus): string {
+  if (status.staleAt === null) return "取りこぼし中";
+  const left = daysBetween(new Date(), status.staleAt);
+  if (left <= 0) return "いま薄れている";
+  return `あと${left}日`;
+}
+
+/** 外側の輪が踏破率、内側の弧がいまのコンディション */
+function Ring({ pct, condition }: { pct: number; condition: number }) {
   const r = 68;
+  const inner = 52;
   const circumference = 2 * Math.PI * r;
+  const innerCircumference = 2 * Math.PI * inner;
+
   const offset = circumference * (1 - Math.min(100, pct) / 100);
+  const innerOffset =
+    innerCircumference * (1 - (Math.min(100, condition) / 100) * (pct / 100));
 
   return (
     <div className="ring-wrap">
@@ -164,11 +202,22 @@ function Ring({ pct }: { pct: number }) {
           strokeDasharray={circumference}
           strokeDashoffset={offset}
         />
+        <circle
+          cx="80"
+          cy="80"
+          r={inner}
+          className="ring-fill ring-fill-inner"
+          strokeDasharray={innerCircumference}
+          strokeDashoffset={innerOffset}
+        />
       </svg>
       <div className="ring-center">
         <span className="ring-pct">{Math.round(pct)}%</span>
-        <span className="ring-label">定着</span>
+        <span className="ring-label">踏破</span>
       </div>
+      <p className="ring-note">
+        踏破したうち、いま覚えている {Math.round(condition)}%
+      </p>
     </div>
   );
 }

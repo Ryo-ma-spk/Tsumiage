@@ -66,36 +66,49 @@ function daysAgo(n: number): string {
 }
 
 /**
- * 30日分のそれらしい履歴を作る。
- * 依存関係の順に進み、後半ほど手が回っていない = 現実的な形にしている。
+ * 90日分のそれらしい履歴を作る。
+ *
+ * 依存関係の順に進み、後半ほど手が回っていない形にしている。
+ * 「まだ鮮度が残っている」「もう薄れている」「いまは大丈夫に見えるが本番までに薄れる」
+ * が全部そろうようにしてあり、そうしないと画面の良し悪しが判断できない。
  */
 function buildDemoAttempts(): Attempt[] {
   const attempts: Attempt[] = [];
-  // この観点だけは「定着後に放置された」状態を作るのでループから外す
-  const reviewDemoId = "m-expand";
-  const ordered = POINTS.filter((p) => p.id !== reviewDemoId);
 
-  ordered.forEach((point, i) => {
-    // 全体の 45% は定着、次の 15% は解けた、次の 12% はあやしい、残りは未着手
-    const ratio = i / ordered.length;
-    if (ratio < 0.45) {
-      const start = 30 - Math.floor(ratio * 50);
-      attempts.push({ pointId: point.id, correct: true, at: daysAgo(start) });
-      attempts.push({
-        pointId: point.id,
-        correct: true,
-        at: daysAgo(Math.max(1, start - 8)),
-      });
-    } else if (ratio < 0.6) {
-      attempts.push({ pointId: point.id, correct: true, at: daysAgo(3) });
-    } else if (ratio < 0.72) {
-      attempts.push({ pointId: point.id, correct: false, at: daysAgo(2) });
+  const record = (pointId: string, days: number, correct = true) => {
+    attempts.push({ pointId, correct, at: daysAgo(days) });
+  };
+
+  POINTS.forEach((point, i) => {
+    const ratio = i / POINTS.length;
+
+    if (ratio < 0.25) {
+      // 早い時期にやったきり。すでに薄れている
+      record(point.id, 80);
+      record(point.id, 70);
+    } else if (ratio < 0.4) {
+      // 長い間隔で2回。いまは大丈夫に見えるが、いずれ薄れる
+      record(point.id, 40);
+      record(point.id, 6);
+    } else if (ratio < 0.5) {
+      // 最近きちんと間隔をあけた。しばらく持つ
+      record(point.id, 12);
+      record(point.id, 2);
+    } else if (ratio < 0.58) {
+      // 一度定着させたが、直近で落とした
+      record(point.id, 30);
+      record(point.id, 20);
+      record(point.id, 1, false);
+    } else if (ratio < 0.68) {
+      // 正答1回。あと1回で定着
+      record(point.id, 3);
+    } else if (ratio < 0.78) {
+      // 何度も間違えている
+      record(point.id, 4, false);
+      record(point.id, 1, false);
     }
+    // 残りは未着手
   });
-
-  // 定着したが放置されて復習に戻った状態（最終正答から21日以上）
-  attempts.push({ pointId: reviewDemoId, correct: true, at: daysAgo(60) });
-  attempts.push({ pointId: reviewDemoId, correct: true, at: daysAgo(40) });
 
   return attempts;
 }

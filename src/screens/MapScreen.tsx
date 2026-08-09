@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Check, Lock, RotateCcw } from "lucide-react";
 import type { KnowledgePoint, PointStatus } from "../types";
 import { SUBJECTS } from "../data/curriculum";
-import { LEVEL_LABEL } from "../logic/mastery";
+import { LEVEL_LABEL, daysBetween } from "../logic/mastery";
 
 interface Props {
   statuses: PointStatus[];
@@ -11,7 +11,10 @@ interface Props {
 
 /**
  * 観点の依存関係をそのまま1本道として見せる画面。
+ * 並び順は `buildStatuses` が依存関係から導いた順序をそのまま使う。
+ *
  * 「あと何%」は数字ではなく、残っている道の長さで伝える。
+ * 一度通ったマスは、鮮度が切れても通ったままにする。
  */
 export function MapScreen({ statuses, onStart }: Props) {
   const available = SUBJECTS.filter((s) =>
@@ -23,16 +26,18 @@ export function MapScreen({ statuses, onStart }: Props) {
   const subject = available.find((s) => s.id === subjectId) ?? available[0];
   const points = statuses.filter((s) => s.point.subjectId === subject?.id);
 
-  const done = points.filter((s) => s.level === "mastered" && !s.needsReview);
-  const pct = points.length === 0 ? 0 : (done.length / points.length) * 100;
+  const walked = points.filter((s) => s.everMastered);
+  const pct = points.length === 0 ? 0 : (walked.length / points.length) * 100;
 
-  // 単元ごとに区切って表示する
+  // 単元ごとに区切って表示する（並び自体は依存順のまま）
   const units: { unit: string; items: PointStatus[] }[] = [];
   for (const s of points) {
     const last = units[units.length - 1];
     if (last && last.unit === s.point.unit) last.items.push(s);
     else units.push({ unit: s.point.unit, items: [s] });
   }
+
+  let row = 0;
 
   return (
     <div className="screen">
@@ -61,25 +66,25 @@ export function MapScreen({ statuses, onStart }: Props) {
           />
         </div>
         <div className="map-progress-text">
-          {done.length} / {points.length} 観点
+          {walked.length} / {points.length} 観点
           <strong>{Math.round(pct)}%</strong>
         </div>
       </div>
 
       <div className="path">
-        {units.map(({ unit, items }) => (
-          <div key={unit} className="path-unit">
+        {units.map(({ unit, items }, unitIndex) => (
+          <div key={`${unit}-${unitIndex}`} className="path-unit">
             <div className="unit-title">{unit}</div>
-            {items.map((s, i) => (
+            {items.map((s) => (
               <div
                 key={s.point.id}
                 className="path-row"
-                style={{ transform: `translateX(${offsetFor(i)}px)` }}
+                style={{ transform: `translateX(${offsetFor(row++)}px)` }}
               >
                 <button
                   className={`node ${nodeClass(s)}`}
                   style={
-                    s.level === "mastered" && !s.needsReview
+                    s.everMastered
                       ? { background: subject?.color, borderColor: subject?.color }
                       : undefined
                   }
@@ -87,9 +92,9 @@ export function MapScreen({ statuses, onStart }: Props) {
                 >
                   {s.locked ? (
                     <Lock size={20} />
-                  ) : s.needsReview ? (
+                  ) : s.everMastered && s.needsReview ? (
                     <RotateCcw size={20} />
-                  ) : s.level === "mastered" ? (
+                  ) : s.everMastered ? (
                     <Check size={22} />
                   ) : (
                     <span className="node-weight">{"★".repeat(s.weight)}</span>
@@ -110,11 +115,19 @@ export function MapScreen({ statuses, onStart }: Props) {
             <h3>{selected.point.name}</h3>
             <div className="sheet-tags">
               <span className={`tag ${nodeClass(selected)}`}>
-                {selected.needsReview ? "要復習" : LEVEL_LABEL[selected.level]}
+                {selected.everMastered && selected.needsReview
+                  ? "薄れている"
+                  : LEVEL_LABEL[selected.level]}
               </span>
               <span className="tag">頻出度 {"★".repeat(selected.weight)}</span>
               <span className="tag">正答 {selected.correctCount} 回</span>
             </div>
+
+            {selected.everMastered && (
+              <p className="sheet-note walked">
+                通過済み。{freshnessNote(selected)}
+              </p>
+            )}
 
             {selected.locked ? (
               <p className="sheet-note">
@@ -138,6 +151,13 @@ export function MapScreen({ statuses, onStart }: Props) {
   );
 }
 
+function freshnessNote(status: PointStatus): string {
+  if (status.staleAt === null) return "いまは取りこぼしています";
+  const left = daysBetween(new Date(), status.staleAt);
+  if (left <= 0) return "そろそろ薄れている頃です";
+  return `あと${left}日は覚えている見込みです`;
+}
+
 /** 一本道に見せるための左右の振れ幅 */
 function offsetFor(index: number): number {
   return Math.round(Math.sin(index * 0.9) * 46);
@@ -145,6 +165,7 @@ function offsetFor(index: number): number {
 
 function nodeClass(s: PointStatus): string {
   if (s.locked) return "locked";
-  if (s.needsReview) return "review";
+  if (s.everMastered && s.needsReview) return "review";
+  if (s.everMastered) return "mastered";
   return s.level;
 }

@@ -1,8 +1,13 @@
 import type { Attempt, KnowledgePoint, PointStatus } from "../types";
-import { daysBetween, evaluate } from "./mastery";
+import { daysBetween } from "./mastery";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** 実績ペースを測る窓（日） */
 const PACE_WINDOW_DAYS = 14;
+
+/** これだけの日数で鮮度が切れる観点は「忘れる前」に拾う */
+const IMMINENT_DAYS = 7;
 
 /** 1セッションで出す観点の数 */
 export const SESSION_SIZE = 5;
@@ -10,64 +15,47 @@ export const SESSION_SIZE = 5;
 export interface PaceSummary {
   /** 出題範囲の重み合計 */
   totalWeight: number;
-  /** 定着済みの重み合計 */
-  doneWeight: number;
-  /** 達成率 0〜100 */
+  /** 一度でも定着させた重み。すごろくの進んだ距離にあたり、後退しない */
+  walkedWeight: number;
+
+  /** 踏破率 0〜100。単調増加で、忘れても下がらない */
   progressPct: number;
-  /** 残り観点数（定着していないもの） */
+  /** 踏破したぶんのうち、いま鮮度が残っている割合 0〜100 */
+  conditionPct: number;
+  /** 今のペースのまま進んだとき、受験日に鮮度が残っている見込みの割合 0〜100 */
+  projectedPct: number;
+
+  /** まだ一度も定着していない観点数 */
   remainingPoints: number;
+  /** 踏破済みだが受験日までに鮮度が切れる観点数 */
+  reviewDuePoints: number;
+
   daysLeft: number;
+
+  /** 受験日までに触らないといけない重み（未踏破 + 復習が要るぶん） */
+  demandWeight: number;
   /** 間に合わせるのに必要な1日あたりの重み */
   requiredPerDay: number;
   /** 直近14日の実測ペース */
   actualPerDay: number;
-  /** 画面表示用: 間に合わせるのに必要な1日あたりの観点数 */
+  /** 画面表示用: 必要な1日あたりの観点数 */
   requiredPointsPerDay: number;
-  /** 画面表示用: 直近14日で実際に定着させた1日あたりの観点数 */
+  /** 画面表示用: 直近14日の1日あたりの観点数 */
   actualPointsPerDay: number;
-  /** 今のペースのまま受験日を迎えたときの達成率 0〜100 */
-  projectedPct: number;
+
   /** 必要ペースに対して足りているか */
   onTrack: boolean;
 }
 
 export function daysUntilExam(examDate: string, now: Date = new Date()): number {
-  const today = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  ).toISOString();
-  return Math.max(0, daysBetween(today, `${examDate}T00:00:00`));
+  return Math.max(0, daysBetween(now, `${examDate}T00:00:00`));
 }
 
-/**
- * 直近の窓の中で新しく定着に到達した重みを数える。
- * 「その日までの履歴」で再評価して、窓の開始時点との差分を取る。
- */
-function masteredAt(
-  statuses: PointStatus[],
-  attempts: Attempt[],
-  at: Date
-): { weight: number; count: number } {
-  const attemptsByPoint = new Map<string, Attempt[]>();
-  for (const a of attempts) {
-    if (new Date(a.at).getTime() > at.getTime()) continue;
-    const list = attemptsByPoint.get(a.pointId);
-    if (list) list.push(a);
-    else attemptsByPoint.set(a.pointId, [a]);
-  }
-
-  let weight = 0;
-  let count = 0;
-  for (const s of statuses) {
-    const pointAttempts = attemptsByPoint.get(s.point.id);
-    if (!pointAttempts || pointAttempts.length === 0) continue;
-    if (evaluate(pointAttempts, at).level === "mastered") {
-      weight += s.weight;
-      count += 1;
-    }
-  }
-  return { weight, count };
+/** 受験日までに鮮度が切れる（= もう一度触る必要がある）か */
+function needsTouchBefore(status: PointStatus, examDate: string): boolean {
+  if (!status.everMastered) return true;
+  if (status.staleAt === null) return true; // 踏破後に落としている
+  return daysBetween(status.staleAt, `${examDate}T00:00:00`) > 0;
 }
 
 export function summarize(
@@ -77,99 +65,187 @@ export function summarize(
   now: Date = new Date()
 ): PaceSummary {
   const totalWeight = statuses.reduce((sum, s) => sum + s.weight, 0);
-  const doneWeight = statuses
-    .filter((s) => s.level === "mastered" && !s.needsReview)
-    .reduce((sum, s) => sum + s.weight, 0);
+  const walked = statuses.filter((s) => s.everMastered);
+  const walkedWeight = walked.reduce((sum, s) => sum + s.weight, 0);
 
-  const donePoints = statuses.filter(
-    (s) => s.level === "mastered" && !s.needsReview
-  ).length;
-  const remainingWeight = Math.max(0, totalWeight - doneWeight);
-  const remainingPoints = statuses.length - donePoints;
+  const progressPct = totalWeight === 0 ? 0 : (walkedWeight / totalWeight) * 100;
+
+  const liveWeight = walked.reduce((sum, s) => sum + s.weight * s.freshness, 0);
+  const conditionPct = walkedWeight === 0 ? 0 : (liveWeight / walkedWeight) * 100;
 
   const daysLeft = daysUntilExam(examDate, now);
-  const progressPct = totalWeight === 0 ? 0 : (doneWeight / totalWeight) * 100;
 
-  const requiredPerDay = daysLeft === 0 ? remainingWeight : remainingWeight / daysLeft;
+  // 受験日までに触らないといけない量 = 未踏破 + 受験日までに鮮度が切れるぶん
+  const due = statuses.filter((s) => needsTouchBefore(s, examDate));
+  const demandWeight = due.reduce((sum, s) => sum + s.weight, 0);
+  const duePoints = due.length;
 
-  // 実績ペース: 窓の開始時点と現在の定着重みの差 ÷ 経過日数
-  const windowStart = new Date(now.getTime() - PACE_WINDOW_DAYS * 86400000);
-  const atStart = masteredAt(statuses, attempts, windowStart);
-  const gained = Math.max(0, doneWeight - atStart.weight);
-  const gainedPoints = Math.max(0, donePoints - atStart.count);
+  const remainingPoints = statuses.filter((s) => !s.everMastered).length;
+  const reviewDuePoints = duePoints - remainingPoints;
+
+  const requiredPerDay = daysLeft === 0 ? demandWeight : demandWeight / daysLeft;
+
+  // 実績ペース: 直近の窓で「新たに踏破した」か「鮮度を戻した」重み
+  const windowStart = new Date(now.getTime() - PACE_WINDOW_DAYS * DAY_MS);
+  const correctInWindow = new Set(
+    attempts
+      .filter(
+        (a) =>
+          a.correct &&
+          new Date(a.at).getTime() >= windowStart.getTime() &&
+          new Date(a.at).getTime() <= now.getTime()
+      )
+      .map((a) => a.pointId)
+  );
+
+  const gained = statuses.filter((s) => {
+    const newlyWalked =
+      s.firstMasteredAt !== null &&
+      new Date(s.firstMasteredAt).getTime() >= windowStart.getTime();
+    const refreshed = s.everMastered && correctInWindow.has(s.point.id);
+    return newlyWalked || refreshed;
+  });
+  const gainedWeight = gained.reduce((sum, s) => sum + s.weight, 0);
 
   const firstAttempt = attempts.map((a) => a.at).sort()[0];
   const elapsed = firstAttempt
     ? Math.min(PACE_WINDOW_DAYS, Math.max(1, daysBetween(firstAttempt, now)))
     : PACE_WINDOW_DAYS;
-  const actualPerDay = gained / elapsed;
 
-  const projectedWeight = Math.min(
-    totalWeight,
-    doneWeight + actualPerDay * daysLeft
-  );
+  const actualPerDay = gainedWeight / elapsed;
+  const actualPointsPerDay = gained.length / elapsed;
+
+  // 受験日に鮮度が残る見込み = すでに持つぶん + 残り日数でこなせるぶん
+  const holdsWeight = statuses
+    .filter((s) => !needsTouchBefore(s, examDate))
+    .reduce((sum, s) => sum + s.weight, 0);
+  const capacityWeight = actualPerDay * daysLeft;
+  const coveredWeight = Math.min(demandWeight, capacityWeight);
+
+  const projectedWeight = Math.min(totalWeight, holdsWeight + coveredWeight);
   const projectedPct =
     totalWeight === 0 ? 0 : (projectedWeight / totalWeight) * 100;
 
   return {
     totalWeight,
-    doneWeight,
+    walkedWeight,
     progressPct,
+    conditionPct,
+    projectedPct,
     remainingPoints,
+    reviewDuePoints,
     daysLeft,
+    demandWeight,
     requiredPerDay,
     actualPerDay,
-    requiredPointsPerDay:
-      daysLeft === 0 ? remainingPoints : remainingPoints / daysLeft,
-    actualPointsPerDay: gainedPoints / elapsed,
-    projectedPct,
+    requiredPointsPerDay: daysLeft === 0 ? duePoints : duePoints / daysLeft,
+    actualPointsPerDay,
     onTrack: actualPerDay >= requiredPerDay,
   };
 }
 
 /**
  * やるべき観点を優先度順に並べる。
+ *
  * 「何をやるか自分で決める」コストを消すのがこのアプリの役目なので、
  * 選定ルールはここに固定し、画面側では選ばせない。
  */
-export function prioritize(statuses: PointStatus[]): PointStatus[] {
+export function prioritize(
+  statuses: PointStatus[],
+  now: Date = new Date()
+): PointStatus[] {
+  const daysToStale = (s: PointStatus): number =>
+    s.staleAt === null ? -1 : daysBetween(now, s.staleAt);
+
   const score = (s: PointStatus): number => {
-    // 復習が必要な定着観点が最優先（落とすと一番もったいない）
-    if (s.needsReview) return 0;
+    // 踏破したのに落ちている観点が最優先（積み上げを崩さない）
+    if (s.everMastered && s.needsReview) return 0;
     if (s.level === "touched") return 1; // 一度つまずいた所
     if (s.level === "solved") return 2; // あと1回で定着
-    return 3; // 未着手
+    // まだ切れていないが、もうすぐ切れる。忘れる前に触る
+    if (s.level === "mastered" && daysToStale(s) <= IMMINENT_DAYS) return 3;
+    if (s.level === "untouched") return 4;
+    return 9; // 鮮度が残っている定着観点はいま出さない
   };
 
   return statuses
-    .filter((s) => !s.locked && (s.level !== "mastered" || s.needsReview))
-    .sort((a, b) => score(a) - score(b) || b.weight - a.weight);
+    .filter((s) => !s.locked && score(s) <= 4)
+    .sort((a, b) => {
+      const diff = score(a) - score(b);
+      if (diff !== 0) return diff;
+
+      // 復習系は切れるのが近い順
+      if (score(a) === 0 || score(a) === 3) {
+        const gap = daysToStale(a) - daysToStale(b);
+        if (gap !== 0) return gap;
+      }
+
+      // 新しく進むぶんは、道の手前から。先に長い道が伸びるほうを優先する
+      if (a.depth !== b.depth) return a.depth - b.depth;
+      if (a.descendants !== b.descendants) return b.descendants - a.descendants;
+      return b.weight - a.weight;
+    });
 }
 
 /** 次にやるべき観点を1つだけ返す */
-export function pickNext(statuses: PointStatus[]): PointStatus | null {
-  return prioritize(statuses)[0] ?? null;
+export function pickNext(
+  statuses: PointStatus[],
+  now: Date = new Date()
+): PointStatus | null {
+  return prioritize(statuses, now)[0] ?? null;
 }
 
 /** 1セッションで出す観点をそろえる */
 export function buildQueue(
   statuses: PointStatus[],
-  size = SESSION_SIZE
+  size = SESSION_SIZE,
+  now: Date = new Date()
 ): KnowledgePoint[] {
-  return prioritize(statuses)
+  return prioritize(statuses, now)
     .slice(0, size)
     .map((s) => s.point);
 }
 
-/** 出題頻度が高いのに定着していない観点 = 不安の正体 */
-export function riskyPoints(statuses: PointStatus[], limit = 5): PointStatus[] {
+/**
+ * 本番で落としそうな観点。
+ *
+ * 一度は定着させたのに、受験日までに鮮度が切れる見込みのもの。
+ * 「大丈夫だと思っていたほうを忘れる」を、起きる前に名前で出すための一覧。
+ */
+export function examRiskPoints(
+  statuses: PointStatus[],
+  examDate: string,
+  limit = 5,
+  now: Date = new Date()
+): PointStatus[] {
+  const daysToStale = (s: PointStatus): number =>
+    s.staleAt === null ? -1 : daysBetween(now, s.staleAt);
+
   return statuses
-    .filter((s) => s.weight >= 3 && (s.level !== "mastered" || s.needsReview))
+    .filter((s) => s.everMastered && needsTouchBefore(s, examDate))
+    .sort((a, b) => {
+      // すでに切れているものが先、次に切れるのが近い順
+      const gap = daysToStale(a) - daysToStale(b);
+      if (gap !== 0) return gap;
+      return b.weight - a.weight;
+    })
+    .slice(0, limit);
+}
+
+/** 何度も間違えている、まだ手の内に入っていない観点 */
+export function weakPoints(statuses: PointStatus[], limit = 5): PointStatus[] {
+  return statuses
+    .filter((s) => !s.locked && !s.everMastered && s.level === "touched")
     .sort((a, b) => b.weight - a.weight)
     .slice(0, limit);
 }
 
-/** これ以上見なくていい観点 */
+/**
+ * いま見なくていい観点。
+ *
+ * 「受験日まで絶対に忘れない」ではなく「今日わざわざ開く必要がない」。
+ * 受験日が遠いほど前者は誰も満たせないので、日々の判断に使えるのは後者のほう。
+ */
 export function settledPoints(statuses: PointStatus[]): PointStatus[] {
-  return statuses.filter((s) => s.level === "mastered" && !s.needsReview);
+  return statuses.filter((s) => s.level === "mastered" && s.freshness > 0);
 }

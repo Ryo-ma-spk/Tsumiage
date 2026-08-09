@@ -386,8 +386,8 @@ tbody tr:last-child td { border-bottom: none; }
   <header class="masthead">
     <h1 class="wordmark">Tsumiage</h1>
     <p class="lede">
-      志望校までの道のりを可視化する学習ダッシュボード。<br>
-      「あと何観点で、何%で、1日あたり何観点やれば間に合うのか」を計算して出し、やらなくていい範囲を切り落として、次にやる1つだけを提示する。
+      合格までの道のりを可視化して、忘れる前に復習させ、間に合うペースに導くツール。<br>
+      漠然とした不安を、名前のついた作業に変えることを目的にしている。
     </p>
     <p class="meta">
       <span>プロトタイプ</span>
@@ -403,6 +403,12 @@ tbody tr:last-child td { border-bottom: none; }
   </p>
   <p>
     Tsumiage はこの決定を肩代わりする。到達度を解答履歴から計算し、志望校で出ない範囲を母数から外し、残った道のりを受験日までの日数で割って、今日やる1つを出す。
+  </p>
+  <p>
+    ねらいは進捗管理そのものではなく、<b>不安を自信に変えること</b>にある。受験生の不安は「何を忘れているか分からない」という形をしていて、対象が分からないから作業に落ちない。忘れかけている観点を名前で挙げられれば、それは不安ではなく today のリストになる。
+  </p>
+  <p>
+    もうひとつ、このツールが防ごうとしている失敗がある。<b>苦手なBばかり練習した結果、得意だったはずのAを本番で思い出せない</b>という反転である。人は「大丈夫だと思っているもの」を復習の対象から外すので、放置された強みのほうが先に落ちる。何をやるかを人が決めているかぎり、この反転は構造的に避けられない。
   </p>
 
   <h2>3つの前提</h2>
@@ -549,14 +555,15 @@ tbody tr:last-child td { border-bottom: none; }
         </svg>
       </div>
       <figcaption>
-        図2 — 数学I・A の12観点（<span class="mono">data/curriculum.ts</span> の実データ）。依存関係は直線ではなく<b>枝分かれと合流を持つ有向グラフ</b>で、独立した根が複数ある。「一本道」はこのグラフを深さ順に畳んだ表示であり、畳み方そのものが設計判断になる。
+        図2 — 数学I・A の12観点（<span class="mono">data/curriculum.ts</span> の実データ）。依存関係は直線ではなく<b>枝分かれと合流を持つ有向グラフ</b>で、独立した根が複数ある。「一本道」はこれを依存順に畳んだ表示。同時に開放される観点はマスタの記述順を保つので、順序は依存から導かれつつ単元のまとまりも崩れない。
       </figcaption>
     </figure>
 
     <p class="premise-where">
       <b>守られている場所</b><br>
+      logic/graph.ts — トポロジカル順・深さ・子孫数<br>
       logic/mastery.ts — isUnlocked()（開放条件）<br>
-      screens/MapScreen.tsx — 道の並び順<br>
+      screens/MapScreen.tsx — 順序は buildStatuses の結果をそのまま使う<br>
       マップを自由配置・カンバン・カテゴリ一覧に置き換えない
     </p>
   </section>
@@ -568,7 +575,7 @@ tbody tr:last-child td { border-bottom: none; }
       何をやるか決める作業そのものが受験勉強の非効率の一部である。選択肢を並べた時点で、アプリは決定コストを利用者に戻してしまう。
     </p>
     <p>
-      優先度の判断は <code>prioritize()</code> 1箇所に集約し、画面側には選定ロジックを書かない。「今日」タブが出すのは次の1観点と、着地予測の信号だけ。並び順は次の規則で固定されている。
+      優先度の判断は <code>prioritize()</code> 1箇所に集約し、画面側には選定ロジックを書かない。「今日」タブが出すのは次の1観点と、本番予測の信号だけ。並び順は次の規則で固定されている。
     </p>
 
     <div class="table-wrap">
@@ -577,15 +584,19 @@ tbody tr:last-child td { border-bottom: none; }
           <tr><th>順</th><th>対象</th><th>理由</th></tr>
         </thead>
         <tbody>
-          <tr><td class="mono">1</td><td class="state-cell"><span class="dot d-review"></span>要復習</td><td>一度積み上げたものを落とすのが一番もったいない</td></tr>
+          <tr><td class="mono">1</td><td class="state-cell"><span class="dot d-review"></span>薄れている</td><td>一度積み上げたものを落とすのが一番もったいない</td></tr>
           <tr><td class="mono">2</td><td class="state-cell"><span class="dot d-touched"></span>あやしい</td><td>一度つまずいた場所は放置すると固定化する</td></tr>
           <tr><td class="mono">3</td><td class="state-cell"><span class="dot d-solved"></span>解けた</td><td>あと1回で定着に届く</td></tr>
-          <tr><td class="mono">4</td><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>残りを頻出度の高い順に</td></tr>
+          <tr><td class="mono">4</td><td class="state-cell"><span class="dot d-mastered"></span>もうすぐ薄れる</td><td>7日以内に切れる見込み。忘れる前に触る</td></tr>
+          <tr><td class="mono">5</td><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>道の手前から順に</td></tr>
         </tbody>
       </table>
     </div>
     <p style="margin-top:14px; font-size:13.5px; color:var(--muted);">
-      同順位のなかでは頻出度（重み）の大きい観点が先に出る。ロックされた観点は候補から除外される。
+      復習系は薄れるのが近い順。新しく進むぶんは、依存の浅い順 → 先に伸びる道が長い順 → 頻出度の順。ロックされた観点は候補から除外される。
+    </p>
+    <p style="margin-top:14px;">
+      最後の並びが、テキストを再開するたび頭から読み直して縄文時代ばかり詳しくなる、あの失敗を防いでいる。<b>アプリは常に続きから出す。</b>先頭に戻る動線がそもそも無い。
     </p>
 
     <p class="premise-where">
@@ -598,12 +609,15 @@ tbody tr:last-child td { border-bottom: none; }
   <h2>到達度モデル</h2>
 
   <p>
-    到達度は4段階で、そのうち「定着」だけが時間経過で巻き戻る。「もう見なくていい」は主張ではなく、この計算の結果として出てくる。
+    到達度は4段階で、そのうち「定着」だけが時間経過で薄れる。「いま見なくていい」は主張ではなく、この計算の結果として出てくる。
+  </p>
+  <p>
+    ここで<b>2つの軸を分けている</b>ことが、このモデルのほぼすべてである。<b>踏破</b>は一度でも定着に到達したかどうかで、後戻りしない。<b>鮮度</b>はいま覚えている見込みで、放っておけば下がる。受験勉強はすごろくなので、忘れたからといってコマまで戻すことはしない。戻すのは鮮度だけにする。
   </p>
 
   <figure>
     <div class="frame">
-      <svg viewBox="0 0 900 250" role="img" aria-label="到達度の状態遷移図。未着手からあやしい・解けたを経て定着に至り、21日経過で要復習に戻る">
+      <svg viewBox="0 0 900 320" role="img" aria-label="到達度の状態遷移図。未着手からあやしい・解けたを経て定着に至り、鮮度が切れると薄れている状態に移る。踏破は別軸で、一度立つと下りない">
         <defs>
           <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity="0.62"></path>
@@ -624,14 +638,14 @@ tbody tr:last-child td { border-bottom: none; }
         <text class="svg-edge-label" x="507" y="91" text-anchor="middle">2回目の正答</text>
 
         <line class="svg-edge" x1="652" y1="110" x2="732" y2="110" marker-end="url(#ah3)" stroke="var(--s-review)" opacity="0.9"></line>
-        <text class="svg-edge-label" x="692" y="84" text-anchor="middle" fill="var(--s-review)">最終正答から</text>
-        <text class="svg-edge-label" x="692" y="99" text-anchor="middle" fill="var(--s-review)">21日</text>
+        <text class="svg-edge-label" x="692" y="84" text-anchor="middle" fill="var(--s-review)">予測した保持</text>
+        <text class="svg-edge-label" x="692" y="99" text-anchor="middle" fill="var(--s-review)">日数が尽きる</text>
 
         <path class="svg-edge" d="M414 136 C 360 194, 300 194, 244 138" marker-end="url(#ah3)"></path>
         <text class="svg-edge-label" x="329" y="200" text-anchor="middle">直近が誤答</text>
 
         <path class="svg-edge" d="M790 136 C 736 202, 660 202, 604 138" marker-end="url(#ah3)" stroke="var(--s-mastered)" opacity="0.9"></path>
-        <text class="svg-edge-label" x="697" y="212" text-anchor="middle" fill="var(--s-mastered)">正答1回で復帰</text>
+        <text class="svg-edge-label" x="697" y="212" text-anchor="middle" fill="var(--s-mastered)">間隔をあけて2回</text>
 
         <rect class="svg-node" x="10" y="88" width="104" height="44" rx="8" stroke="var(--s-untouched)"></rect>
         <text class="svg-label" x="62" y="116" text-anchor="middle" fill="var(--s-untouched)">未着手</text>
@@ -646,11 +660,25 @@ tbody tr:last-child td { border-bottom: none; }
         <text class="svg-label" x="600" y="116" text-anchor="middle" fill="var(--s-mastered)">定着</text>
 
         <rect class="svg-node-dashed" x="738" y="88" width="104" height="44" rx="8" stroke="var(--s-review)"></rect>
-        <text class="svg-label" x="790" y="116" text-anchor="middle" fill="var(--s-review)">要復習</text>
+        <text class="svg-label" x="790" y="116" text-anchor="middle" fill="var(--s-review)">薄れている</text>
+
+        <line x1="10" y1="238" x2="890" y2="238" stroke="currentColor" stroke-width="1" opacity="0.18"></line>
+        <text class="svg-col" x="10" y="230">別の軸</text>
+
+        <line class="svg-edge" x1="404" y1="278" x2="484" y2="278" marker-end="url(#ah3)" stroke="var(--s-mastered)" opacity="0.9"></line>
+        <text class="svg-edge-label" x="444" y="270" text-anchor="middle" fill="var(--s-mastered)">初回のみ</text>
+
+        <rect class="svg-node" x="264" y="256" width="140" height="44" rx="8" stroke="var(--s-untouched)"></rect>
+        <text class="svg-label" x="334" y="284" text-anchor="middle" fill="var(--s-untouched)">未踏破</text>
+
+        <rect class="svg-node" x="484" y="256" width="140" height="44" rx="8" stroke="var(--s-mastered)"></rect>
+        <text class="svg-label" x="554" y="284" text-anchor="middle" fill="var(--s-mastered)">踏破済み</text>
+
+        <text class="svg-edge-label" x="644" y="283" fill="var(--s-mastered)">戻る矢印は無い</text>
       </svg>
     </div>
     <figcaption>
-      図3 — 到達度の状態遷移。<b>「要復習」は独立した段階ではなく、定着に立つフラグ</b>（破線）で、だから復習に戻った観点は母数の「済み」から外れ、優先度の先頭に来る。忘却をモデルに組み込んでいるのはここ1箇所。
+      図3 — 上が到達度、下が踏破。<b>「薄れている」は独立した段階ではなく、定着に立つフラグ</b>（破線）で、優先度の先頭に来る。一方で<b>踏破は一度立つと下りない</b>ので、忘れても「ここまで来た」は消えない。到達率が後退しないのは、進捗をこの下の軸で数えているから。
     </figcaption>
   </figure>
 
@@ -663,11 +691,34 @@ tbody tr:last-child td { border-bottom: none; }
         <tr><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>解答履歴なし</td></tr>
         <tr><td class="state-cell"><span class="dot d-touched"></span>あやしい</td><td>挑戦したが正答なし、または直近が誤答</td></tr>
         <tr><td class="state-cell"><span class="dot d-solved"></span>解けた</td><td>正答あり。ただし定着条件に未達</td></tr>
-        <tr><td class="state-cell"><span class="dot d-mastered"></span>定着</td><td>正答2回以上 かつ 初回正答から3日以上あけて正答 かつ 直近が正答</td></tr>
-        <tr><td class="state-cell"><span class="dot d-review"></span>要復習</td><td>定着後、最終正答から21日が経過</td></tr>
+        <tr><td class="state-cell"><span class="dot d-mastered"></span>定着</td><td>連続正答が2回以上 かつ 直前の正答から3日以上あいている</td></tr>
+        <tr><td class="state-cell"><span class="dot d-review"></span>薄れている</td><td>定着後、予測した保持日数を過ぎた</td></tr>
       </tbody>
     </table>
   </div>
+
+  <h3>保持日数をどう見込むか</h3>
+
+  <p>
+    全観点いっせいに何日、という固定値では、得意なAと苦手なBが同じ速さで薄れることになってしまう。実際に保持できた間隔を土台にして、観点ごとに別々に見込む。
+  </p>
+
+  <ul class="formulas">
+    <li>
+      <span class="fname">保持日数の見込み</span>
+      <span class="fbody">直前の正答からの間隔 × 2.2 × 0.6 <sup>忘れた回数</sup>（4〜120日に収める）</span>
+      <span class="fnote">10日あけて解けたなら次は22日は持つと見込む。過去に落としている観点は割り引いて、早く戻す。</span>
+    </li>
+    <li>
+      <span class="fname">鮮度</span>
+      <span class="fbody">(薄れる予測日 − 今日) ÷ 保持日数　（0〜1）</span>
+      <span class="fnote">0 になると復習の対象。0 になる前に拾うのが「忘れる前に復習させる」の実装。</span>
+    </li>
+  </ul>
+
+  <p>
+    日数はすべて暦日で数える。経過ミリ秒で数えると、夜に解いた人と朝に解いた人で「3日あけた」の判定が割れてしまう。
+  </p>
 
   <h2>ペースの計算</h2>
 
@@ -676,22 +727,41 @@ tbody tr:last-child td { border-bottom: none; }
     0 にするとその観点は出題範囲外として、母数からも道からも消える。これが「やらなくていい範囲を切り落とす」の実装。
   </p>
 
+  <p>
+    目標は「常に全部を覚えている」ことではない。それは不可能だし、目指す必要もない。<b>受験日に鮮度のピークを合わせる</b>のが目標で、ペースの式はすべてそこから逆算されている。
+  </p>
+
   <ul class="formulas">
     <li>
+      <span class="fname">踏破率</span>
+      <span class="fbody">一度でも定着させた重み ÷ 出題範囲の重み</span>
+      <span class="fnote">すごろくで進んだマス。忘れても減らない。「じぶん」のリングの外側。</span>
+    </li>
+    <li>
+      <span class="fname">コンディション</span>
+      <span class="fbody">Σ(鮮度 × 重み) ÷ 踏破した重み</span>
+      <span class="fnote">踏破したうち、いま覚えている割合。上下するのはこちらの軸。</span>
+    </li>
+    <li>
       <span class="fname">必要ペース</span>
-      <span class="fbody">残り観点の重み ÷ 受験日までの日数</span>
+      <span class="fbody">(未踏破の重み + 受験日までに薄れる重み) ÷ 受験日までの日数</span>
+      <span class="fnote">復習して戻ってくるぶんを需要に数える。新規だけで割ると、いつまでも間に合う計算になってしまう。</span>
     </li>
     <li>
       <span class="fname">実績ペース</span>
-      <span class="fbody">直近14日で新たに定着した重み ÷ 経過日数</span>
-      <span class="fnote">その日までの履歴で再評価し、窓の開始時点との差分を取る。過去の申告を信じない。</span>
+      <span class="fbody">直近14日で新たに踏破した重み + 鮮度を戻した重み ÷ 経過日数</span>
+      <span class="fnote">復習も仕事として数える。そうしないと、復習に徹した週のペースが 0 に見える。</span>
     </li>
     <li>
-      <span class="fname">着地予測</span>
-      <span class="fbody">(定着済みの重み + 実績ペース × 残り日数) ÷ 出題範囲の重み</span>
-      <span class="fnote">「今日」タブに出す唯一の数字。現在の到達率ではなく、このままの速度で受験日を迎えたときの到達率。</span>
+      <span class="fname">本番予測</span>
+      <span class="fbody">(受験日まで持つ重み + min(需要, 実績ペース × 残り日数)) ÷ 出題範囲の重み</span>
+      <span class="fnote">「今日」タブに出す唯一の数字。到達率ではなく、受験日に覚えている見込みの割合。</span>
     </li>
   </ul>
+
+  <p>
+    この定義にすると、冒頭のAとBの反転が自動的に拾われる。Aを放置すれば「受験日までに薄れる重み」が増えて需要が膨らみ、本番予測が下がる。そしてAは、薄れる7日前になった時点で優先度の上位に上がってくる。<b>ユーザーがAを思い出さなくても、順番のほうがAを連れてくる。</b>
+  </p>
 
   <h2>3つの画面</h2>
 
@@ -710,17 +780,17 @@ tbody tr:last-child td { border-bottom: none; }
       <tbody>
         <tr>
           <td class="state-cell">今日</td>
-          <td>次の1観点と、着地予測の信号</td>
+          <td>次の1観点と、本番予測の信号</td>
           <td>選択肢、分析指標</td>
         </tr>
         <tr>
           <td class="state-cell">マップ</td>
-          <td>依存関係にそった道と、残りの長さ</td>
+          <td>依存関係にそった道と、踏破した長さ</td>
           <td>自由配置、カテゴリ一覧</td>
         </tr>
         <tr>
           <td class="state-cell">じぶん</td>
-          <td>到達率、ペース、不安な観点、もう見なくていい観点</td>
+          <td>踏破率とコンディション、ペース、本番までに薄れる観点、いま見なくていい観点</td>
           <td>次にやることの提案</td>
         </tr>
       </tbody>
@@ -740,21 +810,36 @@ tbody tr:last-child td { border-bottom: none; }
     設計上の賭けは、<b>観点体系そのものを全国共通にして、大学ごとの差を重み（0〜3）だけで持つ</b>という点にある。大学ごとに観点体系を作るとマッピングの作成コストが大学数に比例するが、この形なら「観点数 × 1回のタグ付け」＋「学部数 × 重み付け」に分解できる。頻出度は本来、過去問への観点タグ付けから作る。
   </p>
 
-  <h2>いまの位置</h2>
+  <h2>検討中：ぼんやりしたランク</h2>
 
   <p>
-    UI とロジックのプロトタイプ。触って方向性を確かめるためのもので、ビルド・lint はクリーン。
+    他の受験生のなかで自分がどのあたりにいるかを、<b>明確な順位ではなく帯で</b>見せる案がある。任天堂がオンラインの順位を正確な数字で出さないのと同じ理屈で、「頑張ったのに世界4000位です」と言われて嬉しい人はいない。目的が不安の解消である以上、精度より粒度のほうが大事になる。
+  </p>
+  <p>
+    ただし持ち込むときに条件が1つある。<b>母集団を「このアプリの利用者」にすると、ほぼ意味を持たない。</b>志望校も受験日もばらばらな集団のなかでの位置は、安心にも危機感にもつながらない。比較が効くのは「同じ志望校で、受験日までの残り日数が近い人」のなかでの帯だけである。
   </p>
 
   <ul class="status">
-    <li><span class="tag tag-done">実装済み</span><span>到達度の判定と復習戻り、開放条件、志望校による絞り込み、ペース計算、3画面とスワイプ判定</span></li>
+    <li><span class="tag tag-todo">前提</span><span>バックエンドが要る。いまは localStorage のみで、他人のデータを1件も持っていない</span></li>
+    <li><span class="tag tag-todo">前提</span><span>利用者が高校生なので、学習データを集めるなら未成年のデータ収集としての設計が要る。技術ではなく事業判断の側</span></li>
+    <li><span class="tag tag-todo">前提</span><span>初期は N が足りず帯が出ない。まずは受験日から逆算した固定の基準線に対する帯から始めるほうが現実的</span></li>
+  </ul>
+
+  <h2>いまの位置</h2>
+
+  <p>
+    UI とロジックのプロトタイプ。触って方向性を確かめるためのもので、ビルド・lint・テストはいずれもクリーン。
+  </p>
+
+  <ul class="status">
+    <li><span class="tag tag-done">実装済み</span><span>踏破と鮮度の分離、観点ごとの保持日数の予測、開放条件、志望校による絞り込み、受験日から逆算したペース計算、3画面とスワイプ判定</span></li>
+    <li><span class="tag tag-done">実装済み</span><span>マップの並びを prereqIds から導出。依存の順序と表示の順序が一致した</span></li>
+    <li><span class="tag tag-done">実装済み</span><span>logic/ のテスト41件。暦日での判定、落としたあとの再定着、踏破率の単調性、本番までに薄れる観点の抽出を固定した</span></li>
     <li><span class="tag tag-todo">未着手</span><span>観点マスタと志望校データの本番化（過去問への観点タグ付け）</span></li>
     <li><span class="tag tag-todo">未着手</span><span>問題数の拡充。いまは1観点あたり2〜3問で、繰り返すと同じ問題が出る</span></li>
     <li><span class="tag tag-todo">未着手</span><span>認証とサーバー同期。永続化は localStorage のみで端末を変えると消える</span></li>
-    <li><span class="tag tag-todo">未着手</span><span>logic/mastery.ts と logic/pace.ts のテスト。判定条件は純関数だが、いま壊れても気づけない</span></li>
-    <li><span class="tag tag-gap">前提との差</span><span>マップの並びが prereqIds ではなく配列順に依存していて、図2の依存グラフを畳んだ結果になっていない</span></li>
-    <li><span class="tag tag-gap">前提との差</span><span>定着判定の日数が暦日ではなく24時間刻みで、解いた時刻によって結果が割れる</span></li>
-    <li><span class="tag tag-gap">前提との差</span><span>一度誤答した観点が、間隔をあけずに正答1回で定着へ復帰する</span></li>
+    <li><span class="tag tag-gap">未検証</span><span>保持日数の係数（間隔 × 2.2、忘却で × 0.6）は仮置き。実データで調整する前提の数字であって、根拠のある値ではない</span></li>
+    <li><span class="tag tag-gap">未実装</span><span>スワイプの取り消し。誤って振ると履歴が残り、全消し以外に戻す手段がない</span></li>
   </ul>
 
   <div class="note">
