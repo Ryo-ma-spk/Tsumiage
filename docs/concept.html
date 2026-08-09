@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsumiage — コンセプト</title>
+<style>
+:root {
+  --paper: #f6f7fa;
+  --surface: #ffffff;
+  --ink: #171b22;
+  --ink-soft: #3d4553;
+  --muted: #626b7d;
+  --rule: #dde1e9;
+  --rule-soft: #e9ecf2;
+  --accent: #3a63c8;
+  --accent-soft: #e6ecfb;
+
+  --s-untouched: #8b93a3;
+  --s-touched: #c8524a;
+  --s-solved: #3a63c8;
+  --s-mastered: #1f8f6a;
+  --s-review: #a97410;
+
+  --display: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", serif;
+  --body: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, "Noto Sans JP", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12151b;
+    --surface: #1a1e26;
+    --ink: #e7eaf1;
+    --ink-soft: #c2c9d6;
+    --muted: #949eb1;
+    --rule: #2a3038;
+    --rule-soft: #232830;
+    --accent: #86a6f2;
+    --accent-soft: #1e2738;
+
+    --s-untouched: #7d8798;
+    --s-touched: #e5776d;
+    --s-solved: #86a6f2;
+    --s-mastered: #4cc196;
+    --s-review: #d9a441;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #12151b;
+  --surface: #1a1e26;
+  --ink: #e7eaf1;
+  --ink-soft: #c2c9d6;
+  --muted: #949eb1;
+  --rule: #2a3038;
+  --rule-soft: #232830;
+  --accent: #86a6f2;
+  --accent-soft: #1e2738;
+
+  --s-untouched: #7d8798;
+  --s-touched: #e5776d;
+  --s-solved: #86a6f2;
+  --s-mastered: #4cc196;
+  --s-review: #d9a441;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15.5px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.page {
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(20px, 1fr)
+    [wide-start] minmax(0, 130px)
+    [text-start] minmax(0, 640px) [text-end]
+    minmax(0, 130px) [wide-end]
+    minmax(20px, 1fr) [full-end];
+  row-gap: 0;
+  padding: 0 0 96px;
+}
+.page > * { grid-column: text; }
+.page > figure,
+.page > .wide { grid-column: wide; }
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  padding: 88px 0 40px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 56px;
+}
+.wordmark {
+  font-family: var(--display);
+  font-size: 46px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  margin: 0 0 18px;
+  font-weight: 600;
+}
+.lede {
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  margin: 0 0 28px;
+  text-wrap: balance;
+}
+.meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+}
+
+/* ---------- headings ---------- */
+
+h2 {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  margin: 64px 0 20px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+  text-wrap: balance;
+}
+h2:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+h3 {
+  font-family: var(--body);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.7;
+  margin: 36px 0 10px;
+  letter-spacing: 0.01em;
+}
+
+p { margin: 0 0 18px; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible,
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+code, .mono {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  letter-spacing: 0;
+}
+code {
+  background: var(--rule-soft);
+  padding: 0.1em 0.36em;
+  border-radius: 3px;
+}
+
+/* ---------- premises ---------- */
+
+.premise {
+  margin: 0 0 12px;
+  padding: 26px 0 4px;
+  border-top: 1px solid var(--rule-soft);
+}
+.premise:first-of-type { border-top: none; padding-top: 8px; }
+
+.premise-no {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+}
+.premise-claim {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+.premise-where {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  border-left: 2px solid var(--rule);
+  padding: 2px 0 2px 14px;
+  margin: 18px 0 0;
+}
+.premise-where b { color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- figures ---------- */
+
+figure {
+  margin: 34px 0 40px;
+  padding: 0;
+}
+figure .frame {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 24px 20px;
+  overflow-x: auto;
+}
+figure svg {
+  display: block;
+  width: 100%;
+  min-width: 560px;
+  max-width: 100%;
+  height: auto;
+  color: var(--ink-soft);
+}
+figcaption {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-top: 12px;
+}
+figcaption b { color: var(--ink-soft); font-weight: 600; }
+
+.svg-node { fill: none; stroke: currentColor; stroke-width: 1.2; }
+.svg-node-dashed { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 5 4; }
+.svg-label { fill: currentColor; font-family: var(--body); font-size: 12.5px; }
+.svg-sub { fill: currentColor; font-family: var(--mono); font-size: 10.5px; opacity: 0.72; }
+.svg-edge { stroke: currentColor; stroke-width: 1.1; fill: none; opacity: 0.62; }
+.svg-edge-label { fill: currentColor; font-family: var(--body); font-size: 11px; opacity: 0.86; }
+.svg-col { fill: currentColor; font-family: var(--mono); font-size: 10px; opacity: 0.5; letter-spacing: 0.08em; }
+
+/* ---------- tables ---------- */
+
+.table-wrap { overflow-x: auto; margin: 24px 0 8px; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.7;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 11px 14px 11px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+th {
+  font-size: 11.5px;
+  font-family: var(--mono);
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 8px;
+  white-space: nowrap;
+}
+td:last-child, th:last-child { padding-right: 0; }
+tbody tr:last-child td { border-bottom: none; }
+
+.state-cell { white-space: nowrap; font-weight: 700; }
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: 1px;
+}
+.d-untouched { background: var(--s-untouched); }
+.d-touched   { background: var(--s-touched); }
+.d-solved    { background: var(--s-solved); }
+.d-mastered  { background: var(--s-mastered); }
+.d-review    { background: var(--s-review); }
+
+/* ---------- formulas ---------- */
+
+.formulas {
+  margin: 22px 0 8px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.formulas li {
+  border-left: 2px solid var(--accent);
+  padding-left: 16px;
+}
+.formulas .fname {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.formulas .fbody {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.formulas .fnote {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.7;
+}
+
+/* ---------- status list ---------- */
+
+.status {
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.status li {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  align-items: baseline;
+}
+.status li:last-child { border-bottom: none; }
+.status .tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  padding: 2px 0;
+  white-space: nowrap;
+}
+.tag-done { color: var(--s-mastered); }
+.tag-todo { color: var(--muted); }
+.tag-gap  { color: var(--s-touched); }
+
+/* ---------- note ---------- */
+
+.note {
+  margin-top: 72px;
+  padding: 20px 22px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.note strong { color: var(--ink-soft); }
+
+@media (max-width: 700px) {
+  .masthead { padding-top: 56px; }
+  .wordmark { font-size: 34px; }
+  .lede { font-size: 16.5px; }
+  h2 { font-size: 22px; }
+  .premise-claim { font-size: 18.5px; }
+  .status li { grid-template-columns: 1fr; gap: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <h1 class="wordmark">Tsumiage</h1>
+    <p class="lede">
+      志望校までの道のりを可視化する学習ダッシュボード。<br>
+      「あと何観点で、何%で、1日あたり何観点やれば間に合うのか」を計算して出し、やらなくていい範囲を切り落として、次にやる1つだけを提示する。
+    </p>
+    <p class="meta">
+      <span>プロトタイプ</span>
+      <span>React + TypeScript + Vite</span>
+      <span>2026-08</span>
+    </p>
+  </header>
+
+  <h2>解こうとしている問題</h2>
+
+  <p>
+    受験生が持っていないのは勉強時間ではなく、<b>「いまどこにいて、あと何をやれば間に合うのか」の見取り図</b>である。参考書は進捗を教えてくれず、模試は年に数回しか座標をくれない。その空白を埋めるために、多くの受験生は「何をやるか決める」作業に毎日の時間を使っている。
+  </p>
+  <p>
+    Tsumiage はこの決定を肩代わりする。到達度を解答履歴から計算し、志望校で出ない範囲を母数から外し、残った道のりを受験日までの日数で割って、今日やる1つを出す。
+  </p>
+
+  <h2>3つの前提</h2>
+
+  <p>
+    この3つはプロダクトの主張そのもので、実装上の都合で崩さない。どれか1つを外すと、残りの2つが意味を失う構造になっている。
+  </p>
+
+  <section class="premise">
+    <span class="premise-no">前提 1</span>
+    <p class="premise-claim">到達度を自己申告で受け取らない</p>
+    <p>
+      チェックボックスは「やった」ではなく「やった気」を記録してしまう。進捗が実力と乖離した瞬間、ダッシュボードは安心を売るだけの装置になる。
+    </p>
+    <p>
+      そこで入力を解答履歴（<code>Attempt</code>）1種類に限定した。到達度という状態はどこにも保存されておらず、履歴からの計算結果としてのみ存在する。申告する場所が UI にないのではなく、<b>データモデルに申告を置く場所がない</b>。
+    </p>
+
+    <figure>
+      <div class="frame">
+        <svg viewBox="0 0 900 220" role="img" aria-label="到達度に至る入力経路は解答履歴の一本のみで、自己申告が入る経路は存在しないことを示す図">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity="0.62"></path>
+            </marker>
+          </defs>
+
+          <rect class="svg-node" x="10" y="42" width="170" height="62" rx="6"></rect>
+          <text class="svg-label" x="95" y="68" text-anchor="middle">スワイプ判定</text>
+          <text class="svg-sub" x="95" y="87" text-anchor="middle">解けた / あやしい</text>
+
+          <rect class="svg-node" x="210" y="42" width="150" height="62" rx="6"></rect>
+          <text class="svg-label" x="285" y="68" text-anchor="middle">Attempt</text>
+          <text class="svg-sub" x="285" y="87" text-anchor="middle">pointId, at, correct</text>
+
+          <rect class="svg-node" x="390" y="42" width="150" height="62" rx="6"></rect>
+          <text class="svg-label" x="465" y="68" text-anchor="middle">evaluate()</text>
+          <text class="svg-sub" x="465" y="87" text-anchor="middle">logic/mastery.ts</text>
+
+          <rect class="svg-node" x="570" y="42" width="160" height="62" rx="6"></rect>
+          <text class="svg-label" x="650" y="68" text-anchor="middle">PointStatus</text>
+          <text class="svg-sub" x="650" y="87" text-anchor="middle">level / locked</text>
+
+          <rect class="svg-node" x="760" y="42" width="130" height="62" rx="6"></rect>
+          <text class="svg-label" x="825" y="79" text-anchor="middle">3つの画面</text>
+
+          <line class="svg-edge" x1="180" y1="73" x2="204" y2="73" marker-end="url(#ah)"></line>
+          <line class="svg-edge" x1="360" y1="73" x2="384" y2="73" marker-end="url(#ah)"></line>
+          <line class="svg-edge" x1="540" y1="73" x2="564" y2="73" marker-end="url(#ah)"></line>
+          <line class="svg-edge" x1="730" y1="73" x2="754" y2="73" marker-end="url(#ah)"></line>
+
+          <text class="svg-edge-label" x="192" y="32" text-anchor="middle">記録</text>
+          <text class="svg-edge-label" x="372" y="32" text-anchor="middle">計算</text>
+          <text class="svg-edge-label" x="552" y="32" text-anchor="middle">結果</text>
+          <text class="svg-edge-label" x="742" y="32" text-anchor="middle">表示</text>
+
+          <rect class="svg-node-dashed" x="390" y="158" width="340" height="46" rx="6" stroke="var(--s-touched)"></rect>
+          <text class="svg-label" x="560" y="186" text-anchor="middle" fill="var(--s-touched)">自己申告（やったチェック・自己評価）</text>
+
+          <line class="svg-edge" x1="650" y1="158" x2="650" y2="110" stroke="var(--s-touched)" stroke-dasharray="5 4" opacity="0.85"></line>
+          <line class="svg-edge" x1="638" y1="122" x2="662" y2="146" stroke="var(--s-touched)" stroke-width="1.8" opacity="1"></line>
+          <line class="svg-edge" x1="662" y1="122" x2="638" y2="146" stroke="var(--s-touched)" stroke-width="1.8" opacity="1"></line>
+          <text class="svg-edge-label" x="678" y="138" fill="var(--s-touched)">この経路を作らない</text>
+        </svg>
+      </div>
+      <figcaption>
+        図1 — 到達度に至る入力は1本しかない。<b>スワイプの判定は「1問の正誤」であって「単元の到達度」ではない</b>。自己申告の粒度を1問まで落とし、そこから先の判断（定着したか、復習に戻すか）を機械側が持つ、というのがこの前提の実装形。
+      </figcaption>
+    </figure>
+
+    <p class="premise-where">
+      <b>守られている場所</b><br>
+      logic/mastery.ts — evaluate() / buildStatuses()<br>
+      types.ts — StudyState は target と attempts しか持たない
+    </p>
+  </section>
+
+  <section class="premise">
+    <span class="premise-no">前提 2</span>
+    <p class="premise-claim">観点の依存関係を UI の構造として使う</p>
+    <p>
+      三角比を飛ばして正弦定理はできない。この当たり前の順序は、参考書では目次の並びとして暗黙に埋まっているだけで、「いまの自分が手を出せる範囲」としては見えない。
+    </p>
+    <p>
+      Tsumiage は依存関係（<code>prereqIds</code>）を2つの用途に同時に使う。<b>開放条件</b>——先行観点がすべて「解けた」以上になるまでロックする——と、<b>マップの並び順</b>である。残りの道の長さがそのまま残量になる。
+    </p>
+
+    <figure>
+      <div class="frame">
+        <svg viewBox="0 0 900 400" role="img" aria-label="数学I・Aの12観点の依存関係。依存の深さごとに5列に並び、枝分かれと合流を持つ有向非巡回グラフになっている">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity="0.62"></path>
+            </marker>
+          </defs>
+
+          <text class="svg-col" x="70"  y="14" text-anchor="middle">深さ 0</text>
+          <text class="svg-col" x="245" y="14" text-anchor="middle">深さ 1</text>
+          <text class="svg-col" x="420" y="14" text-anchor="middle">深さ 2</text>
+          <text class="svg-col" x="595" y="14" text-anchor="middle">深さ 3</text>
+          <text class="svg-col" x="770" y="14" text-anchor="middle">深さ 4</text>
+
+          <line class="svg-edge" x1="126" y1="110" x2="183" y2="49"  marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="126" y1="110" x2="183" y2="123" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="126" y1="110" x2="183" y2="264" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="126" y1="350" x2="183" y2="350" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="301" y1="45"  x2="358" y2="45"  marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="301" y1="125" x2="358" y2="170" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="301" y1="125" x2="533" y2="93"  marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="476" y1="45"  x2="533" y2="86"  marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="476" y1="175" x2="533" y2="153" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="476" y1="175" x2="533" y2="211" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="651" y1="90"  x2="708" y2="264" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="301" y1="270" x2="708" y2="270" marker-end="url(#ah2)"></line>
+
+          <rect class="svg-node" x="14"  y="91"  width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="70" y="115" text-anchor="middle">展開の公式</text>
+          <rect class="svg-node" x="14"  y="331" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="70" y="355" text-anchor="middle">順列・組合せ</text>
+
+          <rect class="svg-node" x="189" y="26"  width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="245" y="50" text-anchor="middle">因数分解</text>
+          <rect class="svg-node" x="189" y="106" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="245" y="130" text-anchor="middle">平方根</text>
+          <rect class="svg-node" x="189" y="251" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="245" y="275" text-anchor="middle">1次不等式</text>
+          <rect class="svg-node" x="189" y="331" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="245" y="355" text-anchor="middle">条件付き確率</text>
+
+          <rect class="svg-node" x="364" y="26"  width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="420" y="50" text-anchor="middle">平方完成</text>
+          <rect class="svg-node" x="364" y="156" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="420" y="180" text-anchor="middle">三角比</text>
+
+          <rect class="svg-node" x="539" y="71"  width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="595" y="95" text-anchor="middle">解の公式</text>
+          <rect class="svg-node" x="539" y="131" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="595" y="155" text-anchor="middle">正弦定理</text>
+          <rect class="svg-node" x="539" y="196" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="595" y="220" text-anchor="middle">余弦定理</text>
+
+          <rect class="svg-node" x="714" y="251" width="112" height="38" rx="6"></rect>
+          <text class="svg-label" x="770" y="275" text-anchor="middle">二次不等式</text>
+        </svg>
+      </div>
+      <figcaption>
+        図2 — 数学I・A の12観点（<span class="mono">data/curriculum.ts</span> の実データ）。依存関係は直線ではなく<b>枝分かれと合流を持つ有向グラフ</b>で、独立した根が複数ある。「一本道」はこのグラフを深さ順に畳んだ表示であり、畳み方そのものが設計判断になる。
+      </figcaption>
+    </figure>
+
+    <p class="premise-where">
+      <b>守られている場所</b><br>
+      logic/mastery.ts — isUnlocked()（開放条件）<br>
+      screens/MapScreen.tsx — 道の並び順<br>
+      マップを自由配置・カンバン・カテゴリ一覧に置き換えない
+    </p>
+  </section>
+
+  <section class="premise">
+    <span class="premise-no">前提 3</span>
+    <p class="premise-claim">ユーザーに「何をやるか」を選ばせない</p>
+    <p>
+      何をやるか決める作業そのものが受験勉強の非効率の一部である。選択肢を並べた時点で、アプリは決定コストを利用者に戻してしまう。
+    </p>
+    <p>
+      優先度の判断は <code>prioritize()</code> 1箇所に集約し、画面側には選定ロジックを書かない。「今日」タブが出すのは次の1観点と、着地予測の信号だけ。並び順は次の規則で固定されている。
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>順</th><th>対象</th><th>理由</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">1</td><td class="state-cell"><span class="dot d-review"></span>要復習</td><td>一度積み上げたものを落とすのが一番もったいない</td></tr>
+          <tr><td class="mono">2</td><td class="state-cell"><span class="dot d-touched"></span>あやしい</td><td>一度つまずいた場所は放置すると固定化する</td></tr>
+          <tr><td class="mono">3</td><td class="state-cell"><span class="dot d-solved"></span>解けた</td><td>あと1回で定着に届く</td></tr>
+          <tr><td class="mono">4</td><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>残りを頻出度の高い順に</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px; font-size:13.5px; color:var(--muted);">
+      同順位のなかでは頻出度（重み）の大きい観点が先に出る。ロックされた観点は候補から除外される。
+    </p>
+
+    <p class="premise-where">
+      <b>守られている場所</b><br>
+      logic/pace.ts — prioritize() / pickNext() / buildQueue()<br>
+      screens/ 配下に選定ロジックを置かない
+    </p>
+  </section>
+
+  <h2>到達度モデル</h2>
+
+  <p>
+    到達度は4段階で、そのうち「定着」だけが時間経過で巻き戻る。「もう見なくていい」は主張ではなく、この計算の結果として出てくる。
+  </p>
+
+  <figure>
+    <div class="frame">
+      <svg viewBox="0 0 900 250" role="img" aria-label="到達度の状態遷移図。未着手からあやしい・解けたを経て定着に至り、21日経過で要復習に戻る">
+        <defs>
+          <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity="0.62"></path>
+          </marker>
+        </defs>
+
+        <path class="svg-edge" d="M62 88 C 150 34, 330 34, 414 84" marker-end="url(#ah3)"></path>
+        <text class="svg-edge-label" x="238" y="42" text-anchor="middle">正答</text>
+
+        <line class="svg-edge" x1="114" y1="110" x2="182" y2="110" marker-end="url(#ah3)"></line>
+        <text class="svg-edge-label" x="148" y="102" text-anchor="middle">誤答</text>
+
+        <line class="svg-edge" x1="292" y1="110" x2="362" y2="110" marker-end="url(#ah3)"></line>
+        <text class="svg-edge-label" x="327" y="102" text-anchor="middle">正答</text>
+
+        <line class="svg-edge" x1="472" y1="110" x2="542" y2="110" marker-end="url(#ah3)"></line>
+        <text class="svg-edge-label" x="507" y="76" text-anchor="middle">間隔3日以上</text>
+        <text class="svg-edge-label" x="507" y="91" text-anchor="middle">2回目の正答</text>
+
+        <line class="svg-edge" x1="652" y1="110" x2="732" y2="110" marker-end="url(#ah3)" stroke="var(--s-review)" opacity="0.9"></line>
+        <text class="svg-edge-label" x="692" y="84" text-anchor="middle" fill="var(--s-review)">最終正答から</text>
+        <text class="svg-edge-label" x="692" y="99" text-anchor="middle" fill="var(--s-review)">21日</text>
+
+        <path class="svg-edge" d="M414 136 C 360 194, 300 194, 244 138" marker-end="url(#ah3)"></path>
+        <text class="svg-edge-label" x="329" y="200" text-anchor="middle">直近が誤答</text>
+
+        <path class="svg-edge" d="M790 136 C 736 202, 660 202, 604 138" marker-end="url(#ah3)" stroke="var(--s-mastered)" opacity="0.9"></path>
+        <text class="svg-edge-label" x="697" y="212" text-anchor="middle" fill="var(--s-mastered)">正答1回で復帰</text>
+
+        <rect class="svg-node" x="10" y="88" width="104" height="44" rx="8" stroke="var(--s-untouched)"></rect>
+        <text class="svg-label" x="62" y="116" text-anchor="middle" fill="var(--s-untouched)">未着手</text>
+
+        <rect class="svg-node" x="188" y="88" width="104" height="44" rx="8" stroke="var(--s-touched)"></rect>
+        <text class="svg-label" x="240" y="116" text-anchor="middle" fill="var(--s-touched)">あやしい</text>
+
+        <rect class="svg-node" x="368" y="88" width="104" height="44" rx="8" stroke="var(--s-solved)"></rect>
+        <text class="svg-label" x="420" y="116" text-anchor="middle" fill="var(--s-solved)">解けた</text>
+
+        <rect class="svg-node" x="548" y="88" width="104" height="44" rx="8" stroke="var(--s-mastered)"></rect>
+        <text class="svg-label" x="600" y="116" text-anchor="middle" fill="var(--s-mastered)">定着</text>
+
+        <rect class="svg-node-dashed" x="738" y="88" width="104" height="44" rx="8" stroke="var(--s-review)"></rect>
+        <text class="svg-label" x="790" y="116" text-anchor="middle" fill="var(--s-review)">要復習</text>
+      </svg>
+    </div>
+    <figcaption>
+      図3 — 到達度の状態遷移。<b>「要復習」は独立した段階ではなく、定着に立つフラグ</b>（破線）で、だから復習に戻った観点は母数の「済み」から外れ、優先度の先頭に来る。忘却をモデルに組み込んでいるのはここ1箇所。
+    </figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>状態</th><th>条件</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>解答履歴なし</td></tr>
+        <tr><td class="state-cell"><span class="dot d-touched"></span>あやしい</td><td>挑戦したが正答なし、または直近が誤答</td></tr>
+        <tr><td class="state-cell"><span class="dot d-solved"></span>解けた</td><td>正答あり。ただし定着条件に未達</td></tr>
+        <tr><td class="state-cell"><span class="dot d-mastered"></span>定着</td><td>正答2回以上 かつ 初回正答から3日以上あけて正答 かつ 直近が正答</td></tr>
+        <tr><td class="state-cell"><span class="dot d-review"></span>要復習</td><td>定着後、最終正答から21日が経過</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>ペースの計算</h2>
+
+  <p>
+    重みは観点の頻出度（1〜3）で、志望学部の <code>emphasis</code> で上書きできる。
+    0 にするとその観点は出題範囲外として、母数からも道からも消える。これが「やらなくていい範囲を切り落とす」の実装。
+  </p>
+
+  <ul class="formulas">
+    <li>
+      <span class="fname">必要ペース</span>
+      <span class="fbody">残り観点の重み ÷ 受験日までの日数</span>
+    </li>
+    <li>
+      <span class="fname">実績ペース</span>
+      <span class="fbody">直近14日で新たに定着した重み ÷ 経過日数</span>
+      <span class="fnote">その日までの履歴で再評価し、窓の開始時点との差分を取る。過去の申告を信じない。</span>
+    </li>
+    <li>
+      <span class="fname">着地予測</span>
+      <span class="fbody">(定着済みの重み + 実績ペース × 残り日数) ÷ 出題範囲の重み</span>
+      <span class="fnote">「今日」タブに出す唯一の数字。現在の到達率ではなく、このままの速度で受験日を迎えたときの到達率。</span>
+    </li>
+  </ul>
+
+  <h2>3つの画面</h2>
+
+  <p>
+    <b>使うのは高校生で、触る場所は通学中のスマホである。</b>PC の広い画面に向かって腰を据えて計画を立てる道具ではない。前提3が「決めさせない」である以上、画面は片手・縦持ち・数十秒で完結する形に寄せる。学習管理ツールの見た目ではなく、彼らが毎日開いているアプリ（Duolingo / TikTok 型）の作法を借りる。
+  </p>
+  <p>
+    ボトムタブは3つから増やさない。分析的な指標を「今日」に置かないことが、前提3を画面構成として守る形になる。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>タブ</th><th>出すもの</th><th>出さないもの</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="state-cell">今日</td>
+          <td>次の1観点と、着地予測の信号</td>
+          <td>選択肢、分析指標</td>
+        </tr>
+        <tr>
+          <td class="state-cell">マップ</td>
+          <td>依存関係にそった道と、残りの長さ</td>
+          <td>自由配置、カテゴリ一覧</td>
+        </tr>
+        <tr>
+          <td class="state-cell">じぶん</td>
+          <td>到達率、ペース、不安な観点、もう見なくていい観点</td>
+          <td>次にやることの提案</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:20px;">
+    判定の入力はスワイプカード。1枚1観点を左右に振って「解けた / あやしい」を記録する。一覧にチェックボックスを並べる形は、前提1を形式的に満たしていても体験として自己申告に戻るため採らない。
+  </p>
+
+  <h2>データ設計の要</h2>
+
+  <p>
+    観点は単元より細かい「知識として定着すべき1つの粒度」で、<b>1観点 = 1問で判定できる</b>ところまで割る。ここが製品の本体であり、最大のコストでもある。
+  </p>
+  <p>
+    設計上の賭けは、<b>観点体系そのものを全国共通にして、大学ごとの差を重み（0〜3）だけで持つ</b>という点にある。大学ごとに観点体系を作るとマッピングの作成コストが大学数に比例するが、この形なら「観点数 × 1回のタグ付け」＋「学部数 × 重み付け」に分解できる。頻出度は本来、過去問への観点タグ付けから作る。
+  </p>
+
+  <h2>いまの位置</h2>
+
+  <p>
+    UI とロジックのプロトタイプ。触って方向性を確かめるためのもので、ビルド・lint はクリーン。
+  </p>
+
+  <ul class="status">
+    <li><span class="tag tag-done">実装済み</span><span>到達度の判定と復習戻り、開放条件、志望校による絞り込み、ペース計算、3画面とスワイプ判定</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>観点マスタと志望校データの本番化（過去問への観点タグ付け）</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>問題数の拡充。いまは1観点あたり2〜3問で、繰り返すと同じ問題が出る</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>認証とサーバー同期。永続化は localStorage のみで端末を変えると消える</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>logic/mastery.ts と logic/pace.ts のテスト。判定条件は純関数だが、いま壊れても気づけない</span></li>
+    <li><span class="tag tag-gap">前提との差</span><span>マップの並びが prereqIds ではなく配列順に依存していて、図2の依存グラフを畳んだ結果になっていない</span></li>
+    <li><span class="tag tag-gap">前提との差</span><span>定着判定の日数が暦日ではなく24時間刻みで、解いた時刻によって結果が割れる</span></li>
+    <li><span class="tag tag-gap">前提との差</span><span>一度誤答した観点が、間隔をあけずに正答1回で定着へ復帰する</span></li>
+  </ul>
+
+  <div class="note">
+    <strong>データについての注記。</strong>本書および実装に含まれる大学名・入試科目・出題範囲は、すべてプロトタイプ用のサンプルです。実在の募集要項ではなく、大学名も架空のものです。実データを扱う際は必ず出典を伴わせます。
+  </div>
+
+</div>
+</body>
+</html>
