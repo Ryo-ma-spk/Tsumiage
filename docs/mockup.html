@@ -6,726 +6,595 @@
 <title>Tsumiage — 画面モック</title>
 <style>
 :root {
-  /* ページ側（モックの台紙） */
-  --page: #ECE9E4;
-  --page-ink: #22303C;
-  --page-muted: #6E7C86;
-
-  /* アプリ本体 */
-  --paper: #FBF8F3;
-  --card: #FFFFFF;
-  --ink: #22303C;
-  --ink-2: #66757F;
-  --line: #E7E3DC;
-  --line-2: #D6D1C7;
-
-  --amber: #FF8A1F;      /* 積み上げたブロック。主色はこれ1色だけ */
-  --amber-d: #D46800;    /* 押せる感じを出すための下辺 */
-  --amber-pale: #FFE7D1;
-
-  --gold: #FFC12E;       /* 完璧。特別な状態のときだけ */
-  --gold-d: #C98F00;
-
-  --green: #2FB673;
-  --green-d: #1E9159;
-  --green-pale: #DCF3E7;
-
-  --coral: #F55A5A;
-  --coral-d: #CF3838;
-  --coral-pale: #FFE3E3;
-
-  /* 丸ゴシックは「かわいい」側に振れすぎるので使わない。
-     親しみは角丸と厚みで出し、文字は太いゴシックで強く保つ。 */
-  --maru: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
-  --body: "Hiragino Sans", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+  --page:#ECE9E4; --page-ink:#22303C; --page-muted:#6E7C86;
+  --paper:#FBF8F3; --card:#FFF; --ink:#22303C; --ink-2:#66757F;
+  --line:#E7E3DC; --line-2:#D6D1C7;
+  --amber:#FF8A1F; --amber-d:#D46800; --amber-pale:#FFE7D1;
+  --gold:#FFC12E; --gold-d:#C98F00; --gold-pale:#FFF3D4;
+  --green:#2FB673; --green-d:#1E9159; --green-pale:#DCF3E7;
+  --coral:#F55A5A; --coral-d:#CF3838; --coral-pale:#FFE3E3;
+  /* 丸ゴシックは「かわいい」側に振れすぎる。親しみは角丸と厚みで出し、
+     文字は太いゴシックで強く保つ */
+  --f:"Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
 }
+*{box-sizing:border-box}
+body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink);
+  font-family:var(--f);line-height:1.7}
 
-* { box-sizing: border-box; }
+.head{max-width:1500px;margin:0 auto 38px}
+.head h1{margin:0 0 8px;font-size:30px;letter-spacing:.02em}
+.head p{margin:0 0 6px;color:var(--page-muted);font-size:14px;max-width:66ch}
+.head .core{display:inline-block;margin-top:10px;padding:8px 16px;border-radius:12px;
+  background:var(--amber-pale);color:#7A4600;font-weight:800;font-size:14px}
 
-body {
-  margin: 0;
-  padding: 44px 24px 90px;
-  background: var(--page);
-  color: var(--page-ink);
-  font-family: var(--body);
-  line-height: 1.7;
-}
+.grid{max-width:1500px;margin:0 auto;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:44px 30px;align-items:start}
+.fw{display:flex;flex-direction:column;gap:11px}
+.lbl{font-size:12.5px;color:var(--page-muted)}
+.lbl b{color:var(--page-ink);font-weight:700}
 
-.head { max-width: 1400px; margin: 0 auto 40px; }
-.head h1 { margin: 0 0 8px; font-family: var(--maru); font-size: 30px; letter-spacing: 0.02em; }
-.head p { margin: 0; color: var(--page-muted); font-size: 14px; max-width: 62ch; }
+.phone{width:100%;min-height:640px;border-radius:30px;border:3px solid #1E2A33;
+  box-shadow:0 10px 0 rgba(30,42,51,.16);overflow:hidden;background:var(--paper);
+  color:var(--ink);display:flex;flex-direction:column;font-size:13.5px}
+.phone.tall{min-height:830px}
+.body{flex:1;padding:18px 16px;display:flex;flex-direction:column}
+.body.mid{justify-content:center}
 
-.grid {
-  max-width: 1400px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 44px 30px; align-items: start;
-}
-.frame-wrap { display: flex; flex-direction: column; gap: 11px; }
-.frame-label { font-size: 12.5px; color: var(--page-muted); }
-.frame-label b { color: var(--page-ink); font-weight: 700; font-family: var(--maru); }
+/* ---- 共通 ---- */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:15px;border:none;border-radius:18px;background:var(--amber);color:#fff;
+  font-size:16px;font-weight:800;box-shadow:0 5px 0 var(--amber-d);letter-spacing:.03em}
+.btn.green{background:var(--green);box-shadow:0 5px 0 var(--green-d)}
+.btn-soft{display:inline-block;padding:10px 22px;border-radius:999px;
+  border:2px solid var(--line-2);background:transparent;color:var(--ink-2);
+  font-size:13px;font-weight:700}
+.panel{background:var(--card);border-radius:22px;border:2px solid var(--line);
+  padding:16px;box-shadow:0 4px 0 var(--line)}
+.tag{display:inline-block;padding:4px 11px;border-radius:999px;background:var(--amber-pale);
+  color:var(--amber-d);font-size:11px;font-weight:800}
+.meter{height:11px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:999px;background:var(--amber)}
 
-.phone {
-  width: 100%; min-height: 620px;
-  border-radius: 30px;
-  border: 3px solid #1E2A33;
-  box-shadow: 0 10px 0 rgba(30,42,51,0.16);
-  overflow: hidden;
-  background: var(--paper); color: var(--ink);
-  display: flex; flex-direction: column;
-  font-size: 13.5px;
-}
-.body { flex: 1; padding: 18px 16px; display: flex; flex-direction: column; }
-.body.mid { justify-content: center; }
-.phone.tall { min-height: 800px; }
+/* ---- 鏡（積み上げ）。どの画面でも主役 ---- */
+.mirror{background:var(--card);border:2px solid var(--line);border-radius:22px;
+  padding:14px 16px;box-shadow:0 4px 0 var(--line)}
+.mirror .top{display:flex;align-items:baseline;gap:7px}
+.mirror .n{font-size:34px;font-weight:800;color:var(--amber-d);line-height:1.1}
+.mirror .of{font-size:12.5px;color:var(--ink-2)}
+.mirror .cap{margin-left:auto;font-size:11px;color:var(--ink-2)}
+.strip{display:flex;flex-wrap:wrap;gap:3.5px;margin-top:10px}
+.b{width:13px;height:13px;border-radius:3.5px;background:var(--amber)}
+.b.f{background:var(--amber-pale)}
+.b.g{background:var(--gold)}
+.b.e{background:var(--line)}
+.b.new{outline:3px solid var(--amber-d);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:11px;margin-top:9px;font-size:10.5px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 
-h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
+.sub1{font-size:11.5px;color:var(--ink-2);margin:9px 0 0;text-align:center;line-height:1.7}
+.sub1 b{color:var(--ink)}
+.sub1 .warn{color:var(--amber-d);font-weight:800}
 
-/* ---------- 共通パーツ ---------- */
-.btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 15px; border: none; border-radius: 18px;
-  background: var(--amber); color: #fff; font-size: 16px; font-weight: 800;
-  box-shadow: 0 5px 0 var(--amber-d); letter-spacing: 0.03em;
-}
-.btn.green { background: var(--green); box-shadow: 0 5px 0 var(--green-d); }
-.btn-soft {
-  display: inline-block; padding: 10px 22px; border-radius: 999px;
-  border: 2px solid var(--line-2); background: transparent;
-  color: var(--ink-2); font-size: 13px; font-weight: 700; font-family: var(--maru);
-}
-.panel {
-  background: var(--card); border-radius: 24px;
-  border: 2px solid var(--line); padding: 18px;
-  box-shadow: 0 4px 0 var(--line);
-}
+/* ---- つぎはこれ ---- */
+.next{margin-top:14px}
+.next h2{margin:9px 0 5px;font-size:22px;line-height:1.35}
+.why{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.pips{display:flex;justify-content:center;gap:9px;margin:16px 0 7px}
+.pip{width:15px;height:15px;border-radius:6px;background:var(--line);border:2px solid var(--line-2)}
+.pip.on{background:var(--amber);border-color:var(--amber-d)}
+.pnote{text-align:center;font-size:12px;color:var(--ink-2);margin:0 0 14px;font-weight:700}
 
-/* ---------- 今日 ---------- */
-.topbar { display: flex; align-items: center; justify-content: space-between; }
-.days { font-family: var(--maru); font-size: 13px; color: var(--ink-2); }
-.days b { color: var(--ink); font-size: 21px; }
-.streak {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: var(--amber-pale); color: var(--amber-d);
-  padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 800;
-  font-family: var(--maru);
-}
+/* ---- 判定カード ---- */
+.bar{display:flex;align-items:center;gap:11px}
+.x{font-size:19px;color:var(--ink-2)}
+.track{flex:1;height:11px;border-radius:999px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--amber);border-radius:999px}
+.stage{flex:1;position:relative;margin:15px 0}
+.sw{position:absolute;inset:0;padding:20px;border-radius:26px;background:var(--card);
+  border:3px solid var(--line-2);box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column}
+.sw.up{transform:translateY(-24px);border-color:var(--gold);box-shadow:0 6px 0 var(--gold-d)}
+.sw.lf{transform:translateX(-26px) rotate(-5deg);border-color:var(--coral);box-shadow:0 6px 0 var(--coral-d)}
+.ut{font-size:12px;font-weight:800;color:var(--amber-d)}
+.ask{margin:auto 0;font-size:20px;font-weight:700;line-height:1.6}
+.since{align-self:flex-start;padding:4px 11px;border-radius:999px;background:var(--line);
+  color:var(--ink-2);font-size:11.5px;font-weight:700}
+.stamp{position:absolute;top:74px;padding:6px 16px;border:4px solid;border-radius:12px;
+  background:var(--card);font-size:19px;font-weight:800}
+.stamp.g{left:50%;transform:translateX(-50%);color:var(--gold-d);border-color:var(--gold)}
+.stamp.n{right:16px;transform:rotate(10deg);color:var(--coral-d);border-color:var(--coral)}
+.pf{align-self:center;display:inline-flex;align-items:center;gap:6px;margin-bottom:13px;
+  padding:9px 20px;border-radius:999px;border:none;background:var(--gold);color:#6B4A00;
+  font-size:13.5px;font-weight:800;box-shadow:0 4px 0 var(--gold-d)}
+.acts{display:flex;justify-content:center;gap:20px}
+.rd{width:96px;padding:13px 0;border-radius:22px;border:none;display:flex;
+  flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:800}
+.rd .e{font-size:24px;line-height:1.1}
+.rd.ok{background:var(--green-pale);color:var(--green-d);box-shadow:0 4px 0 #BCE9D3}
+.rd.ng{background:var(--coral-pale);color:var(--coral-d);box-shadow:0 4px 0 #F7C9C9}
+.hint{text-align:center;font-size:12px;color:var(--ink-2);margin:13px 0 0}
+.undo{align-self:center;margin-top:11px;padding:8px 18px;border-radius:999px;
+  border:2px solid var(--line-2);background:transparent;color:var(--ink-2);
+  font-size:12.5px;font-weight:700}
 
-.gauge { margin: 16px 0 6px; }
-.gauge .lead { font-family: var(--maru); font-size: 26px; font-weight: 800; letter-spacing: 0.02em; }
-.gauge .lead .pct { font-size: 40px; }
-.gauge.ok  .lead { color: var(--green-d); }
-.gauge.mid .lead { color: var(--amber-d); }
-.gauge.no  .lead { color: var(--coral-d); }
-.gauge.idle .lead { color: var(--ink-2); }
-.gauge .sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+/* ---- 確認カード ---- */
+.chk-head{display:flex;align-items:center;gap:7px;background:var(--gold-pale);
+  border-radius:14px;padding:10px 13px;font-size:11.5px;color:#6B4A00;font-weight:700}
+.q{margin:22px 0 auto;font-size:19px;font-weight:700;line-height:1.6}
+.opts{display:flex;flex-direction:column;gap:9px;margin-top:auto}
+.opt{padding:14px;border-radius:16px;background:var(--card);border:2px solid var(--line-2);
+  box-shadow:0 3px 0 var(--line);font-size:14px;font-weight:700;text-align:left;color:var(--ink)}
 
-.meter { height: 12px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 10px; }
-.meter i { display: block; height: 100%; border-radius: 999px; }
-.meter i.ok  { background: var(--green); }
-.meter i.mid { background: var(--amber); }
-.meter i.no  { background: var(--coral); }
+/* ---- 絵が変わった ---- */
+.fix{text-align:center}
+.fix .move{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:16px}
+.fix .move i{width:28px;height:28px;border-radius:8px}
+.fix .move .ar{font-size:19px;color:var(--ink-2)}
+.fix h2{margin:0 0 4px;font-size:22px}
+.fix .nm{font-size:15px;font-weight:800;color:var(--amber-d);margin-bottom:16px}
+.ans{background:var(--card);border:2px solid var(--line);border-radius:16px;
+  padding:13px 15px;text-align:left;font-size:13px;line-height:1.7}
+.ans .k{font-size:10.5px;color:var(--ink-2);font-weight:700}
+.ans .v{font-weight:800;color:var(--green-d)}
+.ans .x2{color:var(--coral-d);text-decoration:line-through}
+.good-news{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:var(--amber-pale);
+  color:#7A4600;font-size:12px;line-height:1.75;text-align:left}
 
-.next { margin-top: 16px; }
-.tag {
-  display: inline-block; padding: 4px 11px; border-radius: 999px;
-  background: var(--amber-pale); color: var(--amber-d);
-  font-size: 11px; font-weight: 800; font-family: var(--maru);
-}
-.next h2 { margin: 10px 0 6px; font-size: 23px; line-height: 1.35; }
-.why {
-  display: flex; gap: 7px; align-items: flex-start;
-  font-size: 12.5px; color: var(--ink-2); line-height: 1.6;
-}
-.why .em { font-size: 15px; line-height: 1.2; }
+/* ---- 結果 ---- */
+.rows{list-style:none;padding:0;margin:0 0 14px}
+.rows li{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;
+  border-radius:14px;background:var(--card);border:2px solid var(--line);font-size:13px}
+.rows .nm{flex:1}
+.rows .mk{font-size:11.5px;font-weight:800;color:var(--green-d)}
+.rows .mk.g{color:var(--gold-d)} .rows .mk.n{color:var(--coral-d)}
+.follow{font-size:12px;line-height:1.7;color:#7A4600;background:var(--amber-pale);
+  border-radius:16px;padding:12px 14px;margin:0 0 14px}
 
-.pips { display: flex; justify-content: center; gap: 9px; margin: 18px 0 8px; }
-.pip {
-  width: 15px; height: 15px; border-radius: 6px;
-  background: var(--line); border: 2px solid var(--line-2);
-}
-.pip.on { background: var(--amber); border-color: var(--amber-d); }
-.pips-note { text-align: center; font-size: 12px; color: var(--ink-2); margin: 0 0 16px; font-weight: 700; }
+/* ---- 図鑑（マップ） ---- */
+.dex{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+.u{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;
+  background:var(--card);border:2px solid var(--line)}
+.u.done{border-color:var(--green);background:var(--green-pale)}
+.u.near{border-color:var(--gold);background:var(--gold-pale)}
+.u .un{width:92px;flex:none;font-size:11px;font-weight:700;line-height:1.3}
+.u .cells{flex:1;display:flex;flex-wrap:wrap;gap:3px}
+.c{width:12px;height:12px;border-radius:3px;background:var(--line)}
+.c.d{background:var(--amber)} .c.f{background:var(--amber-pale)} .c.g{background:var(--gold)}
+.u .ct{width:32px;flex:none;text-align:right;font-size:11px;font-weight:800;color:var(--ink-2)}
+.u.done .ct{color:var(--green-d)}
+.u .st{width:16px;flex:none;text-align:center;font-size:12px}
+.left-note{margin:10px 0 0;padding:11px 13px;border-radius:14px;background:var(--gold-pale);
+  color:#6B4A00;font-size:11.5px;line-height:1.75}
+.left-note b{font-weight:800}
 
-/* ---------- 積み上げブロック ---------- */
-.tower { display: flex; flex-wrap: wrap-reverse; gap: 4px; justify-content: center; }
-.blk { width: 15px; height: 15px; border-radius: 4px; background: var(--amber); }
-.blk.faded { background: var(--amber-pale); }
-.blk.empty { background: var(--line); }
+/* ---- 単元を開く ---- */
+.item{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:15px;
+  background:var(--card);border:2px solid var(--line);font-size:13px}
+.item .dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--line)}
+.item .dot.d{background:var(--amber)} .item .dot.g{background:var(--gold)}
+.item .nm{flex:1;font-weight:700}
+.item .tg{font-size:10.5px;color:var(--ink-2);font-weight:700}
+.found{margin:3px 0 10px 22px;padding-left:11px;border-left:3px solid var(--line);
+  font-size:11.5px;color:var(--ink-2);line-height:1.85}
+.found .ok{color:var(--green-d);font-weight:800}
+.found .gr{font-size:9.5px;opacity:.8}
 
-.big-cheer { text-align: center; }
-.big-cheer .em { font-size: 46px; line-height: 1.1; }
-.big-cheer h2 { margin: 6px 0 4px; font-size: 24px; }
-.big-cheer p { margin: 0 0 16px; font-size: 12.5px; color: var(--ink-2); }
+/* ---- コンプリート ---- */
+.comp{text-align:center}
+.comp .seal{width:110px;height:110px;margin:0 auto 14px;border-radius:50%;
+  background:var(--green-pale);border:5px solid var(--green);display:flex;
+  align-items:center;justify-content:center;font-size:40px}
+.comp h2{margin:0 0 3px;font-size:23px}
+.comp .u2{font-size:14px;font-weight:800;color:var(--green-d);margin-bottom:14px}
+.keep{margin:16px 0 0;padding:12px 14px;border-radius:14px;background:var(--green-pale);
+  color:#14664A;font-size:11.5px;line-height:1.8;text-align:left}
 
-/* ---------- カード ---------- */
-.bar { display: flex; align-items: center; gap: 11px; }
-.x { font-size: 19px; color: var(--ink-2); }
-.track { flex: 1; height: 11px; border-radius: 999px; background: var(--line); overflow: hidden; }
-.track i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
+/* ---- じぶん ---- */
+.me{font-size:12px;color:var(--ink-2)}
+.me b{display:block;font-size:18px;color:var(--ink)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.cellx{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:11px;text-align:center}
+.cellx b{display:block;font-size:20px;font-weight:800}
+.cellx small{font-size:10px;color:var(--ink-2)}
+.sec{margin-top:15px}
+.sec h3{margin:0 0 3px;font-size:13.5px}
+.sec .nt{font-size:10.5px;color:var(--ink-2);margin:0 0 7px}
+.lst{list-style:none;padding:0;margin:0}
+.lst li{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--card);
+  border:2px solid var(--line);border-radius:14px;margin-bottom:5px;font-size:12.5px}
+.lst li.mis{border-color:var(--coral);background:var(--coral-pale)}
+.lst .n2{flex:1}
+.lst .t2{font-size:10.5px;font-weight:800;color:var(--ink-2)}
+.lst .t2.hot{color:var(--coral-d)}
 
-.stage { flex: 1; position: relative; margin: 16px 0; }
-.swipe {
-  position: absolute; inset: 0; padding: 20px;
-  border-radius: 26px; background: var(--card);
-  border: 3px solid var(--line-2); box-shadow: 0 6px 0 var(--line);
-  display: flex; flex-direction: column;
-}
-.swipe.up   { transform: translateY(-24px) scale(1.01); border-color: var(--gold); box-shadow: 0 6px 0 var(--gold-d); }
-.swipe.left { transform: translateX(-26px) rotate(-5deg); border-color: var(--coral); box-shadow: 0 6px 0 var(--coral-d); }
-.unit-tag { font-size: 12px; font-weight: 800; color: var(--amber-d); font-family: var(--maru); }
-.ask { margin: auto 0; font-family: var(--maru); font-size: 20px; font-weight: 700; line-height: 1.6; }
-.since {
-  align-self: flex-start; padding: 4px 11px; border-radius: 999px;
-  background: var(--line); color: var(--ink-2); font-size: 11.5px; font-weight: 700;
-}
-.stamp {
-  position: absolute; top: 78px; padding: 6px 16px;
-  border: 4px solid; border-radius: 12px; background: var(--card);
-  font-family: var(--maru); font-size: 19px; font-weight: 800;
-}
-.stamp.gold { left: 50%; transform: translateX(-50%); color: var(--gold-d); border-color: var(--gold); }
-.stamp.ng { right: 16px; transform: rotate(10deg); color: var(--coral-d); border-color: var(--coral); }
+/* ---- 設定 ---- */
+.fld{margin-bottom:14px}
+.fld span{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+.sel{padding:14px;border-radius:16px;background:var(--card);border:2px solid var(--line-2);
+  font-size:14px;font-weight:700;display:flex;justify-content:space-between}
+.disc{font-size:10.5px;color:var(--ink-2);line-height:1.6;margin:0 0 14px}
 
-.perfect-btn {
-  align-self: center; display: inline-flex; align-items: center; gap: 6px;
-  margin-bottom: 14px; padding: 9px 20px; border-radius: 999px;
-  border: none; background: var(--gold); color: #6B4A00;
-  font-family: var(--maru); font-size: 13.5px; font-weight: 800;
-  box-shadow: 0 4px 0 var(--gold-d);
-}
-.acts { display: flex; justify-content: center; gap: 20px; }
-.round {
-  width: 96px; padding: 13px 0; border-radius: 22px;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  font-family: var(--maru); font-size: 12.5px; font-weight: 800; border: none;
-}
-.round .em { font-size: 24px; line-height: 1.1; }
-.round.ok { background: var(--green-pale); color: var(--green-d); box-shadow: 0 4px 0 #BCE9D3; }
-.round.ng { background: var(--coral-pale); color: var(--coral-d); box-shadow: 0 4px 0 #F7C9C9; }
-.hint { text-align: center; font-size: 12px; color: var(--ink-2); margin: 14px 0 0; }
-.undo {
-  align-self: center; padding: 8px 18px; border-radius: 999px;
-  border: 2px solid var(--line-2); background: transparent;
-  color: var(--ink-2); font-size: 12.5px; font-weight: 700; font-family: var(--maru);
-  margin-top: 12px;
-}
-
-/* ---------- 結果 ---------- */
-.rows { list-style: none; padding: 0; margin: 0 0 16px; }
-.rows li {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; margin-bottom: 6px; border-radius: 14px;
-  background: var(--card); border: 2px solid var(--line); font-size: 13px;
-}
-.rows .nm { flex: 1; }
-.rows .em { font-size: 16px; }
-.rows .mk { font-size: 11.5px; font-weight: 800; font-family: var(--maru); color: var(--green-d); }
-.rows .mk.gold { color: var(--gold-d); }
-.rows .mk.ng { color: var(--coral-d); }
-.follow {
-  font-size: 12px; line-height: 1.7; color: var(--ink-2);
-  background: var(--amber-pale); border-radius: 16px; padding: 12px 14px; margin: 0 0 16px;
-}
-
-/* ---------- マップ（謎解き型） ---------- */
-.map-top { display: flex; align-items: baseline; justify-content: space-between; }
-.map-top .num { font-family: var(--maru); font-size: 22px; font-weight: 800; }
-.map-top small { font-size: 12px; color: var(--ink-2); }
-
-.sec-h {
-  display: flex; align-items: center; gap: 7px;
-  margin: 18px 0 8px; font-family: var(--maru); font-size: 13.5px; font-weight: 800;
-}
-.sec-h .n { color: var(--ink-2); font-weight: 700; font-size: 12px; }
-
-/* いま踏めるもの */
-.open-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px; margin-bottom: 7px; border-radius: 16px;
-  background: var(--card); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line);
-  font-size: 13.5px; font-weight: 700;
-}
-.open-item.next { border-color: var(--amber); box-shadow: 0 3px 0 var(--amber-pale); }
-.open-item .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--amber); flex: none; }
-.open-item .nm { flex: 1; }
-.open-item .badge {
-  padding: 3px 10px; border-radius: 999px; background: var(--amber); color: #fff;
-  font-size: 10.5px; font-weight: 800; font-family: var(--maru);
-}
-
-/* 鍵のかかった扉。必要なものを自分で提示する */
-.gate {
-  padding: 14px; margin-bottom: 9px; border-radius: 18px;
-  background: var(--card); border: 2px dashed var(--line-2);
-}
-.gate.near { border-style: solid; border-color: var(--gold); background: #FFFCF2; }
-.gate .ttl { display: flex; align-items: center; gap: 8px; font-family: var(--maru); font-size: 15px; font-weight: 800; }
-.gate .ttl .lk { font-size: 15px; }
-.gate .grade { font-size: 10.5px; color: var(--ink-2); font-weight: 700; margin-left: auto; }
-.keys { margin: 9px 0 0; padding: 0 0 0 4px; list-style: none; border-left: 3px solid var(--line); }
-.keys li { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px 11px; font-size: 12.5px; }
-.keys .ok { color: var(--green-d); font-weight: 800; }
-.keys .no { color: var(--ink-2); }
-.keys .k-nm { flex: 1; }
-.keys .k-gr { font-size: 10px; color: var(--ink-2); }
-.gate .left {
-  margin: 9px 0 0; font-size: 11.5px; font-weight: 800;
-  color: var(--gold-d); font-family: var(--maru);
-}
-.gate .left.far { color: var(--ink-2); }
-
-/* 開いた瞬間 */
-.unlock { text-align: center; }
-.unlock .big { font-size: 52px; line-height: 1.1; }
-.unlock h2 { margin: 8px 0 2px; font-size: 24px; }
-.unlock .sub { font-size: 12.5px; color: var(--ink-2); margin: 0 0 18px; }
-.keyrow {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  margin-bottom: 8px; font-size: 13px; font-weight: 700;
-}
-.keyrow .kb {
-  padding: 8px 14px; border-radius: 13px;
-  background: var(--green-pale); color: var(--green-d); font-weight: 800;
-}
-.cross-note {
-  margin: 16px 0 0; padding: 12px 14px; border-radius: 14px;
-  background: var(--amber-pale); color: #7A4600; font-size: 11.5px; line-height: 1.7;
-}
-
-/* ---------- じぶん ---------- */
-.me-top { font-size: 12px; color: var(--ink-2); }
-.me-top b { display: block; font-family: var(--maru); font-size: 19px; color: var(--ink); }
-.stat-lead { font-family: var(--maru); font-size: 15px; font-weight: 700; margin: 14px 0 8px; }
-.stat-lead b { font-size: 30px; color: var(--amber-d); }
-.legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--ink-2); margin-top: 10px; }
-.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
-.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 14px 0; }
-.cell { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 12px; text-align: center; }
-.cell b { display: block; font-family: var(--maru); font-size: 22px; font-weight: 800; }
-.cell small { font-size: 10.5px; color: var(--ink-2); }
-.sec h3 { margin: 16px 0 4px; font-size: 14px; }
-.sec .note { font-size: 11px; color: var(--ink-2); margin: 0 0 8px; }
-.list { list-style: none; padding: 0; margin: 0; }
-.list li {
-  display: flex; align-items: center; gap: 9px; padding: 10px 12px;
-  background: var(--card); border: 2px solid var(--line);
-  border-radius: 14px; margin-bottom: 6px; font-size: 12.5px;
-}
-.list .nm { flex: 1; }
-.list .tg { font-size: 11px; font-weight: 800; font-family: var(--maru); color: var(--ink-2); }
-.list .tg.hot { color: var(--coral-d); }
-
-/* ---------- 設定 ---------- */
-.field { margin-bottom: 15px; }
-.field span { display: block; font-size: 12px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
-.select {
-  padding: 14px 14px; border-radius: 16px; background: var(--card);
-  border: 2px solid var(--line-2); font-size: 14px; font-weight: 700;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.disclaim { font-size: 10.5px; color: var(--ink-2); line-height: 1.6; margin: 0 0 16px; }
-
-/* ---------- ナビ ---------- */
-.nav { display: flex; border-top: 2px solid var(--line); background: var(--card); flex: none; }
-.nav div { flex: 1; text-align: center; padding: 10px 0 12px; font-size: 10.5px; font-weight: 700; color: var(--ink-2); font-family: var(--maru); }
-.nav div.on { color: var(--amber-d); }
-.nav .em { display: block; font-size: 19px; margin-bottom: 1px; filter: grayscale(1) opacity(0.5); }
-.nav div.on .em { filter: none; }
+/* ---- ナビ ---- */
+.nav{display:flex;border-top:2px solid var(--line);background:var(--card);flex:none}
+.nav div{flex:1;text-align:center;padding:10px 0 12px;font-size:10.5px;font-weight:700;color:var(--ink-2)}
+.nav div.on{color:var(--amber-d)}
+.nav .e{display:block;font-size:18px;margin-bottom:1px;filter:grayscale(1) opacity(.45)}
+.nav div.on .e{filter:none}
 </style>
 </head>
 <body>
 
 <div class="head">
   <h1>Tsumiage — 画面モック</h1>
-  <p>ハードコードの見た目確認用。対象は中学生〜高校生。学習管理ツールの見た目にはせず、親しみは角丸と厚みで出し、文字は太いゴシックで強く保っている（丸ゴシックは「かわいい」側に振れすぎるので使わない）。主色はオレンジ1色に絞り、土台の文字色を寒色のスレートにして暖色一色にならないようにした。進捗は「積み上げたブロック」で表す ── 置いたブロックは外れず、忘れると色が薄くなるだけ。マップは地図をやめ、観点が「何を土台にしているか」を自分で提示する形にした。抽象的な点を並べるより、何と何がつながっているかが名前で読める。ロックはしない。どの順に覚えるかは本人の自由で、学習の順序を決めているのは学校や本人であってアプリではないため。土台の情報は禁止ではなく「ここが苦しいなら原因はこちらかも」という説明に使う。</p>
+  <p>ハードコードの仕様確認用。実装は入っていません。対象は中学生〜高校生。</p>
+  <p class="core">性格：自分が覚えたことが、可視化できること</p>
+  <p style="margin-top:12px">このアプリは鏡です。<b>欠けても歪んでもいけない</b> —— 覚えていないものも含めて全体が見えること（網羅性）、覚えたつもりと本当に覚えたことを混ぜないこと（確認カード）。ペース計算も持っていますが主役ではないので、画面でいちばん大きいのは常に「積み上げたもの」にしています。</p>
 </div>
 
 <div class="grid">
 
-  <!-- 1 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>今日</b> — 初日。まだ予測が出せない</div>
-    <div class="phone">
-      <div class="body">
-        <div class="topbar">
-          <div class="days">受験まで <b>184</b> 日</div>
-        </div>
+<!-- 1 -->
+<div class="fw"><div class="lbl"><b>今日</b> — 初日。鏡はまだ空</div>
+<div class="phone"><div class="body">
+  <div class="mirror">
+    <div class="top"><span class="n">0</span><span class="of">/ 55 個</span><span class="cap">受験まで 184日</span></div>
+    <div class="strip">
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+    </div>
+  </div>
+  <p class="sub1">受験日の見込みは、同じ観点を日をあけてもう一度できたら出ます</p>
 
-        <div class="gauge idle">
-          <div class="lead">まだ測れません</div>
-          <div class="sub">日をあけてもう一度できたら、ここに見込みが出ます</div>
-          <div class="meter"><i style="width:0"></i></div>
-        </div>
+  <div class="panel next">
+    <span class="tag">つぎはこれ</span>
+    <h2>正負の数の四則</h2>
+    <div class="why">ここができると、先の 32個 がつながります</div>
+    <div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
+    <p class="pnote">今日ぶん あと 5つ</p>
+    <button class="btn">はじめる</button>
+  </div>
+</div>
+<div class="nav"><div class="on"><span class="e">⚡</span>今日</div><div><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
+</div></div>
 
-        <div class="panel next">
-          <span class="tag">つぎはこれ</span>
-          <h2>正負の数の四則</h2>
-          <div class="why"><span>ここができると、先の <b>32個</b> がつながります</span></div>
-          <div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
-          <p class="pips-note">今日ぶん あと 3つ</p>
-          <button class="btn">はじめる</button>
-        </div>
-      </div>
-      <div class="nav">
-        <div class="on"><span class="em">⚡</span>今日</div>
-        <div><span class="em">🗺️</span>マップ</div>
-        <div><span class="em">🧱</span>じぶん</div>
-      </div>
+<!-- 2 -->
+<div class="fw"><div class="lbl"><b>今日</b> — 主役は積み上げ。ペースは1行に落とす</div>
+<div class="phone"><div class="body">
+  <div class="mirror">
+    <div class="top"><span class="n">32</span><span class="of">/ 55 個</span><span class="cap">受験まで 96日</span></div>
+    <div class="strip">
+      <i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+      <i class="b g"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i>
+      <i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--amber)"></i>覚えている</span>
+      <span><i style="background:var(--gold)"></i>完璧</span>
+      <span><i style="background:var(--amber-pale)"></i>薄れてきた</span>
+      <span><i style="background:var(--line)"></i>これから</span>
+    </div>
+  </div>
+  <p class="sub1">このままだと本番で <b>72%</b>。<span class="warn">1日あと1つ</span> 増やせば間に合います</p>
+
+  <div class="panel next">
+    <span class="tag">つぎはこれ</span>
+    <h2>三平方の定理</h2>
+    <div class="why">あと4日で薄れる見込み。いま戻すと長く持ちます</div>
+    <div class="pips"><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
+    <p class="pnote">今日ぶん あと 3つ</p>
+    <button class="btn">はじめる</button>
+  </div>
+</div>
+<div class="nav"><div class="on"><span class="e">⚡</span>今日</div><div><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
+</div></div>
+
+<!-- 3 -->
+<div class="fw"><div class="lbl"><b>今日</b> — 完了。増えたぶんが鏡に出る</div>
+<div class="phone"><div class="body mid">
+  <div style="text-align:center">
+    <div style="font-size:42px;line-height:1.1">🧱</div>
+    <h2 style="margin:6px 0 2px;font-size:23px">今日ぶん、おわり</h2>
+    <p style="margin:0 0 16px;font-size:12.5px;color:var(--ink-2)">5つ積み上げました</p>
+  </div>
+  <div class="mirror">
+    <div class="top"><span class="n">32</span><span class="of">/ 55 個</span><span class="cap">きのうは 27個</span></div>
+    <div class="strip">
+      <i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+      <i class="b g"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i>
+      <i class="b new"></i><i class="b new"></i><i class="b new"></i><i class="b new"></i><i class="b new"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i>
+    </div>
+  </div>
+  <p style="text-align:center;margin:18px 0 0"><button class="btn-soft">まだやる</button></p>
+</div>
+<div class="nav"><div class="on"><span class="e">⚡</span>今日</div><div><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
+</div></div>
+
+<!-- 4 -->
+<div class="fw"><div class="lbl"><b>判定カード</b> — 問題文も答えも出ない</div>
+<div class="phone"><div class="body">
+  <div class="bar"><span class="x">✕</span><span class="track"><i style="width:20%"></i></span><span class="tag">2/5</span></div>
+  <div class="stage"><div class="sw">
+    <div class="ut">中3 平方根</div>
+    <p class="ask">分母に √ がある分数を、有理化して整理できる？</p>
+    <span class="since">12日ぶり</span>
+  </div></div>
+  <button class="pf">⭐️ 完璧</button>
+  <div class="acts"><button class="rd ng"><span class="e">🤔</span>あやしい</button><button class="rd ok"><span class="e">👍</span>できた</button></div>
+  <p class="hint">左右・上にスワイプでもOK</p>
+</div></div></div>
+
+<!-- 5 -->
+<div class="fw"><div class="lbl"><b>判定カード</b> — 上に振ると「完璧」</div>
+<div class="phone"><div class="body">
+  <div class="bar"><span class="x">✕</span><span class="track"><i style="width:20%"></i></span><span class="tag">2/5</span></div>
+  <div class="stage"><div class="sw up">
+    <div class="ut">中3 平方根</div>
+    <p class="ask">分母に √ がある分数を、有理化して整理できる？</p>
+    <span class="since">12日ぶり</span>
+    <div class="stamp g">完璧</div>
+  </div></div>
+  <button class="pf">⭐️ 完璧</button>
+  <div class="acts"><button class="rd ng"><span class="e">🤔</span>あやしい</button><button class="rd ok"><span class="e">👍</span>できた</button></div>
+  <p class="hint">左右・上にスワイプでもOK</p>
+</div></div></div>
+
+<!-- 6 -->
+<div class="fw"><div class="lbl"><b>判定カード</b> — 左は「あやしい」。1つ戻せる</div>
+<div class="phone"><div class="body">
+  <div class="bar"><span class="x">✕</span><span class="track"><i style="width:60%"></i></span><span class="tag">4/5</span></div>
+  <div class="stage"><div class="sw lf">
+    <div class="ut">中2 平行と合同</div>
+    <p class="ask">三角形の合同条件を3つとも言える？</p>
+    <span class="since">31日ぶり</span>
+    <div class="stamp n">あやしい</div>
+  </div></div>
+  <button class="pf">⭐️ 完璧</button>
+  <div class="acts"><button class="rd ng"><span class="e">🤔</span>あやしい</button><button class="rd ok"><span class="e">👍</span>できた</button></div>
+  <button class="undo">↩︎ 1つもどす</button>
+</div></div></div>
+
+<!-- 7 -->
+<div class="fw"><div class="lbl"><b>確認カード</b> — 数回に1度だけ。鏡のゆがみを見ている</div>
+<div class="phone"><div class="body">
+  <div class="bar"><span class="x">✕</span><span class="track"><i style="width:60%"></i></span><span class="tag">4/5</span></div>
+  <div class="chk-head" style="margin-top:15px">🔍 たまに、ほんとうに合っているか見ています</div>
+  <p class="q">同じ弧に対する円周角と中心角の関係は？</p>
+  <div class="opts">
+    <button class="opt">円周角は中心角の半分</button>
+    <button class="opt">中心角は円周角の半分</button>
+    <button class="opt">円周角と中心角は等しい</button>
+    <button class="opt">円周角は中心角の 1/4</button>
+  </div>
+</div></div></div>
+
+<!-- 8 -->
+<div class="fw"><div class="lbl"><b>確認カード</b> — 外した直後。点はつけず、絵が変わったと伝える</div>
+<div class="phone"><div class="body mid">
+  <div class="fix">
+    <div class="move">
+      <i class="b g" style="width:28px;height:28px;border-radius:8px"></i>
+      <span class="ar">→</span>
+      <i class="b e" style="width:28px;height:28px;border-radius:8px"></i>
+    </div>
+    <h2>1つ、まだだった</h2>
+    <div class="nm">円周角の定理</div>
+
+    <div class="ans">
+      <div class="k">えらんだの</div>
+      <div class="x2">中心角は円周角の半分</div>
+      <div class="k" style="margin-top:9px">ほんとうは</div>
+      <div class="v">円周角は中心角の半分</div>
+    </div>
+
+    <p class="good-news">
+      <b>逆で覚えていました。</b>ここは「完璧」に入れていた場所なので、
+      放っておくといちばん出てこなくなるところでした。見つかってよかったやつです。
+    </p>
+
+    <div style="margin-top:18px"><button class="btn">つづける</button></div>
+  </div>
+</div></div></div>
+
+<!-- 9 -->
+<div class="fw"><div class="lbl"><b>結果</b> — あやしかったものは教科書へ送る</div>
+<div class="phone"><div class="body mid">
+  <div style="text-align:center">
+    <h2 style="margin:0 0 2px;font-size:36px">4 / 5</h2>
+    <p style="margin:0 0 16px;font-size:12.5px;color:var(--ink-2)">おつかれさま</p>
+  </div>
+  <ul class="rows">
+    <li><span>⭐️</span><span class="nm">平方根の意味と大小</span><span class="mk g">完璧</span></li>
+    <li><span>👍</span><span class="nm">根号をふくむ式の計算</span><span class="mk">できた</span></li>
+    <li><span>🤔</span><span class="nm">三角形の合同条件</span><span class="mk n">あやしい</span></li>
+    <li><span>👍</span><span class="nm">因数分解</span><span class="mk">できた</span></li>
+    <li><span>🔍</span><span class="nm">円周角の定理</span><span class="mk n">まだだった</span></li>
+  </ul>
+  <p class="follow">🤔 と 🔍 の2つは、教科書や問題集で当たり直しておくと、次に出てきたとき戻せます。</p>
+  <button class="btn green">もどる</button>
+</div></div></div>
+
+<!-- 10 -->
+<div class="fw"><div class="lbl"><b>マップ</b> — 55個ぜんぶ。空きが1つずつ見える</div>
+<div class="phone tall"><div class="body">
+  <div style="display:flex;align-items:baseline;justify-content:space-between">
+    <div><span style="font-size:24px;font-weight:800">32</span> <small style="color:var(--ink-2)">/ 55 個</small></div>
+    <span class="tag">🏅 9 / 21 単元</span>
+  </div>
+  <div class="meter" style="margin-top:8px"><i style="width:58%"></i></div>
+
+  <div class="dex">
+    <div class="u done"><span class="un">中1 正負の数</span><span class="cells"><i class="c d"></i><i class="c g"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u done"><span class="un">中1 文字と式</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u done"><span class="un">中1 方程式</span><span class="cells"><i class="c d"></i><i class="c f"></i><i class="c d"></i></span><span class="ct">3/3</span><span class="st">🏅</span></div>
+    <div class="u done"><span class="un">中1 比例と反比例</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u done"><span class="un">中1 平面図形</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u"><span class="un">中1 空間図形</span><span class="cells"><i class="c d"></i><i class="c"></i></span><span class="ct">1/2</span><span class="st"></span></div>
+    <div class="u done"><span class="un">中1 データの活用</span><span class="cells"><i class="c d"></i><i class="c f"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u done"><span class="un">中2 式の計算</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c g"></i></span><span class="ct">3/3</span><span class="st">🏅</span></div>
+    <div class="u done"><span class="un">中2 連立方程式</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u"><span class="un">中2 一次関数</span><span class="cells"><i class="c d"></i><i class="c f"></i><i class="c"></i><i class="c"></i></span><span class="ct">2/4</span><span class="st"></span></div>
+    <div class="u done"><span class="un">中2 平行と合同</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c d"></i><i class="c d"></i></span><span class="ct">4/4</span><span class="st">🏅</span></div>
+    <div class="u near"><span class="un">中2 三角形と四角形</span><span class="cells"><i class="c d"></i><i class="c g"></i><i class="c"></i></span><span class="ct">2/3</span><span class="st">✨</span></div>
+    <div class="u"><span class="un">中2 データの活用</span><span class="cells"><i class="c d"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
+    <div class="u near"><span class="un">中3 多項式</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c"></i></span><span class="ct">2/3</span><span class="st">✨</span></div>
+    <div class="u done"><span class="un">中3 平方根</span><span class="cells"><i class="c g"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
+    <div class="u"><span class="un">中3 二次方程式</span><span class="cells"><i class="c d"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
+    <div class="u"><span class="un">中3 関数 y=ax²</span><span class="cells"><i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i></span><span class="ct">0/4</span><span class="st"></span></div>
+    <div class="u"><span class="un">中3 相似</span><span class="cells"><i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i></span><span class="ct">0/4</span><span class="st"></span></div>
+    <div class="u"><span class="un">中3 円</span><span class="cells"><i class="c"></i></span><span class="ct">0/1</span><span class="st"></span></div>
+    <div class="u"><span class="un">中3 三平方の定理</span><span class="cells"><i class="c f"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
+    <div class="u"><span class="un">中3 標本調査</span><span class="cells"><i class="c"></i></span><span class="ct">0/1</span><span class="st"></span></div>
+  </div>
+
+  <div class="left-note">
+    ✨ <b>あと1つ</b>で終わる単元が2つあります<br>
+    中2 三角形と四角形 …… 平行四辺形の性質と条件<br>
+    中3 多項式 …… 式の計算の利用
+  </div>
+</div>
+<div class="nav"><div><span class="e">⚡</span>今日</div><div class="on"><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
+</div></div>
+
+<!-- 11 -->
+<div class="fw"><div class="lbl"><b>マップ</b> — 単元を開くと、何を土台にしているかが出る</div>
+<div class="phone tall"><div class="body">
+  <div style="display:flex;align-items:baseline;justify-content:space-between">
+    <span style="font-size:20px;font-weight:800">中3 二次方程式</span>
+    <span class="tag">1 / 3</span>
+  </div>
+  <div class="meter" style="margin-top:8px"><i style="width:33%"></i></div>
+
+  <div style="margin-top:15px">
+    <div class="item"><i class="dot d"></i><span class="nm">二次方程式（因数分解）</span><span class="tg">3週間もちます</span></div>
+    <div class="found"><span class="ok">✓</span> 因数分解 <span class="gr">中3</span></div>
+
+    <div class="item"><i class="dot"></i><span class="nm">平方完成と解の公式</span><span class="tg">まだ</span></div>
+    <div class="found">
+      <span class="ok">✓</span> 二次方程式（因数分解）<span class="gr">中3</span><br>
+      ○ 根号をふくむ式の計算 <span class="gr">中3</span>
+    </div>
+
+    <div class="item"><i class="dot"></i><span class="nm">二次方程式の文章題</span><span class="tg">まだ</span></div>
+    <div class="found">
+      ○ 平方完成と解の公式 <span class="gr">中3</span><br>
+      <span class="ok">✓</span> 連立方程式の文章題 <span class="gr">中2</span>
     </div>
   </div>
 
-  <!-- 2 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>今日</b> — 足りない。責めずに、差分だけ出す</div>
-    <div class="phone">
-      <div class="body">
-        <div class="topbar">
-          <div class="days">受験まで <b>96</b> 日</div>
-        </div>
+  <div class="left-note" style="background:var(--amber-pale);color:#7A4600">
+    土台がまだでも、いまやってOKです。ただ、そろってからのほうが早く終わります。
+  </div>
 
-        <div class="gauge mid">
-          <div class="lead"><span class="pct">72%</span> きわどい</div>
-          <div class="sub">1日 あと <b>1つ</b> 増やせば間に合います</div>
-          <div class="meter"><i class="mid" style="width:72%"></i></div>
-        </div>
+  <div class="sec">
+    <h3>ここができると開くもの</h3>
+    <p class="nt">先につながっている観点</p>
+    <ul class="lst">
+      <li><span class="n2">y = ax² のグラフ</span><span class="t2">中3</span></li>
+    </ul>
+  </div>
+</div>
+<div class="nav"><div><span class="e">⚡</span>今日</div><div class="on"><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
+</div></div>
 
-        <div class="panel next">
-          <span class="tag">つぎはこれ</span>
-          <h2>三平方の定理</h2>
-          <div class="why"><span>あと4日で薄れる見込み。いま戻すと長く持ちます</span></div>
-          <div class="pips"><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
-          <p class="pips-note">今日ぶん あと 3つ</p>
-          <button class="btn">はじめる</button>
-        </div>
-      </div>
-      <div class="nav">
-        <div class="on"><span class="em">⚡</span>今日</div>
-        <div><span class="em">🗺️</span>マップ</div>
-        <div><span class="em">🧱</span>じぶん</div>
-      </div>
+<!-- 12 -->
+<div class="fw"><div class="lbl"><b>単元コンプリート</b> — この印は二度と外れない</div>
+<div class="phone tall"><div class="body mid">
+  <div class="comp">
+    <div class="seal">🏅</div>
+    <h2>コンプリート</h2>
+    <div class="u2">中2 平行と合同 ・ 4個ぜんぶ</div>
+
+    <div class="strip" style="justify-content:center">
+      <i class="b" style="width:20px;height:20px;border-radius:5px"></i>
+      <i class="b" style="width:20px;height:20px;border-radius:5px"></i>
+      <i class="b" style="width:20px;height:20px;border-radius:5px"></i>
+      <i class="b" style="width:20px;height:20px;border-radius:5px"></i>
+    </div>
+
+    <p class="keep">
+      <b>この印は、これから薄れても外れません。</b><br>
+      忘れたら色が薄くなるだけで、集めた事実は消えません ——
+      受験勉強はすごろくなので、コマは戻さないからです。
+    </p>
+
+    <div style="margin-top:16px;font-size:12.5px;color:var(--ink-2)">
+      21単元中 <b style="color:var(--amber-d);font-size:16px">9</b> 個目
+    </div>
+    <div style="margin-top:16px"><button class="btn green">つづける</button></div>
+  </div>
+</div>
+<div class="nav"><div><span class="e">⚡</span>今日</div><div class="on"><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
+</div></div>
+
+<!-- 13 -->
+<div class="fw"><div class="lbl"><b>じぶん</b> — 積み上げと、鏡のゆがみ</div>
+<div class="phone tall"><div class="body">
+  <div class="me">県立A高校（サンプル）<b>普通科</b></div>
+
+  <div class="mirror" style="margin-top:12px">
+    <div class="top"><span class="n">32</span><span class="of">/ 55 個</span><span class="cap">🏅 9 / 21 単元</span></div>
+    <div class="strip">
+      <i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+      <i class="b g"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i>
+      <i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+      <i class="b e"></i><i class="b e"></i><i class="b e"></i>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--amber)"></i>覚えている 22</span>
+      <span><i style="background:var(--gold)"></i>完璧 4</span>
+      <span><i style="background:var(--amber-pale)"></i>薄れてきた 6</span>
     </div>
   </div>
 
-  <!-- 3 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>今日</b> — 完了。ここで終わりだと言い切る</div>
-    <div class="phone">
-      <div class="body mid">
-        <div class="big-cheer">
-          <div class="em">🧱</div>
-          <h2>今日ぶん、おわり</h2>
-          <p>5つ積み上げました</p>
-          <div class="pips">
-            <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip on"></i>
-          </div>
-        </div>
-
-        <div class="panel" style="margin-top:20px;text-align:center">
-          <div class="stat-lead" style="margin:0 0 10px">ここまで <b>32</b> 個</div>
-          <div class="tower">
-            <i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk faded"></i><i class="blk faded"></i>
-            <i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk faded"></i><i class="blk faded"></i><i class="blk faded"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk faded"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk"></i>
-          </div>
-        </div>
-
-        <p style="text-align:center;margin:18px 0 0"><button class="btn-soft">まだやる</button></p>
-      </div>
-      <div class="nav">
-        <div class="on"><span class="em">⚡</span>今日</div>
-        <div><span class="em">🗺️</span>マップ</div>
-        <div><span class="em">🧱</span>じぶん</div>
-      </div>
-    </div>
+  <div class="duo">
+    <div class="cellx"><b>96</b><small>受験まで（日）</small></div>
+    <div class="cellx"><b>23</b><small>まだ入っていない</small></div>
   </div>
 
-  <!-- 4 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>判定カード</b> — 問題文も答えも出ない</div>
-    <div class="phone">
-      <div class="body">
-        <div class="bar">
-          <span class="x">✕</span>
-          <span class="track"><i style="width:20%"></i></span>
-          <span class="tag">2/5</span>
-        </div>
-        <div class="stage">
-          <div class="swipe">
-            <div class="unit-tag">中3 平方根</div>
-            <p class="ask">分母に √ がある分数を、有理化して整理できる？</p>
-            <span class="since">12日ぶり</span>
-          </div>
-        </div>
-        <button class="perfect-btn">⭐️ 完璧</button>
-        <div class="acts">
-          <button class="round ng"><span class="em">🤔</span>あやしい</button>
-          <button class="round ok"><span class="em">👍</span>できた</button>
-        </div>
-        <p class="hint">左右・上にスワイプでもOK</p>
-      </div>
-    </div>
+  <div class="sec">
+    <h3>🔍 勘違いかも</h3>
+    <p class="nt">覚えたつもりだったけれど、確認で外したところ</p>
+    <ul class="lst">
+      <li class="mis"><span class="n2">円周角の定理</span><span class="t2 hot">逆で覚えていた</span></li>
+    </ul>
   </div>
 
-  <!-- 5 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>判定カード</b> — 上に振ると「完璧」（保持 ×1.5）</div>
-    <div class="phone">
-      <div class="body">
-        <div class="bar">
-          <span class="x">✕</span>
-          <span class="track"><i style="width:20%"></i></span>
-          <span class="tag">2/5</span>
-        </div>
-        <div class="stage">
-          <div class="swipe up">
-            <div class="unit-tag">中3 平方根</div>
-            <p class="ask">分母に √ がある分数を、有理化して整理できる？</p>
-            <span class="since">12日ぶり</span>
-            <div class="stamp gold">完璧</div>
-          </div>
-        </div>
-        <button class="perfect-btn">⭐️ 完璧</button>
-        <div class="acts">
-          <button class="round ng"><span class="em">🤔</span>あやしい</button>
-          <button class="round ok"><span class="em">👍</span>できた</button>
-        </div>
-        <p class="hint">左右・上にスワイプでもOK</p>
-      </div>
-    </div>
+  <div class="sec">
+    <h3>そろそろ薄れそう</h3>
+    <p class="nt">この順で戻ってきます</p>
+    <ul class="lst">
+      <li><span class="n2">正負の数の四則</span><span class="t2 hot">いま薄れてる</span></li>
+      <li><span class="n2">文字式の計算</span><span class="t2 hot">いま薄れてる</span></li>
+      <li><span class="n2">一元一次方程式</span><span class="t2">あと6日</span></li>
+    </ul>
   </div>
+</div>
+<div class="nav"><div><span class="e">⚡</span>今日</div><div><span class="e">🗺️</span>マップ</div><div class="on"><span class="e">🧱</span>じぶん</div></div>
+</div></div>
 
-  <!-- 6 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>判定カード</b> — 左は「あやしい」。1つ戻せる</div>
-    <div class="phone">
-      <div class="body">
-        <div class="bar">
-          <span class="x">✕</span>
-          <span class="track"><i style="width:60%"></i></span>
-          <span class="tag">4/5</span>
-        </div>
-        <div class="stage">
-          <div class="swipe left">
-            <div class="unit-tag">中2 平行と合同</div>
-            <p class="ask">三角形の合同条件を3つとも言える？</p>
-            <span class="since">31日ぶり</span>
-            <div class="stamp ng">あやしい</div>
-          </div>
-        </div>
-        <button class="perfect-btn">⭐️ 完璧</button>
-        <div class="acts">
-          <button class="round ng"><span class="em">🤔</span>あやしい</button>
-          <button class="round ok"><span class="em">👍</span>できた</button>
-        </div>
-        <button class="undo">↩︎ 1つもどす</button>
-      </div>
-    </div>
-  </div>
+<!-- 14 -->
+<div class="fw"><div class="lbl"><b>最初の設定</b> — やらなくていい範囲を切り落とす</div>
+<div class="phone"><div class="body">
+  <h2 style="margin:10px 0 4px;font-size:25px">志望校を決めよう</h2>
+  <p style="margin:0 0 20px;font-size:12.5px;color:var(--ink-2)">やらなくていい範囲を、先に切り落とします</p>
 
-  <!-- 7 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>結果</b> — あやしかったものは教科書へ送る</div>
-    <div class="phone">
-      <div class="body mid">
-        <div class="big-cheer">
-          <h2 style="font-size:38px">4 / 5</h2>
-          <p>おつかれさま</p>
-        </div>
-        <ul class="rows">
-          <li><span class="em">⭐️</span><span class="nm">平方根の意味と大小</span><span class="mk gold">完璧</span></li>
-          <li><span class="em">👍</span><span class="nm">根号をふくむ式の計算</span><span class="mk">できた</span></li>
-          <li><span class="em">🤔</span><span class="nm">三角形の合同条件</span><span class="mk ng">あやしい</span></li>
-          <li><span class="em">👍</span><span class="nm">因数分解</span><span class="mk">できた</span></li>
-          <li><span class="em">👍</span><span class="nm">式の展開</span><span class="mk">できた</span></li>
-        </ul>
-        <p class="follow">🤔 だった1個は、教科書や問題集で当たり直しておくと、次に出てきたとき戻せます。</p>
-        <button class="btn green">もどる</button>
-      </div>
-    </div>
-  </div>
+  <div class="fld"><span>学校</span><div class="sel">県立A高校（サンプル）<span>⌄</span></div></div>
+  <div class="fld"><span>学科・コース</span><div class="sel">普通科<span>⌄</span></div></div>
+  <div class="fld"><span>受験日</span><div class="sel">2027 / 02 / 10<span>📅</span></div></div>
 
-  <!-- 8 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>マップ</b> — 何と何がつながっているかを、名前で見せる</div>
-    <div class="phone tall">
-      <div class="body">
-        <div class="map-top">
-          <div><span class="num">32</span> <small>/ 55 個</small></div>
-          <span class="tag">数学</span>
-        </div>
-        <div class="meter"><i class="mid" style="width:58%"></i></div>
-
-        <div class="sec-h">いまやるといいもの <span class="n">3</span></div>
-        <div class="open-item next">
-          <i class="dot"></i><span class="nm">二次方程式（因数分解）</span><span class="badge">つぎはこれ</span>
-        </div>
-        <div class="open-item"><i class="dot"></i><span class="nm">相似な図形と相似条件</span></div>
-        <div class="open-item"><i class="dot"></i><span class="nm">円周角の定理</span></div>
-
-        <div class="sec-h">土台があと1つ <span class="n">2</span></div>
-        <p style="font-size:11px;color:var(--ink-2);margin:-2px 0 8px">
-          いまやってもOK。ただ、土台がそろってからのほうが早く終わります
-        </p>
-
-        <div class="gate near">
-          <div class="ttl"><span class="lk">🧩</span>三平方の定理<span class="grade">中3</span></div>
-          <ul class="keys">
-            <li><span class="ok">✓</span><span class="k-nm">相似の証明と辺の長さ</span><span class="k-gr">中3</span></li>
-            <li><span class="no">○</span><span class="k-nm">根号をふくむ式の計算</span><span class="k-gr">中3</span></li>
-          </ul>
-          <p class="left">あと1つで土台がそろう</p>
-        </div>
-
-        <div class="gate near">
-          <div class="ttl"><span class="lk">🧩</span>二次方程式の文章題<span class="grade">中3</span></div>
-          <ul class="keys">
-            <li><span class="ok">✓</span><span class="k-nm">連立方程式の文章題</span><span class="k-gr">中2</span></li>
-            <li><span class="no">○</span><span class="k-nm">平方完成と解の公式</span><span class="k-gr">中3</span></li>
-          </ul>
-          <p class="left">あと1つで土台がそろう</p>
-        </div>
-
-        <div class="sec-h">土台が2つ以上たりない <span class="n">20</span></div>
-
-        <div class="gate">
-          <div class="ttl"><span class="lk">🧩</span>y = ax² のグラフ<span class="grade">中3</span></div>
-          <ul class="keys">
-            <li><span class="no">○</span><span class="k-nm">一次関数の式とグラフ</span><span class="k-gr">中2</span></li>
-            <li><span class="no">○</span><span class="k-nm">二次方程式（因数分解）</span><span class="k-gr">中3</span></li>
-          </ul>
-          <p class="left far">土台があと2つ</p>
-        </div>
-      </div>
-      <div class="nav">
-        <div><span class="em">⚡</span>今日</div>
-        <div class="on"><span class="em">🗺️</span>マップ</div>
-        <div><span class="em">🧱</span>じぶん</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 8b -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>土台がそろった</b> — 学年をまたいで、工程としてつながる</div>
-    <div class="phone tall">
-      <div class="body mid">
-        <div class="unlock">
-          <div class="big">🧩</div>
-          <h2>土台がそろった</h2>
-          <p class="sub">y = ax² のグラフ</p>
-
-          <div class="keyrow">
-            <span class="kb">一次関数の式とグラフ</span>
-          </div>
-          <div class="keyrow">
-            <span class="kb">二次方程式（因数分解）</span>
-          </div>
-          <p class="sub" style="margin-top:12px">この2つがそろいました</p>
-
-          <p class="cross-note">
-            一次関数は <b>中2</b>、二次関数は <b>中3</b> で習います。
-            でも工程としてはひと続きなので、学年で切らずに、
-            <b>開いた直後にそのまま続けられる</b>順番で出します。
-          </p>
-
-          <div style="margin-top:20px">
-            <button class="btn">つづける</button>
-          </div>
-        </div>
-      </div>
-      <div class="nav">
-        <div><span class="em">⚡</span>今日</div>
-        <div class="on"><span class="em">🗺️</span>マップ</div>
-        <div><span class="em">🧱</span>じぶん</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 9 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>じぶん</b> — 積んだ数は減らない。薄い色が「忘れかけ」</div>
-    <div class="phone">
-      <div class="body">
-        <div class="me-top">県立A高校（サンプル）<b>普通科</b></div>
-
-        <div class="panel" style="margin-top:12px">
-          <div class="stat-lead">ここまで <b>32</b> 個 積みました</div>
-          <div class="tower">
-            <i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk"></i><i class="blk faded"></i><i class="blk faded"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk faded"></i><i class="blk faded"></i><i class="blk faded"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk"></i><i class="blk faded"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk faded"></i><i class="blk faded"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i><i class="blk"></i>
-            <i class="blk"></i><i class="blk"></i>
-            <i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i>
-            <i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i>
-            <i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i>
-            <i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i><i class="blk empty"></i>
-          </div>
-          <div class="legend">
-            <span><i style="background:var(--amber)"></i>覚えている</span>
-            <span><i style="background:var(--amber-pale)"></i>薄れてきた</span>
-            <span><i style="background:var(--line)"></i>これから</span>
-          </div>
-        </div>
-
-        <div class="duo">
-          <div class="cell"><b>184</b><small>受験まで（日）</small></div>
-          <div class="cell"><b>23</b><small>まだ踏んでいない</small></div>
-        </div>
-
-        <div class="sec">
-          <h3>本番までに薄れそう</h3>
-          <p class="note">この順で復習に戻ってきます</p>
-          <ul class="list">
-            <li><span class="nm">正負の数の四則</span><span class="tg hot">いま薄れてる</span></li>
-            <li><span class="nm">文字式の計算</span><span class="tg hot">いま薄れてる</span></li>
-            <li><span class="nm">一元一次方程式</span><span class="tg">あと6日</span></li>
-          </ul>
-        </div>
-      </div>
-      <div class="nav">
-        <div><span class="em">⚡</span>今日</div>
-        <div><span class="em">🗺️</span>マップ</div>
-        <div class="on"><span class="em">🧱</span>じぶん</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 10 -->
-  <div class="frame-wrap">
-    <div class="frame-label"><b>最初の設定</b> — やらなくていい範囲を切り落とす</div>
-    <div class="phone">
-      <div class="body">
-        <div class="big-cheer" style="margin-bottom:8px;text-align:left">
-          <h2 style="font-size:26px">志望校を決めよう</h2>
-          <p>やらなくていい範囲を、先に切り落とします</p>
-        </div>
-
-        <div class="field">
-          <span>学校</span>
-          <div class="select">県立A高校（サンプル）<span>⌄</span></div>
-        </div>
-        <div class="field">
-          <span>学科・コース</span>
-          <div class="select">普通科<span>⌄</span></div>
-        </div>
-        <div class="field">
-          <span>受験日</span>
-          <div class="select">2027 / 02 / 10<span>📅</span></div>
-        </div>
-
-        <p class="disclaim">※ 入試科目・出題範囲はプロトタイプ用のサンプルデータです。実際の募集要項ではありません。</p>
-        <button class="btn">はじめる</button>
-      </div>
-    </div>
-  </div>
+  <p class="disc">※ 入試科目・出題範囲はプロトタイプ用のサンプルデータです。実際の募集要項ではありません。</p>
+  <button class="btn">はじめる</button>
+</div></div></div>
 
 </div>
-
 </body>
 </html>
