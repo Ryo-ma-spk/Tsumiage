@@ -324,6 +324,9 @@
 .card-front.ng {
   border-color: var(--bad);
 }
+.card-front.perfect {
+  border-color: var(--accent);
+}
 
 .card-meta {
   font-size: 12px;
@@ -367,9 +370,33 @@
   border-color: var(--bad);
   transform: rotate(12deg);
 }
+/* 上スワイプなので、左右のスタンプとは違って中央に出す */
+.stamp-perfect {
+  left: 50%;
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateX(-50%);
+}
 .card-front.ok .stamp-ok,
-.card-front.ng .stamp-ng {
+.card-front.ng .stamp-ng,
+.card-front.perfect .stamp-perfect {
   opacity: 1;
+}
+
+/* 「完璧」は「できた」の上位なので、2つのボタンと並べず上に置く */
+.btn-perfect {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .session-actions {

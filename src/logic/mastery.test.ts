@@ -256,3 +256,57 @@ describe("evaluate — 反応時間が保持日数に効く", () => {
     expect(result.staleAt).not.toBeNull();
   });
 });
+
+describe("「完璧」は保持を伸ばすだけで、忘却からは外さない", () => {
+  function twice(perfect: boolean): Attempt[] {
+    return [
+      at("2026-08-01", true),
+      { ...at("2026-08-04", true), perfect: perfect || undefined },
+    ];
+  }
+
+  it("完璧に振ると長く持つ", () => {
+    const withPerfect = evaluate(twice(true), NOW).staleAt;
+    const plain = evaluate(twice(false), NOW).staleAt;
+
+    expect(new Date(withPerfect!).getTime()).toBeGreaterThan(
+      new Date(plain!).getTime()
+    );
+  });
+
+  it("それでも薄れる日は必ず来る", () => {
+    // ここが無限や null になったら、忘却の対象から外れてしまっている
+    const result = evaluate(twice(true), NOW);
+
+    expect(result.staleAt).not.toBeNull();
+    expect(Number.isFinite(new Date(result.staleAt!).getTime())).toBe(true);
+  });
+
+  it("時間が経てば鮮度は 0 まで落ちて、復習に戻ってくる", () => {
+    // 「完璧」で永久に安全になると、得意なつもりの観点を本番で落とす
+    const attempts = twice(true);
+    const long = evaluate(attempts, new Date("2027-06-01T09:00:00"));
+
+    expect(long.freshness).toBe(0);
+    expect(long.needsReview).toBe(true);
+  });
+
+  it("上限（120日）は超えない", () => {
+    const attempts = [
+      at("2026-01-01", true),
+      { ...at("2026-08-04", true), perfect: true, latencyMs: 3_000 },
+    ];
+    const result = evaluate(attempts, NOW);
+
+    expect(daysBetween("2026-08-04", result.staleAt!)).toBeLessThanOrEqual(120);
+  });
+
+  it("誤答に perfect が付いていても効かない", () => {
+    const attempts = [
+      at("2026-08-01", true),
+      { ...at("2026-08-04", false), perfect: true },
+    ];
+
+    expect(evaluate(attempts, NOW).level).toBe("touched");
+  });
+});

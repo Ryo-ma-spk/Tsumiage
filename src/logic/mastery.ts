@@ -37,6 +37,15 @@ const LATENCY_SLOW_MS = 25_000;
 const LATENCY_ABANDONED_MS = 120_000;
 
 /**
+ * 「完璧」として振ったときに保持日数へ掛ける倍率。
+ *
+ * ここは倍率であって、忘却からの離脱ではない。列から消す信号は危険で、
+ * 間隔を動かすだけの信号は安全、という線を守るための形。
+ * 判定が甘くても、遅れて戻ってきて実際の結果で上書きされる。
+ */
+const PERFECT_BONUS = 1.5;
+
+/**
  * 想起にかかった時間から保持日数の補正倍率を出す。
  *
  * 問題文を持たないぶんこの信号は弱いので、幅は狭めにとってある。
@@ -112,7 +121,8 @@ function predictRetentionDays(streak: Attempt[], lapses: number): number {
     heldDays *
     RETENTION_GROWTH *
     LAPSE_DISCOUNT ** lapses *
-    latencyFactor(last.latencyMs);
+    latencyFactor(last.latencyMs) *
+    (last.perfect ? PERFECT_BONUS : 1);
   return Math.min(
     RETENTION_MAX_DAYS,
     Math.max(RETENTION_MIN_DAYS, Math.round(predicted))
