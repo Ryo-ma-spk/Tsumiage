@@ -22,10 +22,9 @@ interface Props {
 export function TodayScreen({ statuses, summary, today, next, onStart }: Props) {
   const queue = buildQueue(statuses);
   const subject = next ? SUBJECT_BY_ID.get(next.point.subjectId) : undefined;
-  const started = statuses.some((s) => s.lastAttemptAt !== null);
   const shortfall = dailyShortfall(summary);
 
-  const signal = !started
+  const signal = !summary.measurable
     ? { text: "まだ測っていません", tone: "idle" }
     : summary.projectedPct >= 95
     ? { text: "間に合う", tone: "good" }
@@ -40,7 +39,7 @@ export function TodayScreen({ statuses, summary, today, next, onStart }: Props) 
           受験まで <strong>{summary.daysLeft}</strong> 日
         </div>
         <div className={`signal ${signal.tone}`}>
-          {started ? (
+          {summary.measurable ? (
             <span className="signal-pct">
               {Math.round(summary.projectedPct)}%
             </span>
@@ -50,15 +49,22 @@ export function TodayScreen({ statuses, summary, today, next, onStart }: Props) 
           <span className="signal-text">{signal.text}</span>
         </div>
         <p className="signal-sub">
-          {!started
-            ? "何回か振ると、受験日の見込みが出せるようになります"
+          {!summary.measurable
+            ? "同じ観点を、日をあけてもう一度できたら見込みが出せます"
             : shortfall > 0
             ? `1日あと ${shortfall}つ 増やせば間に合います`
             : "今のペースのまま受験日を迎えたときに、覚えている見込みの割合"}
         </p>
       </header>
 
-      {today.completed ? (
+      {!next ? (
+        <section className="next-card">
+          <h2 className="next-name">今日ぶんは終わりました</h2>
+          <p className="next-reason">
+            出題範囲はすべて、受験日まで持つ見込みです。
+          </p>
+        </section>
+      ) : today.completed ? (
         <section className="next-card done">
           <h2 className="next-name">今日ぶん、終わりました</h2>
           <div className="today-dots" aria-hidden>
@@ -68,13 +74,11 @@ export function TodayScreen({ statuses, summary, today, next, onStart }: Props) 
           </div>
           <p className="next-reason">ここまで {Math.round(summary.progressPct)}% 踏破</p>
 
-          {next && (
-            <button className="btn-ghost" onClick={() => onStart(queue)}>
-              まだやる
-            </button>
-          )}
+          <button className="btn-ghost" onClick={() => onStart(queue)}>
+            まだやる
+          </button>
         </section>
-      ) : next ? (
+      ) : (
         <section className="next-card">
           <div className="next-label">つぎはこれ</div>
           <div className="next-subject" style={{ color: subject?.color }}>
@@ -100,13 +104,6 @@ export function TodayScreen({ statuses, summary, today, next, onStart }: Props) 
             {queue.length}問はじめる
           </button>
         </section>
-      ) : (
-        <section className="next-card">
-          <h2 className="next-name">今日ぶんは終わりました</h2>
-          <p className="next-reason">
-            出題範囲はすべて、受験日まで持つ見込みです。
-          </p>
-        </section>
       )}
     </div>
   );
@@ -124,6 +121,10 @@ function reasonFor(status: PointStatus): string {
     return `あと${left}日で薄れる見込み。いま戻すと長く持ちます`;
   }
 
+  // 先が大きく開く観点は、頻出であることより「進める」ほうが効く
+  if (status.descendants >= 3) {
+    return `ここを踏むと、先の${status.descendants}観点に進めます`;
+  }
   if (status.weight >= 3) return "志望校でよく出る観点";
   if (status.descendants > 0) {
     return `ここを踏むと、先の${status.descendants}観点に進めます`;

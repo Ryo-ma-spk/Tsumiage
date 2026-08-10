@@ -482,7 +482,7 @@ tbody tr:last-child td { border-bottom: none; }
     <span class="premise-no">前提 2</span>
     <p class="premise-claim">観点の依存関係を UI の構造として使う</p>
     <p>
-      三角比を飛ばして正弦定理はできない。この当たり前の順序は、参考書では目次の並びとして暗黙に埋まっているだけで、「いまの自分が手を出せる範囲」としては見えない。
+      平方根を飛ばして三平方の定理はできない。この当たり前の順序は、参考書では目次の並びとして暗黙に埋まっているだけで、「いまの自分が手を出せる範囲」としては見えない。
     </p>
     <p>
       Tsumiage は依存関係（<code>prereqIds</code>）を2つの用途に同時に使う。<b>開放条件</b>——先行観点がすべて「解けた」以上になるまでロックする——と、<b>マップの並び順</b>である。残りの道の長さがそのまま残量になる。
@@ -490,64 +490,71 @@ tbody tr:last-child td { border-bottom: none; }
 
     <figure>
       <div class="frame">
-        <svg viewBox="0 0 900 400" role="img" aria-label="数学I・Aの12観点の依存関係。依存の深さごとに5列に並び、枝分かれと合流を持つ有向非巡回グラフになっている">
+        <svg viewBox="0 0 900 300" role="img" aria-label="数と式の系列と図形の系列が別々に伸びたあと、根号をふくむ式の計算から三平方の定理へ領域をまたぐ辺が引かれていることを示す図">
           <defs>
             <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity="0.62"></path>
             </marker>
           </defs>
 
-          <text class="svg-col" x="70"  y="14" text-anchor="middle">深さ 0</text>
-          <text class="svg-col" x="245" y="14" text-anchor="middle">深さ 1</text>
-          <text class="svg-col" x="420" y="14" text-anchor="middle">深さ 2</text>
-          <text class="svg-col" x="595" y="14" text-anchor="middle">深さ 3</text>
-          <text class="svg-col" x="770" y="14" text-anchor="middle">深さ 4</text>
+          <text class="svg-col" x="20" y="24">A 数と式</text>
+          <rect class="svg-node" x="20" y="40" width="150" height="54" rx="6"></rect>
+          <text class="svg-label" x="95" y="62" text-anchor="middle">正負の数の四則</text>
+          <text class="svg-sub" x="95" y="80" text-anchor="middle">中1</text>
 
-          <line class="svg-edge" x1="126" y1="110" x2="183" y2="49"  marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="126" y1="110" x2="183" y2="123" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="126" y1="110" x2="183" y2="264" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="126" y1="350" x2="183" y2="350" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="301" y1="45"  x2="358" y2="45"  marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="301" y1="125" x2="358" y2="170" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="301" y1="125" x2="533" y2="93"  marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="476" y1="45"  x2="533" y2="86"  marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="476" y1="175" x2="533" y2="153" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="476" y1="175" x2="533" y2="211" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="651" y1="90"  x2="708" y2="264" marker-end="url(#ah2)"></line>
-          <line class="svg-edge" x1="301" y1="270" x2="708" y2="270" marker-end="url(#ah2)"></line>
+          <rect class="svg-node" x="200" y="40" width="150" height="54" rx="6"></rect>
+          <text class="svg-label" x="275" y="62" text-anchor="middle">累乗と指数</text>
+          <text class="svg-sub" x="275" y="80" text-anchor="middle">中1</text>
 
-          <rect class="svg-node" x="14"  y="91"  width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="70" y="115" text-anchor="middle">展開の公式</text>
-          <rect class="svg-node" x="14"  y="331" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="70" y="355" text-anchor="middle">順列・組合せ</text>
+          <rect class="svg-node" x="380" y="40" width="150" height="54" rx="6"></rect>
+          <text class="svg-label" x="455" y="62" text-anchor="middle">平方根</text>
+          <text class="svg-sub" x="455" y="80" text-anchor="middle">中3</text>
 
-          <rect class="svg-node" x="189" y="26"  width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="245" y="50" text-anchor="middle">因数分解</text>
-          <rect class="svg-node" x="189" y="106" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="245" y="130" text-anchor="middle">平方根</text>
-          <rect class="svg-node" x="189" y="251" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="245" y="275" text-anchor="middle">1次不等式</text>
-          <rect class="svg-node" x="189" y="331" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="245" y="355" text-anchor="middle">条件付き確率</text>
+          <rect class="svg-node" x="560" y="40" width="150" height="54" rx="6"></rect>
+          <text class="svg-label" x="635" y="62" text-anchor="middle">根号をふくむ計算</text>
+          <text class="svg-sub" x="635" y="80" text-anchor="middle">中3</text>
 
-          <rect class="svg-node" x="364" y="26"  width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="420" y="50" text-anchor="middle">平方完成</text>
-          <rect class="svg-node" x="364" y="156" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="420" y="180" text-anchor="middle">三角比</text>
+          <line class="svg-edge" x1="170" y1="67" x2="194" y2="67" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="350" y1="67" x2="374" y2="67" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="530" y1="67" x2="554" y2="67" marker-end="url(#ah2)"></line>
 
-          <rect class="svg-node" x="539" y="71"  width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="595" y="95" text-anchor="middle">解の公式</text>
-          <rect class="svg-node" x="539" y="131" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="595" y="155" text-anchor="middle">正弦定理</text>
-          <rect class="svg-node" x="539" y="196" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="595" y="220" text-anchor="middle">余弦定理</text>
+          <text class="svg-col" x="20" y="194">B 図形</text>
+          <rect class="svg-node" x="20" y="210" width="128" height="54" rx="6"></rect>
+          <text class="svg-label" x="84" y="232" text-anchor="middle">平面図形</text>
+          <text class="svg-sub" x="84" y="250" text-anchor="middle">中1</text>
 
-          <rect class="svg-node" x="714" y="251" width="112" height="38" rx="6"></rect>
-          <text class="svg-label" x="770" y="275" text-anchor="middle">二次不等式</text>
+          <rect class="svg-node" x="168" y="210" width="128" height="54" rx="6"></rect>
+          <text class="svg-label" x="232" y="232" text-anchor="middle">平行線と角</text>
+          <text class="svg-sub" x="232" y="250" text-anchor="middle">中2</text>
+
+          <rect class="svg-node" x="316" y="210" width="128" height="54" rx="6"></rect>
+          <text class="svg-label" x="380" y="232" text-anchor="middle">三角形の合同</text>
+          <text class="svg-sub" x="380" y="250" text-anchor="middle">中2</text>
+
+          <rect class="svg-node" x="464" y="210" width="128" height="54" rx="6"></rect>
+          <text class="svg-label" x="528" y="232" text-anchor="middle">証明の書き方</text>
+          <text class="svg-sub" x="528" y="250" text-anchor="middle">中2</text>
+
+          <rect class="svg-node" x="612" y="210" width="128" height="54" rx="6"></rect>
+          <text class="svg-label" x="676" y="232" text-anchor="middle">相似</text>
+          <text class="svg-sub" x="676" y="250" text-anchor="middle">中3</text>
+
+          <rect class="svg-node" x="760" y="210" width="128" height="54" rx="6" stroke="var(--s-mastered)"></rect>
+          <text class="svg-label" x="824" y="232" text-anchor="middle" fill="var(--s-mastered)">三平方の定理</text>
+          <text class="svg-sub" x="824" y="250" text-anchor="middle" fill="var(--s-mastered)">中3</text>
+
+          <line class="svg-edge" x1="148" y1="237" x2="162" y2="237" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="296" y1="237" x2="310" y2="237" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="444" y1="237" x2="458" y2="237" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="592" y1="237" x2="606" y2="237" marker-end="url(#ah2)"></line>
+          <line class="svg-edge" x1="740" y1="237" x2="754" y2="237" marker-end="url(#ah2)"></line>
+
+          <path class="svg-edge" d="M635 94 C 635 150, 824 150, 824 204" stroke="var(--s-mastered)" opacity="1" marker-end="url(#ah2)"></path>
+          <text class="svg-edge-label" x="735" y="145" text-anchor="middle" fill="var(--s-mastered)">領域をまたぐ</text>
         </svg>
       </div>
       <figcaption>
-        図2 — 数学I・A の12観点（<span class="mono">data/curriculum.ts</span> の実データ）。依存関係は直線ではなく<b>枝分かれと合流を持つ有向グラフ</b>で、独立した根が複数ある。「一本道」はこれを依存順に畳んだ表示。同時に開放される観点はマスタの記述順を保つので、順序は依存から導かれつつ単元のまとまりも崩れない。
+        図2 — 中学数学の一部（<span class="mono">data/curriculum.ts</span> の実データ）。<b>三平方の定理は「図形」なのに「数と式」の平方根を必要とする。</b>参考書の目次では章が違うので見えない依存で、マップが目次の焼き直しか本当の依存関係かは、この1本が引けているかで決まる。実データにはこの種の学年・領域をまたぐ辺が20本あり、依存の深さは最大10になる。
       </figcaption>
     </figure>
 
@@ -727,7 +734,7 @@ tbody tr:last-child td { border-bottom: none; }
   <h2>ペースの計算</h2>
 
   <p>
-    重みは観点の頻出度（1〜3）で、志望学部の <code>emphasis</code> で上書きできる。
+    重みは観点の頻出度（1〜3）で、志望校のコースごとの <code>emphasis</code> で上書きできる。
     0 にするとその観点は出題範囲外として、母数からも道からも消える。これが「やらなくていい範囲を切り落とす」の実装。
   </p>
 
@@ -850,10 +857,10 @@ tbody tr:last-child td { border-bottom: none; }
     観点は単元より細かい「知識として定着すべき1つの粒度」で、<b>1観点 = その場で答えられるか1回で判定できる</b>ところまで割る。ここが製品の本体であり、最大のコストでもある。
   </p>
   <p>
-    観点体系の一次ソースは学習指導要領を想定している。公開されていて、全国共通で、出典を示せる。しかも「〜できるようにする」という能力の記述なので、カードの問いかけにほぼそのまま変換できる。<b>教材を持たないという選択が、ここで体系の作りやすさに返ってくる。</b>大学ごとの差は重み（0〜3）だけで持つ。
+    観点体系の一次ソースは学習指導要領を想定している。公開されていて、全国共通で、出典を示せる。しかも「〜できるようにする」という能力の記述なので、カードの問いかけにほぼそのまま変換できる。<b>教材を持たないという選択が、ここで体系の作りやすさに返ってくる。</b>志望校ごとの差は重み（0〜3）だけで持つ。
   </p>
   <p>
-    設計上の賭けは、<b>観点体系そのものを全国共通にして、大学ごとの差を重み（0〜3）だけで持つ</b>という点にある。大学ごとに観点体系を作るとマッピングの作成コストが大学数に比例するが、この形なら「観点数 × 1回のタグ付け」＋「学部数 × 重み付け」に分解できる。頻出度は本来、過去問への観点タグ付けから作る。
+    設計上の賭けは、<b>観点体系そのものを全国共通にして、志望校ごとの差を重み（0〜3）だけで持つ</b>という点にある。学校ごとに観点体系を作るとマッピングの作成コストが学校数に比例するが、この形なら「観点数 × 1回のタグ付け」＋「コース数 × 重み付け」に分解できる。頻出度は本来、過去問への観点タグ付けから作る。
   </p>
 
   <h2>検討中：ぼんやりしたランク</h2>
@@ -881,8 +888,9 @@ tbody tr:last-child td { border-bottom: none; }
     <li><span class="tag tag-done">実装済み</span><span>踏破と鮮度の分離、観点ごとの保持日数の予測、開放条件、志望校による絞り込み、受験日から逆算したペース計算、3画面とスワイプ判定</span></li>
     <li><span class="tag tag-done">実装済み</span><span>マップの並びを prereqIds から導出。依存の順序と表示の順序が一致した</span></li>
     <li><span class="tag tag-done">実装済み</span><span>今日ぶんの単位と完了状態、セッションの構成比、反応時間による補正、スワイプの取り消し、不足時の差分表示</span></li>
-    <li><span class="tag tag-done">実装済み</span><span>logic/ のテスト66件。暦日での判定、落としたあとの再定着、踏破率の単調性、本番までに薄れる観点の抽出、ブランク後に新規が必ず入ること、今日ぶんの目標が日中に動かないことを固定した</span></li>
-    <li><span class="tag tag-todo">未着手</span><span>観点マスタが30観点しかない。高校全課程まで広げるのが次の本体作業で、学習指導要領を一次ソースに科目単位で積む。中学課程はまだ入れない</span></li>
+    <li><span class="tag tag-done">実装済み</span><span>logic/ のテスト75件。暦日での判定、落としたあとの再定着、踏破率の単調性、本番までに薄れる観点の抽出、ブランク後に新規が必ず入ること、今日ぶんの目標が日中に動かないことを固定した</span></li>
+    <li><span class="tag tag-done">実装済み</span><span>開発確認用に中学数学55観点（深さ10・学年をまたぐ辺20本）。深い依存を入れて初めて出た不具合を3つ直した — 開放数を超える今日ぶんの目標、踏破ゼロのときの赤い 0%、根っこの観点に「よく出る」としか言えないこと</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>受験する科目をそろえる（いまは数学1科目のみ）。国語は依存関係がほぼ言えないので、前提2がどこで成立しなくなるかを見るのに使える</span></li>
     <li><span class="tag tag-todo">未着手</span><span>志望校データの本番化（過去問への観点タグ付けによる頻出度）</span></li>
     <li><span class="tag tag-todo">未着手</span><span>認証とサーバー同期。永続化は localStorage のみで端末を変えると消える</span></li>
     <li><span class="tag tag-gap">未検証</span><span>保持日数の係数（間隔 × 2.2、忘却で × 0.6、反応時間で ×0.9〜1.2）は仮置き。実データで調整する前提の数字であって、根拠のある値ではない</span></li>
@@ -890,7 +898,7 @@ tbody tr:last-child td { border-bottom: none; }
   </ul>
 
   <div class="note">
-    <strong>データについての注記。</strong>本書および実装に含まれる大学名・入試科目・出題範囲は、すべてプロトタイプ用のサンプルです。実在の募集要項ではなく、大学名も架空のものです。実データを扱う際は必ず出典を伴わせます。
+    <strong>データについての注記。</strong>観点の領域構成と単元の並びは中学校学習指導要領（数学）に沿わせていますが、個々の観点への割り方・頻出度・学校名・コースはすべて開発用の作り物です。実在の入試情報ではありません。実データを扱う際は必ず出典を伴わせます。
   </div>
 
 </div>

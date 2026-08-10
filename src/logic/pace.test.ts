@@ -286,7 +286,8 @@ describe("summarizeToday — 今日ぶん", () => {
     return { pointId, at: new Date(iso).toISOString(), correct };
   }
 
-  const few = [point("a"), point("b"), point("c")];
+  // 目標の下限(5)を下回らないよう、開放済みの観点を6つ用意しておく
+  const few = ["a", "b", "c", "d", "e", "f"].map((id) => point(id));
 
   it("受験日が遠いうちは下限の5に張り付く", () => {
     expect(summarizeToday(few, [], null, EXAM, NOW).goal).toBe(5);
@@ -405,5 +406,78 @@ describe("summarize — 始めたばかりのペースを信用しすぎない",
     // 1日ぶんをそのまま日割りすると 5.0 になり、着地予測が 100% に張り付く
     expect(summary.actualPointsPerDay).toBeLessThan(2);
     expect(summary.projectedPct).toBeLessThan(100);
+  });
+});
+
+describe("summarizeToday — 出せる数を超える目標を出さない", () => {
+  it("開放されている観点が少なければ、そこまでに切り下げる", () => {
+    // 一本道。まっさらな状態では先頭の1つしか開放されていない
+    const points = [
+      point("a"),
+      point("b", ["a"]),
+      point("c", ["b"]),
+      point("d", ["c"]),
+      point("e", ["d"]),
+      point("f", ["e"]),
+      point("g", ["f"]),
+    ];
+
+    const today = summarizeToday(points, [], null, EXAM, NOW);
+
+    // 下限は5だが、そもそも1つしか振れない。5 のままだと永久に未達になる
+    expect(today.goal).toBe(1);
+  });
+
+  it("1つ振れば今日ぶんが完了する", () => {
+    const points = [point("a"), point("b", ["a"])];
+    const attempts = [
+      { pointId: "a", at: new Date("2026-08-10T09:00:00").toISOString(), correct: true },
+    ];
+
+    expect(summarizeToday(points, attempts, null, EXAM, NOW).completed).toBe(true);
+  });
+});
+
+describe("summarize — 「まだ測れない」と「足りない」を混ぜない", () => {
+  const points = Array.from({ length: 20 }, (_, i) => point(`p${i}`));
+
+  it("踏破が1つも無いうちは予測を出さない", () => {
+    // 初日に何問か振った直後。まだ solved どまりで踏破は 0
+    const attempts = points.slice(0, 3).map((p) => at(p.id, "2026-08-10", true));
+    const summary = summarize(
+      buildStatuses(points, attempts, null, NOW),
+      attempts,
+      EXAM,
+      NOW
+    );
+
+    // ここが true だと、初日から赤い 0%「このままだと足りない」が出る
+    expect(summary.measurable).toBe(false);
+    expect(summary.projectedPct).toBe(0);
+  });
+
+  it("1つでも踏破すれば測れるようになる", () => {
+    const attempts = mastered("p0", "2026-08-01", "2026-08-05");
+    const summary = summarize(
+      buildStatuses(points, attempts, null, NOW),
+      attempts,
+      EXAM,
+      NOW
+    );
+
+    expect(summary.measurable).toBe(true);
+  });
+
+  it("しばらく放置していても、踏破があるなら測る（それは本当に足りていない）", () => {
+    const attempts = mastered("p0", "2026-01-01", "2026-01-10");
+    const summary = summarize(
+      buildStatuses(points, attempts, null, NOW),
+      attempts,
+      EXAM,
+      NOW
+    );
+
+    expect(summary.measurable).toBe(true);
+    expect(summary.actualPointsPerDay).toBe(0);
   });
 });

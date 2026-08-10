@@ -39,7 +39,7 @@ export function SetupScreen({ initial, onSave, onCancel }: Props) {
       </div>
 
       <label className="field">
-        <span className="field-label">大学</span>
+        <span className="field-label">学校</span>
         <select
           value={universityId}
           onChange={(e) => {
@@ -58,7 +58,7 @@ export function SetupScreen({ initial, onSave, onCancel }: Props) {
       </label>
 
       <label className="field">
-        <span className="field-label">学部</span>
+        <span className="field-label">学科・コース</span>
         <select
           value={validFacultyId}
           onChange={(e) => setFacultyId(e.target.value)}

@@ -134,3 +134,39 @@ describe("観点マスタ", () => {
     }
   });
 });
+
+describe("観点マスタ（中学数学）が開発の確認に足りているか", () => {
+  const { depthById, descendantsById } = analyzeGraph(POINTS);
+  const byId = new Map(POINTS.map((p) => [p.id, p]));
+
+  it("依存が浅いフラットな一覧になっていない", () => {
+    // 深さがないと、道の順序も開放条件も実質はたらいていないのと変わらない
+    expect(Math.max(...depthById.values())).toBeGreaterThanOrEqual(6);
+  });
+
+  it("学年をまたぐ依存がある", () => {
+    // 目次の並びをなぞっただけなら、ここは 0 本になる
+    const crossYear = POINTS.flatMap((p) =>
+      p.prereqIds.filter(
+        (q) => byId.get(q)!.unit.slice(0, 2) !== p.unit.slice(0, 2)
+      )
+    );
+
+    expect(crossYear.length).toBeGreaterThan(0);
+  });
+
+  it("平方根を踏まないと三平方の定理に進めない", () => {
+    // 参考書の目次では章が違うので見えない依存。ここが引けているかが要
+    expect(byId.get("m3-pythagoras")?.prereqIds).toContain("m3-sqrt-calc");
+  });
+
+  it("先の観点をいちばん多く開く観点を挙げられる", () => {
+    const [topId, count] = [...descendantsById.entries()].sort(
+      (a, b) => b[1] - a[1]
+    )[0];
+
+    // 「戻るべき場所」を名前で出せるかは、この数字が意味を持つかで決まる
+    expect(count).toBeGreaterThan(POINTS.length / 2);
+    expect(byId.get(topId)?.unit).toContain("中1");
+  });
+});

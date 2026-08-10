@@ -71,6 +71,15 @@ export interface PaceSummary {
 
   /** 必要ペースに対して足りているか */
   onTrack: boolean;
+
+  /**
+   * 本番予測を出していいか。
+   *
+   * 踏破が1つも無いうちは実績ペースが 0 にしかならず、予測は必ず 0% になる。
+   * 始めたばかりの人に赤い 0% を見せるのは、事実としても間違っている。
+   * 「まだ測れない」と「足りない」は別のことなので、混ぜない。
+   */
+  measurable: boolean;
 }
 
 export function daysUntilExam(examDate: string, now: Date = new Date()): number {
@@ -170,6 +179,7 @@ export function summarize(
     requiredPointsPerDay: daysLeft === 0 ? duePoints : duePoints / daysLeft,
     actualPointsPerDay,
     onTrack: actualPerDay >= requiredPerDay,
+    measurable: walkedWeight > 0,
   };
 }
 
@@ -307,9 +317,14 @@ export function summarizeToday(
   const duePoints = openingStatuses.filter((s) => needsTouchBefore(s, examDate)).length;
   const perDay = daysLeft === 0 ? duePoints : duePoints / daysLeft;
 
+  // 依存関係が深いと、始めたばかりの人には数個しか開放されていない。
+  // today の目標が実際に出せる数を超えると、達成しようのない残数が出続ける。
+  const available = prioritize(openingStatuses, dayStart).length;
+
   const goal = Math.min(
     TODAY_MAX_POINTS,
-    Math.max(TODAY_MIN_POINTS, Math.ceil(perDay))
+    Math.max(TODAY_MIN_POINTS, Math.ceil(perDay)),
+    available
   );
 
   const touchedToday = new Set(
