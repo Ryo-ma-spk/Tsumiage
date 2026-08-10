@@ -1,4 +1,9 @@
-import type { KnowledgePoint, Subject, University } from "../types";
+import type {
+  CheckQuestion,
+  KnowledgePoint,
+  Subject,
+  University,
+} from "../types";
 
 export const SUBJECTS: Subject[] = [{ id: "math", name: "数学", color: "#5b8def" }];
 
@@ -589,7 +594,135 @@ export const UNIVERSITIES: University[] = [
   },
 ];
 
+/**
+ * 確認カード（監査）。観点マスタとは別に持つ。
+ *
+ * **教材ではない。** 自己申告と実際がずれていないかを見るためだけのもの。
+ * 1観点1問、解説なし。ここを増やすと問題集になり、
+ * 「参考書ではない」という前提が崩れる。
+ *
+ * 置き場所は「逆で覚えやすいところ」に絞ってある。逆に覚えている人は
+ * 流暢に、確信をもって、間違ったほうを思い出すので、自己申告では絶対に拾えない。
+ * **どの問いにも、誤答の選択肢として「逆」を必ず入れてある。**
+ * 全観点ぶんは要らない。ここが効く場所にだけ置く。
+ */
+export const CHECKS: Record<string, CheckQuestion> = {
+  "m1-signed": {
+    prompt: "−2² を計算すると？",
+    choices: ["−4", "4", "±4", "−2"],
+    answerIndex: 0, // 4 と答える人は (−2)² と取り違えている
+  },
+  "m1-power": {
+    prompt: "(−2)³ の値は？",
+    choices: ["−8", "8", "−6", "6"],
+    answerIndex: 0,
+  },
+  "m1-prop": {
+    prompt: "反比例を表す式はどれ？",
+    choices: ["y = a / x", "y = ax", "y = x + a", "y = ax²"],
+    answerIndex: 0, // y = ax は比例。逆に覚えやすい
+  },
+  "m1-data": {
+    prompt: "1つだけ極端に大きい値があるとき、代表値としてより適切なのは？",
+    choices: ["中央値", "平均値", "最頻値", "最大値"],
+    answerIndex: 0, // 平均値と逆に覚えやすい
+  },
+  "m1-solid-volume": {
+    prompt: "円錐の体積は、底面と高さが同じ円柱の体積の何倍？",
+    choices: ["1/3 倍", "3 倍", "1/2 倍", "2 倍"],
+    answerIndex: 0,
+  },
+  "m2-linear": {
+    prompt: "一次関数 y = ax + b の a は何を表す？",
+    choices: ["傾き", "切片", "x の値", "y の値"],
+    answerIndex: 0, // b（切片）と逆に覚えやすい
+  },
+  "m2-congruent": {
+    prompt: "三角形の「合同」条件に入らないものはどれ？",
+    choices: [
+      "3つの角がそれぞれ等しい",
+      "3つの辺がそれぞれ等しい",
+      "2辺とその間の角がそれぞれ等しい",
+      "1辺とその両端の角がそれぞれ等しい",
+    ],
+    answerIndex: 0, // これは相似条件。合同と相似は取り違えやすい
+  },
+  "m2-box": {
+    prompt: "箱ひげ図の「箱」の中には、データ全体のおよそ何%が入る？",
+    choices: ["50%", "25%", "75%", "100%"],
+    answerIndex: 0,
+  },
+  "m2-prob-not": {
+    prompt: "「少なくとも1つ表が出る」確率の求め方は？",
+    choices: [
+      "1 −（全部裏が出る確率）",
+      "1 −（全部表が出る確率）",
+      "表が1枚だけ出る確率",
+      "表が出る確率をたす",
+    ],
+    answerIndex: 0, // 余事象の取り方を逆にしやすい
+  },
+  "m3-expand": {
+    prompt: "x² − 9 を因数分解すると？",
+    choices: ["(x + 3)(x − 3)", "(x − 3)²", "(x + 3)²", "(x − 9)(x + 1)"],
+    answerIndex: 0, // 和と差の積を、平方の形と取り違えやすい
+  },
+  "m3-sqrt": {
+    prompt: "√16 の値は？",
+    choices: ["4", "±4", "8", "256"],
+    answerIndex: 0, // 「16 の平方根」（±4）と逆に覚えやすい
+  },
+  "m3-quad-factor": {
+    prompt: "(x − 2)(x + 5) = 0 の解は？",
+    choices: ["x = 2, −5", "x = −2, 5", "x = 2, 5", "x = −2, −5"],
+    answerIndex: 0, // 符号をそのまま読んで逆にしやすい
+  },
+  "m3-quadfn-rate": {
+    prompt: "y = ax² の変化の割合は？",
+    choices: [
+      "x の値によって変わる",
+      "つねに一定で a になる",
+      "つねに一定で 2a になる",
+      "つねに 0",
+    ],
+    answerIndex: 0, // 一次関数（一定）と逆に覚えやすい
+  },
+  "m3-similar-ratio": {
+    prompt: "相似比が 2 : 3 のとき、面積比は？",
+    choices: ["4 : 9", "8 : 27", "2 : 3", "3 : 2"],
+    answerIndex: 0, // 体積比（8:27）や、そのままの比と取り違えやすい
+  },
+  "m3-circle-angle": {
+    prompt: "同じ弧に対する円周角と中心角の関係は？",
+    choices: [
+      "円周角は中心角の半分",
+      "中心角は円周角の半分",
+      "円周角と中心角は等しい",
+      "円周角は中心角の 1/4",
+    ],
+    answerIndex: 0, // まさに逆で覚えやすい代表例
+  },
+  "m3-pythagoras": {
+    prompt: "直角三角形で c が斜辺のとき、成り立つ式は？",
+    choices: ["a² + b² = c²", "a² + c² = b²", "a + b = c", "a² − b² = c²"],
+    answerIndex: 0, // どれを斜辺にするかを逆にしやすい
+  },
+  "m3-sampling": {
+    prompt: "全数調査のほうが向いているのはどっち？",
+    choices: [
+      "学校の健康診断",
+      "電球の寿命の調査",
+      "テレビの視聴率調査",
+      "缶詰の品質検査",
+    ],
+    answerIndex: 0, // 調べると壊れるものは標本調査。逆にしやすい
+  },
+};
+
 export const SUBJECT_BY_ID = new Map(SUBJECTS.map((s) => [s.id, s]));
+
+/** 確認カードを持っている観点のID */
+export const CHECKABLE_IDS = new Set(Object.keys(CHECKS));
 
 export function findFaculty(universityId: string, facultyId: string) {
   const uni = UNIVERSITIES.find((u) => u.id === universityId);

@@ -321,6 +321,69 @@ export function buildQueue(
   return merged.slice(0, size).map((s) => s.point);
 }
 
+/**
+ * このセッションで確認カードに回す観点を1つ選ぶ。
+ *
+ * 自己申告では「逆で覚えていた」を拾えない。逆に覚えている人は流暢に、
+ * 確信をもって思い出すので、即答して「完璧」に振り、保持日数が伸びて
+ * いちばん出てこなくなる。だから狙うのは、**申告がいちばん強かったもの**。
+ *
+ * 全部を確認すると問題集になるので、1セッション1枚だけにする。
+ */
+export function pickAudit(
+  queue: KnowledgePoint[],
+  statuses: PointStatus[],
+  attempts: Attempt[],
+  checkableIds: Set<string>
+): string | null {
+  const statusById = new Map(statuses.map((s) => [s.point.id, s]));
+
+  /** 最後に確認カードを出した時刻。まだなら 0 */
+  const lastAudit = new Map<string, number>();
+  /** 直近の申告が「完璧」だったか */
+  const claimedPerfect = new Map<string, boolean>();
+
+  for (const a of [...attempts].sort((x, y) => x.at.localeCompare(y.at))) {
+    const t = new Date(a.at).getTime();
+    if (a.audit) lastAudit.set(a.pointId, t);
+    if (a.correct) claimedPerfect.set(a.pointId, a.perfect === true);
+  }
+
+  const candidates = queue
+    .filter((p) => checkableIds.has(p.id))
+    .filter((p) => statusById.get(p.id)?.everMastered)
+    .sort((a, b) => {
+      // 「完璧」と言い切っているものほど、外れていたときの害が大きい
+      const pa = claimedPerfect.get(a.id) ? 0 : 1;
+      const pb = claimedPerfect.get(b.id) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      // 長く確認していないものから
+      return (lastAudit.get(a.id) ?? 0) - (lastAudit.get(b.id) ?? 0);
+    });
+
+  return candidates[0]?.id ?? null;
+}
+
+/**
+ * 勘違いの疑いがある観点。
+ *
+ * 定着させたはずなのに、確認カードで外したもの。忘却なら時間が自己修正するが、
+ * 勘違いは安定していて自己修正しないので、名前で出して当たり直させる。
+ */
+export function suspectedMisconceptions(
+  statuses: PointStatus[],
+  attempts: Attempt[]
+): PointStatus[] {
+  const lastAuditResult = new Map<string, boolean>();
+  for (const a of [...attempts].sort((x, y) => x.at.localeCompare(y.at))) {
+    if (a.audit) lastAuditResult.set(a.pointId, a.correct);
+  }
+
+  return statuses.filter(
+    (s) => s.everMastered && lastAuditResult.get(s.point.id) === false
+  );
+}
+
 /** その時刻が属する「学習日」の始まり */
 export function studyDayStart(now: Date = new Date()): Date {
   const d = new Date(now);

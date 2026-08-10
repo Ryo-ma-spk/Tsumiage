@@ -8,6 +8,8 @@ import {
   settledPoints,
   summarize,
   summarizeToday,
+  pickAudit,
+  suspectedMisconceptions,
   weakPoints,
   type PaceSummary,
 } from "./pace";
@@ -552,5 +554,84 @@ describe("buildQueue — セッションの中で工程をつなぐ", () => {
     // 上位から順に取るだけだと、頻出度の高い d・e が間に割り込んでいた
     expect(ib).toBe(ia + 1);
     expect(ic).toBe(ib + 1);
+  });
+});
+
+describe("確認カード — 自己申告で拾えないものを拾う", () => {
+  const checkable = new Set(["a", "b"]);
+
+  function auditAt(pointId: string, day: string, correct: boolean): Attempt {
+    return { ...at(pointId, day, correct), audit: true };
+  }
+
+  it("「完璧」と言い切っている観点を優先して確認する", () => {
+    // 逆で覚えている人ほど流暢に即答して完璧に振る。害が大きいのはそちら
+    const points = [point("a"), point("b")];
+    const attempts: Attempt[] = [
+      ...mastered("a", "2026-07-20", "2026-08-05"),
+      at("b", "2026-07-20", true),
+      { ...at("b", "2026-08-05", true), perfect: true },
+    ];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(
+      pickAudit(points, statuses, attempts, checkable)
+    ).toBe("b");
+  });
+
+  it("まだ定着していない観点は確認しない", () => {
+    // 監査は「できているつもり」を確かめるためのもの
+    const points = [point("a")];
+    const attempts = [at("a", "2026-08-09", true)];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(pickAudit(points, statuses, attempts, checkable)).toBeNull();
+  });
+
+  it("確認カードを持たない観点は選ばれない", () => {
+    const points = [point("z")];
+    const attempts = mastered("z", "2026-07-20", "2026-08-05");
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(pickAudit(points, statuses, attempts, checkable)).toBeNull();
+  });
+
+  it("長く確認していないものから回す", () => {
+    const points = [point("a"), point("b")];
+    const attempts: Attempt[] = [
+      ...mastered("a", "2026-07-20", "2026-08-05"),
+      ...mastered("b", "2026-07-20", "2026-08-05"),
+      auditAt("a", "2026-08-08", true), // a は最近確認した
+    ];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(pickAudit(points, statuses, attempts, checkable)).toBe("b");
+  });
+
+  it("定着させたのに確認で外したら、勘違いの疑いとして挙げる", () => {
+    const points = [point("a"), point("b")];
+    const attempts: Attempt[] = [
+      ...mastered("a", "2026-07-20", "2026-08-05"),
+      ...mastered("b", "2026-07-20", "2026-08-05"),
+      auditAt("a", "2026-08-09", false), // 逆で覚えていた
+    ];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(
+      suspectedMisconceptions(statuses, attempts).map((s) => s.point.id)
+    ).toEqual(["a"]);
+  });
+
+  it("確認で当たり直せば疑いは消える", () => {
+    const points = [point("a")];
+    const attempts: Attempt[] = [
+      ...mastered("a", "2026-07-01", "2026-07-10"),
+      auditAt("a", "2026-07-20", false),
+      at("a", "2026-08-01", true),
+      auditAt("a", "2026-08-09", true),
+    ];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(suspectedMisconceptions(statuses, attempts)).toEqual([]);
   });
 });

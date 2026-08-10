@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { POINTS } from "./curriculum";
+import { CHECKS, POINTS } from "./curriculum";
 import { analyzeGraph } from "../logic/graph";
 import type { KnowledgePoint } from "../types";
 
@@ -51,6 +51,17 @@ describe("学習要項", () => {
     expect(missing.map((p) => p.unit)).toEqual([]);
   });
 
+  it("確認カードが実在する観点を指していて、選択肢がそろっている", () => {
+    const ids = new Set(POINTS.map((p) => p.id));
+    for (const [id, q] of Object.entries(CHECKS)) {
+      expect(ids.has(id), `確認カードが未知の観点 ${id} を指している`).toBe(true);
+      expect(q.choices.length, `${id} の選択肢が4つない`).toBe(4);
+      expect(q.answerIndex, `${id} の正解の番号が範囲外`).toBeLessThan(4);
+      // 逆で覚えている人を拾うのが目的なので、誤答の受け皿が要る
+      expect(new Set(q.choices).size, `${id} の選択肢が重複している`).toBe(4);
+    }
+  });
+
   it("docs/curriculum.html を書き出す", () => {
     const { depthById, descendantsById } = analyzeGraph(POINTS);
     const byId = new Map(POINTS.map((p) => [p.id, p]));
@@ -89,7 +100,7 @@ describe("学習要項", () => {
       return `
   <h3>${esc(u)}</h3>
   <div class="table-wrap"><table>
-    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th><th class="c">確認</th></tr></thead>
     <tbody>
     ${rows
       .map((p) => {
@@ -107,6 +118,7 @@ describe("学習要項", () => {
       <td class="keys">${keys.length ? keys.join("") : '<span class="none">なし（出発点）</span>'}</td>
       <td class="c">${depthById.get(p.id)}</td>
       <td class="c">${descendantsById.get(p.id)}</td>
+      <td class="c chk">${CHECKS[p.id] ? "◎" : ""}</td>
     </tr>`;
       })
       .join("\n")}
@@ -174,6 +186,7 @@ td.w{color:var(--amber-d);letter-spacing:-1px}
 .mx td:first-child{font-weight:700}
 .cross li{margin-bottom:5px;font-size:13.5px}
 .cross b{color:var(--amber-d)}
+td.chk{color:var(--green-d);font-weight:700}
 </style>
 </head>
 <body>
@@ -194,6 +207,7 @@ td.w{color:var(--amber-d);letter-spacing:-1px}
   <div class="stat"><b>${maxDepth}</b><small>依存の最大の深さ</small></div>
   <div class="stat"><b>${crossGrade.length}</b><small>学年をまたぐ依存</small></div>
   <div class="stat"><b>${crossArea.length}</b><small>領域をまたぐ依存</small></div>
+  <div class="stat"><b>${Object.keys(CHECKS).length}</b><small>確認カード</small></div>
 </div>
 
 <h2>構成</h2>
@@ -241,6 +255,23 @@ ${crossGrade
   )
   .join("\n")}
 </ul>
+
+<h2>確認カード <span class="cnt">${Object.keys(CHECKS).length}問</span></h2>
+<p class="lede">自己申告では「逆で覚えていた」を拾えない。逆に覚えている人は流暢に、確信をもって思い出すので、即答して「完璧」に振り、いちばん出てこなくなる。そこで<b>逆で覚えやすいところにだけ</b>確認カードを置き、誤答の選択肢に必ず「逆」を入れてある。教材ではないので1観点1問、解説は持たない。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>観点</th><th>問い</th><th>正解</th><th>「逆」の受け皿</th></tr></thead>
+<tbody>
+${Object.entries(CHECKS)
+  .map(([id, q]) => {
+    const p = byId.get(id)!;
+    return `<tr><td class="nm">${esc(p.name)}</td><td class="ask">${esc(
+      q.prompt
+    )}</td><td><b>${esc(q.choices[q.answerIndex])}</b></td><td class="ask">${esc(
+      q.choices.filter((_, i) => i !== q.answerIndex).join(" / ")
+    )}</td></tr>`;
+  })
+  .join("\n")}
+</tbody></table></div>
 
 ${AREAS.map(areaSection).join("\n")}
 
