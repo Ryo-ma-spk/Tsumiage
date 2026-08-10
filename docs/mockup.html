@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsumiage — 画面モック</title>
+<style>
+:root {
+  --page: #0a0e17;
+  --page-text: #e7ecf7;
+  --page-muted: #7c88a3;
+  --page-line: #202a3d;
+
+  /* アプリ本体（src/app.css）と同じトークン */
+  --bg: #0f1420;
+  --surface: #1a2132;
+  --surface-2: #232c42;
+  --line: #2e3950;
+  --text: #eef2fb;
+  --muted: #8d99b5;
+  --accent: #5b8def;
+  --good: #4bb98f;
+  --warn: #e5a13a;
+  --bad: #e0685f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 40px 24px 80px;
+  background: var(--page);
+  color: var(--page-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.7;
+}
+
+.head { max-width: 1400px; margin: 0 auto 40px; }
+.head h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0.02em; }
+.head p { margin: 0; color: var(--page-muted); font-size: 14px; max-width: 60ch; }
+
+.grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 40px 28px;
+  align-items: start;
+}
+
+.frame-wrap { display: flex; flex-direction: column; gap: 10px; }
+.frame-label { font-size: 12px; color: var(--page-muted); letter-spacing: 0.04em; }
+.frame-label b { color: var(--page-text); font-weight: 600; }
+
+/* 端末枠 */
+/* 実機は縦スクロールするが、モックでは切れると比べられないので伸ばす */
+.phone {
+  width: 100%;
+  min-height: 600px;
+  border: 1px solid var(--page-line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+.body { flex: 1; padding: 16px; display: flex; flex-direction: column; }
+.body.center { justify-content: center; }
+
+/* ---------- 今日 ---------- */
+.countdown { text-align: center; font-size: 12px; color: var(--muted); }
+.countdown b { color: var(--text); font-size: 17px; }
+
+.signal { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-top: 10px; }
+.signal .pct { font-size: 38px; font-weight: 800; letter-spacing: -0.02em; }
+.signal .txt { font-size: 12px; font-weight: 700; }
+.good  .pct, .good  .txt { color: var(--good); }
+.warn  .pct, .warn  .txt { color: var(--warn); }
+.bad   .pct, .bad   .txt { color: var(--bad); }
+.idle  .txt { color: var(--muted); }
+.idle  .pct { color: var(--muted); opacity: 0.5; }
+.sub { text-align: center; font-size: 11px; color: var(--muted); margin: 4px 0 0; }
+
+.card {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.card.done-state { border-color: var(--good); text-align: center; }
+.eyebrow { font-size: 11px; font-weight: 700; color: var(--muted); }
+.subject { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--accent); }
+.title { margin: 4px 0 8px; font-size: 19px; font-weight: 700; line-height: 1.35; }
+.reason { font-size: 12px; color: var(--muted); }
+
+.dots { display: flex; justify-content: center; gap: 8px; margin: 16px 0 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); }
+.dot.on { background: var(--good); border-color: var(--good); }
+.remain { text-align: center; font-size: 11px; color: var(--muted); margin: 0 0 14px; }
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px; border: none; border-radius: 13px;
+  background: var(--accent); color: #fff; font-size: 14px; font-weight: 700;
+}
+.btn-ghost {
+  display: inline-block; padding: 8px 18px; border-radius: 999px;
+  border: 1px solid var(--line); background: transparent;
+  color: var(--muted); font-size: 12px; font-weight: 600;
+}
+
+/* ---------- スワイプ ---------- */
+.bar { display: flex; align-items: center; gap: 10px; }
+.track { flex: 1; height: 3px; border-radius: 2px; background: var(--surface-2); }
+.track i { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+.count { font-size: 11px; color: var(--muted); }
+
+.stage { flex: 1; position: relative; margin: 14px 0; }
+.swipe {
+  position: absolute; inset: 0;
+  padding: 18px; border-radius: 18px;
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; flex-direction: column;
+}
+.swipe.up   { transform: translateY(-26px); border-color: var(--accent); }
+.swipe.left { transform: translateX(-30px) rotate(-4deg); border-color: var(--bad); }
+.ask { margin: auto 0; font-size: 17px; font-weight: 700; line-height: 1.6; }
+.since { font-size: 11px; font-weight: 600; color: var(--muted); }
+.stamp {
+  position: absolute; top: 72px; padding: 4px 12px;
+  border: 3px solid; border-radius: 7px;
+  font-size: 15px; font-weight: 800; background: var(--surface);
+}
+.stamp.perfect { left: 50%; transform: translateX(-50%); color: var(--accent); border-color: var(--accent); }
+.stamp.ng { right: 18px; transform: rotate(12deg); color: var(--bad); border-color: var(--bad); }
+
+.perfect-btn {
+  align-self: center; display: inline-flex; align-items: center; gap: 5px;
+  margin-bottom: 12px; padding: 7px 16px; border-radius: 999px;
+  border: 1px solid var(--accent); background: transparent;
+  color: var(--accent); font-size: 12px; font-weight: 700;
+}
+.actions { display: flex; justify-content: center; gap: 22px; }
+.round {
+  width: 82px; padding: 12px 0; border-radius: 17px;
+  background: var(--surface); border: 2px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700;
+}
+.round.ok { color: var(--good); border-color: #2c5a48; }
+.round.ng { color: var(--bad); border-color: #5a3230; }
+.round .ico { font-size: 19px; line-height: 1; }
+.hint { text-align: center; font-size: 11px; color: var(--muted); margin: 12px 0 0; }
+
+/* ---------- 終了 ---------- */
+.score { text-align: center; font-size: 46px; font-weight: 800; color: var(--good); line-height: 1.1; }
+.score span { font-size: 20px; color: var(--muted); }
+.done-cap { text-align: center; color: var(--muted); font-size: 12px; margin: 0 0 18px; }
+.rows { list-style: none; padding: 0; margin: 0 0 14px; }
+.rows li {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12px;
+}
+.rows li:last-child { border-bottom: none; }
+.pip { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.pip.ok { background: var(--good); }
+.pip.ng { background: var(--bad); }
+.rows .name { flex: 1; }
+.rows .mark { color: var(--muted); font-size: 11px; }
+.rows .mark.perfect { color: var(--accent); }
+.followup { font-size: 11px; line-height: 1.7; color: var(--muted); margin: 0 0 14px; }
+
+/* ---------- マップ ---------- */
+.map-head { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.map-bar { height: 5px; border-radius: 3px; background: var(--surface-2); margin: 8px 0 4px; }
+.map-bar i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+.road { flex: 1; overflow: hidden; margin-top: 10px; }
+.unit { font-size: 10px; color: var(--muted); text-align: center; margin: 10px 0 6px; letter-spacing: 0.04em; }
+.node-row { display: flex; margin: 6px 0; }
+.node-row.l { justify-content: flex-start; padding-left: 18%; }
+.node-row.r { justify-content: flex-end; padding-right: 18%; }
+.node { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 108px; }
+.ball {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; border: 2px solid var(--line); background: var(--surface);
+}
+.ball.walked { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ball.review { background: var(--accent); border-color: var(--warn); color: #fff; }
+.ball.open { border-color: var(--accent); color: var(--accent); }
+.ball.lock { color: var(--muted); opacity: 0.55; }
+.node small { font-size: 9.5px; color: var(--muted); text-align: center; line-height: 1.3; }
+
+/* ---------- じぶん ---------- */
+.me-head { font-size: 11px; color: var(--muted); }
+.me-head b { display: block; font-size: 16px; color: var(--text); }
+.ring-wrap { text-align: center; margin: 10px 0 4px; }
+.ring { width: 118px; height: 118px; }
+.ring-track { fill: none; stroke: var(--surface-2); stroke-width: 9; }
+.ring-fill { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 80px 80px; }
+.ring-fill.inner { stroke: var(--good); stroke-width: 7; }
+.ring-mid { font-size: 22px; font-weight: 800; }
+.ring-mid small { display: block; font-size: 10px; font-weight: 600; color: var(--muted); }
+.ring-note { font-size: 10.5px; color: var(--muted); margin: 2px 0 0; }
+
+.pace { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 10px 0; }
+.cell { background: var(--surface); border-radius: 11px; padding: 9px; text-align: center; }
+.cell b { display: block; font-size: 17px; }
+.cell small { font-size: 9.5px; color: var(--muted); }
+.cell.good b { color: var(--good); }
+
+.sec { margin-top: 12px; }
+.sec h4 { margin: 0 0 6px; font-size: 12px; }
+.sec .note { font-size: 10px; color: var(--muted); margin: 0 0 6px; }
+.list { list-style: none; padding: 0; margin: 0; }
+.list li { display: flex; align-items: center; gap: 7px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 11.5px; }
+.list li:last-child { border-bottom: none; }
+.list .pill { width: 3px; height: 14px; border-radius: 2px; background: var(--accent); flex: none; }
+.list .nm { flex: 1; }
+.list .tg { font-size: 10px; color: var(--muted); }
+.list .tg.hot { color: var(--warn); }
+
+/* ---------- 設定 ---------- */
+.field { margin-bottom: 14px; }
+.field span { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+.select {
+  padding: 11px 12px; border-radius: 11px;
+  background: var(--surface); border: 1px solid var(--line); font-size: 13px;
+}
+.disclaim { font-size: 10px; color: var(--muted); line-height: 1.6; margin: 0 0 14px; }
+
+/* ---------- ボトムナビ ---------- */
+.nav {
+  display: flex; border-top: 1px solid var(--line);
+  background: var(--surface); flex: none;
+}
+.nav div { flex: 1; text-align: center; padding: 9px 0 11px; font-size: 10px; color: var(--muted); }
+.nav div.on { color: var(--accent); }
+.nav .ico { display: block; font-size: 15px; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Tsumiage — 画面モック</h1>
+  <p>実装は入っていない、ハードコードの見た目確認用。色と余白は <code>src/app.css</code> と同じトークンを使っている。状態ごとに並べてあるので、実機では順番にしか見られない画面を横に比べられる。</p>
+</div>
+
+<div class="grid">
+
+  <!-- 1. 今日 / 初日 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>今日</b> — 初日。まだ予測が出せない</div>
+    <div class="phone">
+      <div class="body">
+        <div class="countdown">受験まで <b>184</b> 日</div>
+        <div class="signal idle">
+          <span class="pct">—</span><span class="txt">まだ測っていません</span>
+        </div>
+        <p class="sub">同じ観点を、日をあけてもう一度できたら見込みが出せます</p>
+
+        <div class="card">
+          <div class="eyebrow">つぎはこれ</div>
+          <div class="subject">数学 ・ 中1 正負の数</div>
+          <div class="title">正負の数の四則</div>
+          <div class="reason">ここを踏むと、先の32観点に進めます</div>
+          <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+          <p class="remain">今日ぶん あと 3つ</p>
+          <button class="btn">▶ 3問はじめる</button>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="on"><span class="ico">⚡</span>今日</div>
+        <div><span class="ico">🗺</span>マップ</div>
+        <div><span class="ico">📊</span>じぶん</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 今日 / 進行中・不足 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>今日</b> — ペースが足りない。差分で処方を出す</div>
+    <div class="phone">
+      <div class="body">
+        <div class="countdown">受験まで <b>96</b> 日</div>
+        <div class="signal warn">
+          <span class="pct">72%</span><span class="txt">きわどい</span>
+        </div>
+        <p class="sub">1日あと 1つ 増やせば間に合います</p>
+
+        <div class="card">
+          <div class="eyebrow">つぎはこれ</div>
+          <div class="subject">数学 ・ 中3 三平方の定理</div>
+          <div class="title">三平方の定理</div>
+          <div class="reason">あと4日で薄れる見込み。いま戻すと長く持ちます</div>
+          <div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+          <p class="remain">今日ぶん あと 3つ</p>
+          <button class="btn">▶ 5問はじめる</button>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="on"><span class="ico">⚡</span>今日</div>
+        <div><span class="ico">🗺</span>マップ</div>
+        <div><span class="ico">📊</span>じぶん</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 今日 / 完了 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>今日</b> — 今日ぶん完了。ここで終わりだと言い切る</div>
+    <div class="phone">
+      <div class="body">
+        <div class="countdown">受験まで <b>96</b> 日</div>
+        <div class="signal good">
+          <span class="pct">96%</span><span class="txt">間に合う</span>
+        </div>
+        <p class="sub">今のペースのまま受験日を迎えたときに、覚えている見込みの割合</p>
+
+        <div class="card done-state">
+          <div class="title">今日ぶん、終わりました</div>
+          <div class="dots">
+            <i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i>
+          </div>
+          <div class="reason" style="margin-bottom:14px">ここまで 61% 踏破</div>
+          <button class="btn-ghost">まだやる</button>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="on"><span class="ico">⚡</span>今日</div>
+        <div><span class="ico">🗺</span>マップ</div>
+        <div><span class="ico">📊</span>じぶん</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. カード -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>判定カード</b> — 問題文も答えも出ない</div>
+    <div class="phone">
+      <div class="body">
+        <div class="bar">
+          <span style="color:var(--muted)">✕</span>
+          <span class="track"><i style="width:20%"></i></span>
+          <span class="count">2/5</span>
+        </div>
+        <div class="stage">
+          <div class="swipe">
+            <div class="subject">数学 ・ 中3 平方根</div>
+            <p class="ask">分母に √ がある分数を、有理化して整理できる？</p>
+            <div class="since">12日ぶり</div>
+          </div>
+        </div>
+        <button class="perfect-btn">✦ 完璧</button>
+        <div class="actions">
+          <div class="round ng"><span class="ico">↺</span>あやしい</div>
+          <div class="round ok"><span class="ico">✓</span>できた</div>
+        </div>
+        <p class="hint">左右・上にスワイプでも判定できます</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. カード / 上スワイプ -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>判定カード</b> — 上に振ると「完璧」（保持 ×1.5）</div>
+    <div class="phone">
+      <div class="body">
+        <div class="bar">
+          <span style="color:var(--muted)">✕</span>
+          <span class="track"><i style="width:20%"></i></span>
+          <span class="count">2/5</span>
+        </div>
+        <div class="stage">
+          <div class="swipe up">
+            <div class="subject">数学 ・ 中3 平方根</div>
+            <p class="ask">分母に √ がある分数を、有理化して整理できる？</p>
+            <div class="since">12日ぶり</div>
+            <div class="stamp perfect">完璧</div>
+          </div>
+        </div>
+        <button class="perfect-btn">✦ 完璧</button>
+        <div class="actions">
+          <div class="round ng"><span class="ico">↺</span>あやしい</div>
+          <div class="round ok"><span class="ico">✓</span>できた</div>
+        </div>
+        <p class="hint">左右・上にスワイプでも判定できます</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. カード / 左スワイプ + 取り消し -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>判定カード</b> — 左は「あやしい」。1つ戻せる</div>
+    <div class="phone">
+      <div class="body">
+        <div class="bar">
+          <span style="color:var(--muted)">✕</span>
+          <span class="track"><i style="width:60%"></i></span>
+          <span class="count">4/5</span>
+        </div>
+        <div class="stage">
+          <div class="swipe left">
+            <div class="subject">数学 ・ 中2 平行と合同</div>
+            <p class="ask">三角形の合同条件を3つとも言える？</p>
+            <div class="since">31日ぶり</div>
+            <div class="stamp ng">あやしい</div>
+          </div>
+        </div>
+        <button class="perfect-btn">✦ 完璧</button>
+        <div class="actions">
+          <div class="round ng"><span class="ico">↺</span>あやしい</div>
+          <div class="round ok"><span class="ico">✓</span>できた</div>
+        </div>
+        <p class="hint" style="color:var(--muted)">↩ 1つもどす</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. セッション終了 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>セッション終了</b> — あやしかったものは教科書へ送る</div>
+    <div class="phone">
+      <div class="body center">
+        <div class="score">4<span> / 5</span></div>
+        <p class="done-cap">おつかれさま</p>
+        <ul class="rows">
+          <li><i class="pip ok"></i><span class="name">平方根の意味と大小</span><span class="mark perfect">完璧</span></li>
+          <li><i class="pip ok"></i><span class="name">根号をふくむ式の計算</span><span class="mark">できた</span></li>
+          <li><i class="pip ng"></i><span class="name">三角形の合同条件</span><span class="mark">あやしい</span></li>
+          <li><i class="pip ok"></i><span class="name">因数分解</span><span class="mark">できた</span></li>
+          <li><i class="pip ok"></i><span class="name">式の展開</span><span class="mark">できた</span></li>
+        </ul>
+        <p class="followup">あやしかった1個は、教科書や問題集で当たり直しておくと次に出てきたとき戻せます。</p>
+        <button class="btn">もどる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. マップ -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>マップ</b> — 依存関係の順に一本道。踏破は減らない</div>
+    <div class="phone">
+      <div class="body">
+        <div class="map-head"><span>数学</span><span>32 / 55 観点</span></div>
+        <div class="map-bar"><i style="width:58%"></i></div>
+        <div class="road">
+          <div class="unit">中3 平方根</div>
+          <div class="node-row l">
+            <div class="node"><div class="ball walked">✓</div><small>平方根の意味と大小</small></div>
+          </div>
+          <div class="node-row r">
+            <div class="node"><div class="ball review">↺</div><small>根号をふくむ式の計算</small></div>
+          </div>
+          <div class="unit">中3 二次方程式</div>
+          <div class="node-row l">
+            <div class="node"><div class="ball open">★★★</div><small>二次方程式（因数分解）</small></div>
+          </div>
+          <div class="node-row r">
+            <div class="node"><div class="ball lock">🔒</div><small>平方完成と解の公式</small></div>
+          </div>
+          <div class="node-row l">
+            <div class="node"><div class="ball lock">🔒</div><small>二次方程式の文章題</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="nav">
+        <div><span class="ico">⚡</span>今日</div>
+        <div class="on"><span class="ico">🗺</span>マップ</div>
+        <div><span class="ico">📊</span>じぶん</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. じぶん -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>じぶん</b> — 外側が踏破、内側がコンディション</div>
+    <div class="phone">
+      <div class="body">
+        <div class="me-head">県立A高校（サンプル）<b>普通科</b></div>
+
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 160 160">
+            <circle class="ring-track" cx="80" cy="80" r="68"></circle>
+            <circle class="ring-fill" cx="80" cy="80" r="68" stroke-dasharray="427" stroke-dashoffset="192"></circle>
+            <circle class="ring-fill inner" cx="80" cy="80" r="52" stroke-dasharray="327" stroke-dashoffset="252"></circle>
+          </svg>
+          <div class="ring-mid" style="margin-top:-72px">55%<small>踏破</small></div>
+          <p class="ring-note" style="margin-top:44px">踏破したうち、いま覚えている 42%</p>
+        </div>
+
+        <div class="pace">
+          <div class="cell"><b>184</b><small>受験まで（日）</small></div>
+          <div class="cell"><b>23</b><small>まだ踏んでいない</small></div>
+          <div class="cell"><b>0.3</b><small>1日あたり必要</small></div>
+          <div class="cell good"><b>1.0</b><small>いまのペース</small></div>
+        </div>
+
+        <div class="sec">
+          <h4>本番までに薄れる観点</h4>
+          <p class="note">薄れるのが近い順に、この並びで復習に戻ってきます</p>
+          <ul class="list">
+            <li><i class="pill"></i><span class="nm">正負の数の四則</span><span class="tg hot">いま薄れている</span></li>
+            <li><i class="pill"></i><span class="nm">文字式の計算</span><span class="tg hot">いま薄れている</span></li>
+            <li><i class="pill"></i><span class="nm">一元一次方程式</span><span class="tg">あと6日</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav">
+        <div><span class="ico">⚡</span>今日</div>
+        <div><span class="ico">🗺</span>マップ</div>
+        <div class="on"><span class="ico">📊</span>じぶん</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. 設定 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>最初の設定</b> — やらなくていい範囲を切り落とす</div>
+    <div class="phone">
+      <div class="body">
+        <div class="title" style="margin-top:14px">志望校を決めよう</div>
+        <p class="reason" style="margin-bottom:20px">やらなくていい範囲を切り落とすところから始めます。</p>
+
+        <div class="field">
+          <span>学校</span>
+          <div class="select">県立A高校（サンプル）　⌄</div>
+        </div>
+        <div class="field">
+          <span>学科・コース</span>
+          <div class="select">普通科　⌄</div>
+        </div>
+        <div class="field">
+          <span>受験日</span>
+          <div class="select">2027 / 02 / 10</div>
+        </div>
+
+        <p class="disclaim">※ 入試科目・出題範囲はプロトタイプ用のサンプルデータです。実際の募集要項ではありません。</p>
+        <button class="btn">はじめる ›</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
