@@ -228,27 +228,36 @@
   color: var(--muted);
 }
 
-.today-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 18px;
+/* 今日ぶんを踏み終えたら、はっきり終わりだと分かる見た目にする */
+.next-card.done {
+  text-align: center;
+  border-color: var(--good);
 }
-.stat {
+.next-card.done .next-name {
+  margin-top: 0;
+}
+
+.today-dots {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 14px 6px;
-  border-radius: 14px;
-  background: var(--surface);
+  justify-content: center;
+  gap: 10px;
+  margin: 18px 0 10px;
 }
-.stat-value {
-  font-size: 22px;
-  font-weight: 800;
+.today-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  box-sizing: border-box;
 }
-.stat-label {
-  font-size: 11px;
+.today-dot.filled {
+  background: var(--good);
+  border-color: var(--good);
+}
+.today-remain {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -320,34 +329,17 @@
   font-size: 12px;
   font-weight: 700;
 }
-.card-point {
-  margin-top: 6px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--muted);
-}
-/* 上下 auto で、メタ情報と答えボタンの間に問題文を垂直中央寄せする */
-.card-prompt {
+/* 上下 auto で、メタ情報と経過表示の間に問いを垂直中央寄せする */
+.card-ask {
   margin: auto 0;
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 700;
-  line-height: 1.6;
+  line-height: 1.65;
 }
-.card-answer {
-  padding: 16px;
-  border-radius: 14px;
-  background: var(--surface-2);
-  font-size: 17px;
-  line-height: 1.6;
-}
-.btn-reveal {
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px dashed var(--line);
-  background: transparent;
-  color: var(--muted);
-  font-size: 14px;
+.card-since {
+  font-size: 13px;
   font-weight: 600;
+  color: var(--muted);
 }
 
 /* メタ情報に重ならないよう、カード上部より少し下に置く */
@@ -407,11 +399,31 @@
   border-color: #5a3230;
 }
 
+/* 高さを固定して、取り消しボタンの出入りでカードが跳ねないようにする */
+.session-foot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 44px;
+  margin-top: 10px;
+}
 .session-hint {
-  margin: 14px 0 4px;
+  margin: 0;
   text-align: center;
   font-size: 12px;
   color: var(--muted);
+}
+.btn-undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .session-done {
@@ -430,6 +442,14 @@
 }
 .done-caption {
   margin: 0 0 28px;
+  color: var(--muted);
+}
+/* 学び直しはアプリの外でやるので、その導線だけ置く */
+.done-followup {
+  max-width: 340px;
+  margin: 18px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
   color: var(--muted);
 }
 .done-list {

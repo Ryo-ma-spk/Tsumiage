@@ -1,44 +1,52 @@
 // 学習ダッシュボードの型定義
 
-/** 到達度。自己申告ではなく解答履歴から計算される */
+/**
+ * 到達度。1回の判定では動かず、判定の履歴から計算される。
+ * 「やった」チェックのように一度で確定するものは入力に入れない。
+ */
 export type MasteryLevel =
   | "untouched" // 未着手
-  | "touched" // 触れた（挑戦したが正答していない）
-  | "solved" // 解けた（正答したが定着判定に届いていない）
-  | "mastered"; // 定着（間隔をあけて複数回正答）
+  | "touched" // 触れた（挑戦したが思い出せていない）
+  | "solved" // できた（思い出せたが定着判定に届いていない）
+  | "mastered"; // 定着（間隔をあけて複数回できた）
 
-/** 1回の解答記録。これが到達度計算の唯一の入力 */
+/** 1回の判定記録。これが到達度計算の唯一の入力 */
 export interface Attempt {
   pointId: string;
   /** ISO 8601 */
   at: string;
   correct: boolean;
-}
-
-/** 観点に紐づく確認問題 */
-export interface Question {
-  id: string;
-  /** 問題文 */
-  prompt: string;
-  /** 答え・解説（タップで表示） */
-  answer: string;
+  /**
+   * 観点が表示されてから判定を確定するまでの時間（ミリ秒）。
+   * 想起にかけた時間の目安として保持日数の補正に使う。
+   * 古い履歴には無いので optional。欠けていれば補正しない。
+   */
+  latencyMs?: number;
 }
 
 /**
  * 知識観点。単元より細かい「定着すべき1つの観点」。
- * 1観点 = 1問で判定できる粒度に保つ。
+ * 1観点 = その場で答えられるか1回で判定できる粒度に保つ。
+ *
+ * このアプリは参考書でも問題集でもないので、問題文と答えは持たない。
+ * 学習そのものは教科書・問題集の側でやる。
  */
 export interface KnowledgePoint {
   id: string;
   subjectId: string;
   /** 単元名（マップの区切り表示に使う） */
   unit: string;
+  /** 短い名前。マップや一覧で使う */
   name: string;
+  /**
+   * カードに出す問いかけ。「〜できる？」の形にして、
+   * 見た瞬間に頭の中で答えを作らせる。答えはアプリ側で持たない。
+   */
+  ask: string;
   /** 先に solved 以上になっている必要がある観点 */
   prereqIds: string[];
   /** 頻出度 1〜3。ペース計算の重みになる */
   weight: number;
-  questions: Question[];
 }
 
 export interface Subject {

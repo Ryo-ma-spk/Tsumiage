@@ -7,13 +7,14 @@ import { MapScreen } from "./screens/MapScreen";
 import { StatsScreen } from "./screens/StatsScreen";
 import { useStudyStore } from "./hooks/useStudyStore";
 import { buildStatuses } from "./logic/mastery";
-import { pickNext, summarize } from "./logic/pace";
+import { pickNext, summarize, summarizeToday } from "./logic/pace";
 import { POINTS, findFaculty } from "./data/curriculum";
 import type { KnowledgePoint } from "./types";
 import "./app.css";
 
 export default function App() {
-  const { state, setTarget, recordAttempt, reset, seedDemo } = useStudyStore();
+  const { state, setTarget, recordAttempt, undoLastAttempt, reset, seedDemo } =
+    useStudyStore();
   const [tab, setTab] = useState<Tab>("today");
   const [session, setSession] = useState<KnowledgePoint[] | null>(null);
   const [editingTarget, setEditingTarget] = useState(false);
@@ -27,17 +28,25 @@ export default function App() {
     [state.attempts, faculty]
   );
 
+  const examDate =
+    state.target?.examDate ?? new Date().toISOString().slice(0, 10);
+
   const summary = useMemo(
-    () =>
-      summarize(
-        statuses,
-        state.attempts,
-        state.target?.examDate ?? new Date().toISOString().slice(0, 10)
-      ),
-    [statuses, state.attempts, state.target]
+    () => summarize(statuses, state.attempts, examDate),
+    [statuses, state.attempts, examDate]
+  );
+
+  const today = useMemo(
+    () => summarizeToday(POINTS, state.attempts, faculty, examDate),
+    [state.attempts, faculty, examDate]
   );
 
   const next = useMemo(() => pickNext(statuses), [statuses]);
+
+  const lastSeenById = useMemo(
+    () => new Map(statuses.map((s) => [s.point.id, s.lastAttemptAt])),
+    [statuses]
+  );
 
   if (!state.target || editingTarget) {
     return (
@@ -59,7 +68,9 @@ export default function App() {
       <div className="app">
         <SwipeSession
           points={session}
+          lastSeenById={lastSeenById}
           onRecord={recordAttempt}
+          onUndo={undoLastAttempt}
           onClose={() => setSession(null)}
         />
       </div>
@@ -78,6 +89,7 @@ export default function App() {
             <TodayScreen
               statuses={statuses}
               summary={summary}
+              today={today}
               next={next}
               onStart={start}
             />

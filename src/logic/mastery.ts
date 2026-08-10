@@ -21,6 +21,36 @@ const RETENTION_MAX_DAYS = 120;
 /** 一度忘れた観点は保持期間を割り引く。忘れた回数だけ掛かる */
 const LAPSE_DISCOUNT = 0.6;
 
+/**
+ * 想起にかかった時間の区切り（ミリ秒）。
+ *
+ * 観点を見てから頭の中で答えを作るので、まじめにやれば数秒はかかる。
+ * ここより速い判定は「思い出せた」証拠ではなく「想起していない」疑いなので、
+ * 保持日数を伸ばさない。速いほど良いという単調な関係にはしない。
+ */
+const LATENCY_SKIPPED_MS = 1_500;
+/** ここまでに出たなら即座に思い出せたとみなす */
+const LATENCY_QUICK_MS = 8_000;
+/** ここを超えたら難産 */
+const LATENCY_SLOW_MS = 25_000;
+/** これを超えたら別のことをしていたとみなして補正しない */
+const LATENCY_ABANDONED_MS = 120_000;
+
+/**
+ * 想起にかかった時間から保持日数の補正倍率を出す。
+ *
+ * 問題文を持たないぶんこの信号は弱いので、幅は狭めにとってある。
+ * 計測できていない履歴（古いデータ）は補正なし。
+ */
+export function latencyFactor(latencyMs: number | undefined): number {
+  if (latencyMs === undefined) return 1;
+  if (latencyMs > LATENCY_ABANDONED_MS) return 1;
+  if (latencyMs < LATENCY_SKIPPED_MS) return 1;
+  if (latencyMs < LATENCY_QUICK_MS) return 1.2;
+  if (latencyMs < LATENCY_SLOW_MS) return 1;
+  return 0.9;
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function startOfDay(value: string | Date): number {
@@ -71,13 +101,18 @@ function reachesMastery(streak: Attempt[]): boolean {
  *
  * 「実際に保持できた間隔」を土台にして、それより少し先まで持つと予測する。
  * 過去に忘れた回数だけ割り引くので、何度も落としている観点は早く戻ってくる。
+ * 直近の判定にかかった時間でも微調整する。
  */
 function predictRetentionDays(streak: Attempt[], lapses: number): number {
   const last = streak[streak.length - 1];
   const prev = streak[streak.length - 2];
   const heldDays = Math.max(daysBetween(prev.at, last.at), MASTERED_SPAN_DAYS);
 
-  const predicted = heldDays * RETENTION_GROWTH * LAPSE_DISCOUNT ** lapses;
+  const predicted =
+    heldDays *
+    RETENTION_GROWTH *
+    LAPSE_DISCOUNT ** lapses *
+    latencyFactor(last.latencyMs);
   return Math.min(
     RETENTION_MAX_DAYS,
     Math.max(RETENTION_MIN_DAYS, Math.round(predicted))
@@ -85,8 +120,11 @@ function predictRetentionDays(streak: Attempt[], lapses: number): number {
 }
 
 /**
- * 解答履歴だけから到達度と鮮度を計算する。
- * 「チェックを入れた」という自己申告は入力に含めない。
+ * 判定の履歴だけから到達度と鮮度を計算する。
+ *
+ * 1回の判定では到達度が動かないのが肝。定着とみなすには、間隔をあけて
+ * 複数回続く必要がある。読んだだけで「できた」と振った観点は、
+ * 間隔が空いた2回目で落ちるので、時間が申告を検証してくれる。
  */
 export function evaluate(
   attempts: Attempt[],
@@ -260,6 +298,6 @@ export function buildStatuses(
 export const LEVEL_LABEL: Record<MasteryLevel, string> = {
   untouched: "未着手",
   touched: "あやしい",
-  solved: "解けた",
+  solved: "できた",
   mastered: "定着",
 };

@@ -1,14 +1,18 @@
-import { useMemo, useRef, useState } from "react";
-import { Check, RotateCcw, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, RotateCcw, Undo2, X } from "lucide-react";
 import type { KnowledgePoint } from "../types";
 import { SUBJECT_BY_ID } from "../data/curriculum";
+import { daysBetween } from "../logic/mastery";
 
 /** これ以上横に動かしたら判定を確定する（px） */
 const SWIPE_THRESHOLD = 90;
 
 interface Props {
   points: KnowledgePoint[];
-  onRecord: (pointId: string, correct: boolean) => void;
+  /** 最後にその観点を触った日。「何日ぶり」の表示に使う */
+  lastSeenById: Map<string, string | null>;
+  onRecord: (pointId: string, correct: boolean, latencyMs: number) => void;
+  onUndo: () => void;
   onClose: () => void;
 }
 
@@ -17,34 +21,50 @@ interface Result {
   correct: boolean;
 }
 
-export function SwipeSession({ points, onRecord, onClose }: Props) {
+/**
+ * 1枚1観点のカードを振って判定する。
+ *
+ * 問題文と答えは出さない。観点の問いかけを見て、頭の中で答えを作れたかを
+ * その場で振る。アプリは参考書ではないので、学習そのものは教科書側でやる。
+ */
+export function SwipeSession({
+  points,
+  lastSeenById,
+  onRecord,
+  onUndo,
+  onClose,
+}: Props) {
   const [index, setIndex] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
   const [drag, setDrag] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [results, setResults] = useState<Result[]>([]);
   const startX = useRef(0);
-
-  // セッション中は同じ問題を出し続ける
-  const questions = useMemo(
-    () =>
-      points.map(
-        (p) => p.questions[Math.floor(Math.random() * p.questions.length)]
-      ),
-    [points]
-  );
+  /** そのカードが表示された時刻。想起にかけた時間を測る起点 */
+  const shownAt = useRef(Date.now());
 
   const current = points[index];
-  const question = questions[index];
+
+  // カードが変わるたびに計測を測り直す
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, [index]);
 
   const commit = (correct: boolean) => {
     if (!current) return;
-    onRecord(current.id, correct);
+    onRecord(current.id, correct, Date.now() - shownAt.current);
     setResults((prev) => [...prev, { point: current, correct }]);
     setDrag(0);
     setDragging(false);
-    setShowAnswer(false);
     setIndex((i) => i + 1);
+  };
+
+  const undo = () => {
+    if (results.length === 0) return;
+    onUndo();
+    setResults((prev) => prev.slice(0, -1));
+    setDrag(0);
+    setDragging(false);
+    setIndex((i) => Math.max(0, i - 1));
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -70,6 +90,8 @@ export function SwipeSession({ points, onRecord, onClose }: Props) {
 
   if (!current) {
     const correctCount = results.filter((r) => r.correct).length;
+    const shaky = results.filter((r) => !r.correct);
+
     return (
       <div className="session session-done">
         <div className="done-score">
@@ -84,11 +106,18 @@ export function SwipeSession({ points, onRecord, onClose }: Props) {
               <span className={r.correct ? "dot ok" : "dot ng"} />
               <span className="done-name">{r.point.name}</span>
               <span className="done-mark">
-                {r.correct ? "解けた" : "あやしい"}
+                {r.correct ? "できた" : "あやしい"}
               </span>
             </li>
           ))}
         </ul>
+
+        {shaky.length > 0 && (
+          <p className="done-followup">
+            あやしかった{shaky.length}個は、教科書や問題集で当たり直しておくと
+            次に出てきたとき戻せます。
+          </p>
+        )}
 
         <button className="btn-primary wide" onClick={onClose}>
           もどる
@@ -98,7 +127,8 @@ export function SwipeSession({ points, onRecord, onClose }: Props) {
   }
 
   const subject = SUBJECT_BY_ID.get(current.subjectId);
-  const intent = drag >= SWIPE_THRESHOLD ? "ok" : drag <= -SWIPE_THRESHOLD ? "ng" : "";
+  const intent =
+    drag >= SWIPE_THRESHOLD ? "ok" : drag <= -SWIPE_THRESHOLD ? "ng" : "";
 
   return (
     <div className="session">
@@ -134,22 +164,10 @@ export function SwipeSession({ points, onRecord, onClose }: Props) {
           <div className="card-meta" style={{ color: subject?.color }}>
             {subject?.name} ・ {current.unit}
           </div>
-          <div className="card-point">{current.name}</div>
-          <p className="card-prompt">{question.prompt}</p>
+          <p className="card-ask">{current.ask}</p>
+          <div className="card-since">{sinceLabel(lastSeenById.get(current.id))}</div>
 
-          {showAnswer ? (
-            <p className="card-answer">{question.answer}</p>
-          ) : (
-            <button
-              className="btn-reveal"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => setShowAnswer(true)}
-            >
-              答えを見る
-            </button>
-          )}
-
-          <div className="card-stamp stamp-ok">解けた</div>
+          <div className="card-stamp stamp-ok">できた</div>
           <div className="card-stamp stamp-ng">あやしい</div>
         </div>
       </div>
@@ -161,11 +179,29 @@ export function SwipeSession({ points, onRecord, onClose }: Props) {
         </button>
         <button className="round-btn ok" onClick={() => commit(true)}>
           <Check size={26} />
-          <span>解けた</span>
+          <span>できた</span>
         </button>
       </div>
 
-      <p className="session-hint">左右にスワイプでも判定できます</p>
+      <div className="session-foot">
+        {results.length > 0 ? (
+          <button className="btn-undo" onClick={undo}>
+            <Undo2 size={16} />
+            1つもどす
+          </button>
+        ) : (
+          <p className="session-hint">左右にスワイプでも判定できます</p>
+        )}
+      </div>
     </div>
   );
+}
+
+/** 前回いつ触ったか。判定の目安になるので出す */
+function sinceLabel(lastSeenAt: string | null | undefined): string {
+  if (!lastSeenAt) return "はじめて";
+  const days = daysBetween(lastSeenAt, new Date());
+  if (days <= 0) return "今日やったところ";
+  if (days === 1) return "きのうぶり";
+  return `${days}日ぶり`;
 }

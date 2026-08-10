@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, evaluate } from "./mastery";
+import { daysBetween, evaluate, latencyFactor } from "./mastery";
 import type { Attempt } from "../types";
 
 /** 読みやすさのため、日付は "YYYY-MM-DD HH:MM" で書く */
@@ -190,5 +190,69 @@ describe("evaluate — 鮮度の予測", () => {
 
     expect(result.staleAt).toBeNull();
     expect(result.freshness).toBe(0);
+  });
+});
+
+describe("latencyFactor — 想起にかけた時間", () => {
+  it("計測できていない履歴は補正しない", () => {
+    expect(latencyFactor(undefined)).toBe(1);
+  });
+
+  it("速すぎる判定は伸ばさない（想起していない疑い）", () => {
+    // 観点を見て頭の中で答えを作るなら、1秒では終わらない
+    expect(latencyFactor(400)).toBe(1);
+    expect(latencyFactor(1_499)).toBe(1);
+  });
+
+  it("即座に出たときだけ伸ばす", () => {
+    expect(latencyFactor(3_000)).toBe(1.2);
+    expect(latencyFactor(7_999)).toBe(1.2);
+  });
+
+  it("考え込んだら伸ばさない、難産なら割り引く", () => {
+    expect(latencyFactor(15_000)).toBe(1);
+    expect(latencyFactor(40_000)).toBe(0.9);
+  });
+
+  it("長すぎるものは中断とみなして補正しない", () => {
+    expect(latencyFactor(200_000)).toBe(1);
+  });
+
+  it("速いほど良いという単調な関係にはしない", () => {
+    // 0.4秒 < 3秒 なのに、係数は 3秒のほうが大きい
+    expect(latencyFactor(400)).toBeLessThan(latencyFactor(3_000));
+  });
+});
+
+describe("evaluate — 反応時間が保持日数に効く", () => {
+  function withLatency(ms: number | undefined): Attempt[] {
+    const first = at("2026-08-01", true);
+    const second = { ...at("2026-08-04", true), latencyMs: ms };
+    return [first, second];
+  }
+
+  it("即答した観点のほうが長く持つ", () => {
+    const quick = evaluate(withLatency(3_000), NOW).staleAt;
+    const plain = evaluate(withLatency(undefined), NOW).staleAt;
+
+    expect(new Date(quick!).getTime()).toBeGreaterThan(
+      new Date(plain!).getTime()
+    );
+  });
+
+  it("難産だった観点は早く戻ってくる", () => {
+    const slow = evaluate(withLatency(40_000), NOW).staleAt;
+    const plain = evaluate(withLatency(undefined), NOW).staleAt;
+
+    expect(new Date(slow!).getTime()).toBeLessThan(
+      new Date(plain!).getTime()
+    );
+  });
+
+  it("latencyMs の無い古い履歴でも壊れない", () => {
+    const result = evaluate(withLatency(undefined), NOW);
+
+    expect(result.level).toBe("mastered");
+    expect(result.staleAt).not.toBeNull();
   });
 });

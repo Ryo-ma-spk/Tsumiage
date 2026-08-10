@@ -402,7 +402,10 @@ tbody tr:last-child td { border-bottom: none; }
     受験生が持っていないのは勉強時間ではなく、<b>「いまどこにいて、あと何をやれば間に合うのか」の見取り図</b>である。参考書は進捗を教えてくれず、模試は年に数回しか座標をくれない。その空白を埋めるために、多くの受験生は「何をやるか決める」作業に毎日の時間を使っている。
   </p>
   <p>
-    Tsumiage はこの決定を肩代わりする。到達度を解答履歴から計算し、志望校で出ない範囲を母数から外し、残った道のりを受験日までの日数で割って、今日やる1つを出す。
+    Tsumiage はこの決定を肩代わりする。到達度を判定の履歴から計算し、志望校で出ない範囲を母数から外し、残った道のりを受験日までの日数で割って、今日やる1つを出す。
+  </p>
+  <p>
+    <b>参考書でも問題集でもない。</b>問題文も答えも持たない。学ぶのは教科書や問題集の側で、このツールがやるのは、高校で学ぶことを観点として一覧にして、次にどれを触るか指し示し、忘れる前に戻すところだけである。教材を作らないぶん、観点の体系と、そこを歩く順序の設計に賭けている。
   </p>
   <p>
     ねらいは進捗管理そのものではなく、<b>不安を自信に変えること</b>にある。受験生の不安は「何を忘れているか分からない」という形をしていて、対象が分からないから作業に落ちない。忘れかけている観点を名前で挙げられれば、それは不安ではなく today のリストになる。
@@ -411,71 +414,60 @@ tbody tr:last-child td { border-bottom: none; }
     もうひとつ、このツールが防ごうとしている失敗がある。<b>苦手なBばかり練習した結果、得意だったはずのAを本番で思い出せない</b>という反転である。人は「大丈夫だと思っているもの」を復習の対象から外すので、放置された強みのほうが先に落ちる。何をやるかを人が決めているかぎり、この反転は構造的に避けられない。
   </p>
 
-  <h2>3つの前提</h2>
+  <h2>崩してはいけない前提</h2>
 
   <p>
-    この3つはプロダクトの主張そのもので、実装上の都合で崩さない。どれか1つを外すと、残りの2つが意味を失う構造になっている。
+    次の3つはプロダクトの主張そのもので、実装上の都合で崩さない。どれか1つを外すと、残りの2つが意味を失う構造になっている。4つ目の「踏破と鮮度を混ぜない」は、後の<a href="#model">到達度モデル</a>で扱う。
   </p>
 
   <section class="premise">
     <span class="premise-no">前提 1</span>
-    <p class="premise-claim">到達度を自己申告で受け取らない</p>
+    <p class="premise-claim">一回の申告で到達度を動かさない</p>
     <p>
       チェックボックスは「やった」ではなく「やった気」を記録してしまう。進捗が実力と乖離した瞬間、ダッシュボードは安心を売るだけの装置になる。
     </p>
     <p>
-      そこで入力を解答履歴（<code>Attempt</code>）1種類に限定した。到達度という状態はどこにも保存されておらず、履歴からの計算結果としてのみ存在する。申告する場所が UI にないのではなく、<b>データモデルに申告を置く場所がない</b>。
+      とはいえ、このツールは問題を持たない。答えを採点する主体がいない以上、<b>入力は必然的に申告である</b>。「自己申告を受け取らない」と言い切ることはできない。できるのは、申告を1回では信じないことのほうだ。
+    </p>
+    <p>
+      定着とみなす条件を「間隔をあけて2回続けてできた」に置いてある。読んだだけで「できた」を振った観点は、間隔が空いた2回目で落ちる。<b>アプリが想起を検証できなくても、時間が検証してくれる。</b>
+    </p>
+    <p>
+      到達度という状態はどこにも保存されておらず、判定履歴（<code>Attempt</code>）からの計算結果としてのみ存在する。チェックボックスを置かないのは、それが1回で確定してしまうからである。
     </p>
 
     <figure>
       <div class="frame">
-        <svg viewBox="0 0 900 220" role="img" aria-label="到達度に至る入力経路は解答履歴の一本のみで、自己申告が入る経路は存在しないことを示す図">
+        <svg viewBox="0 0 900 260" role="img" aria-label="読んだだけで「できた」と申告した観点は、間隔をあけた2回目の判定で落ちるため定着に到達しないことを示す図">
           <defs>
             <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity="0.62"></path>
             </marker>
           </defs>
 
-          <rect class="svg-node" x="10" y="42" width="170" height="62" rx="6"></rect>
-          <text class="svg-label" x="95" y="68" text-anchor="middle">スワイプ判定</text>
-          <text class="svg-sub" x="95" y="87" text-anchor="middle">解けた / あやしい</text>
+          <text class="svg-sub" x="10" y="22">読んだ直後に「できた」と振った場合</text>
+          <line class="svg-edge" x1="180" y1="62" x2="700" y2="62"></line>
+          <circle cx="200" cy="62" r="11" fill="var(--s-solved)"></circle>
+          <text class="svg-sub" x="200" y="90" text-anchor="middle">できた</text>
+          <circle cx="520" cy="62" r="11" fill="var(--s-touched)"></circle>
+          <text class="svg-sub" x="520" y="90" text-anchor="middle">あやしい</text>
+          <text class="svg-edge-label" x="360" y="52" text-anchor="middle">3日以上あける</text>
+          <text class="svg-label" x="716" y="67" fill="var(--s-touched)">定着に到達しない</text>
 
-          <rect class="svg-node" x="210" y="42" width="150" height="62" rx="6"></rect>
-          <text class="svg-label" x="285" y="68" text-anchor="middle">Attempt</text>
-          <text class="svg-sub" x="285" y="87" text-anchor="middle">pointId, at, correct</text>
+          <line class="svg-edge" x1="10" y1="120" x2="890" y2="120" opacity="0.35"></line>
 
-          <rect class="svg-node" x="390" y="42" width="150" height="62" rx="6"></rect>
-          <text class="svg-label" x="465" y="68" text-anchor="middle">evaluate()</text>
-          <text class="svg-sub" x="465" y="87" text-anchor="middle">logic/mastery.ts</text>
-
-          <rect class="svg-node" x="570" y="42" width="160" height="62" rx="6"></rect>
-          <text class="svg-label" x="650" y="68" text-anchor="middle">PointStatus</text>
-          <text class="svg-sub" x="650" y="87" text-anchor="middle">level / locked</text>
-
-          <rect class="svg-node" x="760" y="42" width="130" height="62" rx="6"></rect>
-          <text class="svg-label" x="825" y="79" text-anchor="middle">3つの画面</text>
-
-          <line class="svg-edge" x1="180" y1="73" x2="204" y2="73" marker-end="url(#ah)"></line>
-          <line class="svg-edge" x1="360" y1="73" x2="384" y2="73" marker-end="url(#ah)"></line>
-          <line class="svg-edge" x1="540" y1="73" x2="564" y2="73" marker-end="url(#ah)"></line>
-          <line class="svg-edge" x1="730" y1="73" x2="754" y2="73" marker-end="url(#ah)"></line>
-
-          <text class="svg-edge-label" x="192" y="32" text-anchor="middle">記録</text>
-          <text class="svg-edge-label" x="372" y="32" text-anchor="middle">計算</text>
-          <text class="svg-edge-label" x="552" y="32" text-anchor="middle">結果</text>
-          <text class="svg-edge-label" x="742" y="32" text-anchor="middle">表示</text>
-
-          <rect class="svg-node-dashed" x="390" y="158" width="340" height="46" rx="6" stroke="var(--s-touched)"></rect>
-          <text class="svg-label" x="560" y="186" text-anchor="middle" fill="var(--s-touched)">自己申告（やったチェック・自己評価）</text>
-
-          <line class="svg-edge" x1="650" y1="158" x2="650" y2="110" stroke="var(--s-touched)" stroke-dasharray="5 4" opacity="0.85"></line>
-          <line class="svg-edge" x1="638" y1="122" x2="662" y2="146" stroke="var(--s-touched)" stroke-width="1.8" opacity="1"></line>
-          <line class="svg-edge" x1="662" y1="122" x2="638" y2="146" stroke="var(--s-touched)" stroke-width="1.8" opacity="1"></line>
-          <text class="svg-edge-label" x="678" y="138" fill="var(--s-touched)">この経路を作らない</text>
+          <text class="svg-sub" x="10" y="152">本当に手の内に入っている場合</text>
+          <line class="svg-edge" x1="180" y1="192" x2="700" y2="192"></line>
+          <circle cx="200" cy="192" r="11" fill="var(--s-solved)"></circle>
+          <text class="svg-sub" x="200" y="220" text-anchor="middle">できた</text>
+          <circle cx="520" cy="192" r="11" fill="var(--s-mastered)"></circle>
+          <text class="svg-sub" x="520" y="220" text-anchor="middle">できた</text>
+          <text class="svg-edge-label" x="360" y="182" text-anchor="middle">3日以上あける</text>
+          <text class="svg-label" x="716" y="197" fill="var(--s-mastered)">ここで初めて踏破</text>
         </svg>
       </div>
       <figcaption>
-        図1 — 到達度に至る入力は1本しかない。<b>スワイプの判定は「1問の正誤」であって「単元の到達度」ではない</b>。自己申告の粒度を1問まで落とし、そこから先の判断（定着したか、復習に戻すか）を機械側が持つ、というのがこの前提の実装形。
+        図1 — 申告そのものは止められない。止められるのは、<b>それを1回で信じること</b>のほうである。定着の条件を「間隔をあけて2回」に置くと、やった気で振った観点は2回目で落ちる。アプリが想起を検証できなくても、時間が検証してくれる。
       </figcaption>
     </figure>
 
@@ -606,7 +598,7 @@ tbody tr:last-child td { border-bottom: none; }
     </p>
   </section>
 
-  <h2>到達度モデル</h2>
+  <h2 id="model">到達度モデル</h2>
 
   <p>
     到達度は4段階で、そのうち「定着」だけが時間経過で薄れる。「いま見なくていい」は主張ではなく、この計算の結果として出てくる。
@@ -688,7 +680,7 @@ tbody tr:last-child td { border-bottom: none; }
         <tr><th>状態</th><th>条件</th></tr>
       </thead>
       <tbody>
-        <tr><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>解答履歴なし</td></tr>
+        <tr><td class="state-cell"><span class="dot d-untouched"></span>未着手</td><td>判定の履歴なし</td></tr>
         <tr><td class="state-cell"><span class="dot d-touched"></span>あやしい</td><td>挑戦したが正答なし、または直近が誤答</td></tr>
         <tr><td class="state-cell"><span class="dot d-solved"></span>解けた</td><td>正答あり。ただし定着条件に未達</td></tr>
         <tr><td class="state-cell"><span class="dot d-mastered"></span>定着</td><td>連続正答が2回以上 かつ 直前の正答から3日以上あいている</td></tr>
@@ -706,7 +698,7 @@ tbody tr:last-child td { border-bottom: none; }
   <ul class="formulas">
     <li>
       <span class="fname">保持日数の見込み</span>
-      <span class="fbody">直前の正答からの間隔 × 2.2 × 0.6 <sup>忘れた回数</sup>（4〜120日に収める）</span>
+      <span class="fbody">直前の正答からの間隔 × 2.2 × 0.6 <sup>忘れた回数</sup> × 反応の係数（4〜120日に収める）</span>
       <span class="fnote">10日あけて解けたなら次は22日は持つと見込む。過去に落としている観点は割り引いて、早く戻す。</span>
     </li>
     <li>
@@ -718,6 +710,18 @@ tbody tr:last-child td { border-bottom: none; }
 
   <p>
     日数はすべて暦日で数える。経過ミリ秒で数えると、夜に解いた人と朝に解いた人で「3日あけた」の判定が割れてしまう。
+  </p>
+
+  <h3>反応の係数</h3>
+
+  <p>
+    観点が出てから判定を振るまでの時間を測って、保持日数を微調整する。1.5〜8秒なら ×1.2、8〜25秒なら ×1.0、25秒超なら ×0.9。1.5秒未満と120秒超は補正しない。
+  </p>
+  <p>
+    ここで注意が要る。<b>速いほど良い、という単調な関係にはしていない。</b>問題文を見て解く形式なら速さは自信の表れになるが、観点の問いかけだけを見て頭の中で答えを作る形式では、まじめにやれば数秒はかかる。1秒未満のスワイプは思い出せた証拠ではなく、<b>思い出そうとしていない証拠</b>である。だから伸ばさない。
+  </p>
+  <p>
+    この数字は画面に出さない。速さを褒めれば当てずっぽうのスワイプが増えて、予測のほうが壊れる。問題文を持たないぶんこの信号は弱いので、係数の幅も狭めにとってある。
   </p>
 
   <h2>ペースの計算</h2>
@@ -749,8 +753,8 @@ tbody tr:last-child td { border-bottom: none; }
     </li>
     <li>
       <span class="fname">実績ペース</span>
-      <span class="fbody">直近14日で新たに踏破した重み + 鮮度を戻した重み ÷ 経過日数</span>
-      <span class="fnote">復習も仕事として数える。そうしないと、復習に徹した週のペースが 0 に見える。</span>
+      <span class="fbody">直近14日で新たに踏破した重み + 鮮度を戻した重み ÷ 経過日数（最低3日で均す）</span>
+      <span class="fnote">復習も仕事として数える。そうしないと、復習に徹した週のペースが 0 に見える。最低3日で均すのは、始めた日に5観点やっただけで「1日5観点のペース」と読んで予測が 100% に張り付くのを避けるため。1日はまだペースではない。</span>
     </li>
     <li>
       <span class="fname">本番予測</span>
@@ -761,6 +765,30 @@ tbody tr:last-child td { border-bottom: none; }
 
   <p>
     この定義にすると、冒頭のAとBの反転が自動的に拾われる。Aを放置すれば「受験日までに薄れる重み」が増えて需要が膨らみ、本番予測が下がる。そしてAは、薄れる7日前になった時点で優先度の上位に上がってくる。<b>ユーザーがAを思い出さなくても、順番のほうがAを連れてくる。</b>
+  </p>
+
+  <h3>足りないときに何を言うか</h3>
+
+  <p>
+    このツールの目的は不安を自信に変えることなので、「このままだと足りない」とだけ言うのは目的に反する。診断を渡されても動けないし、動けない診断は不安を増やすだけである。
+  </p>
+  <p>
+    そこで必要ペースと実績ペースの差を取って、<b>「1日あと N つ 増やせば間に合います」</b>と差分で出す。足りていれば何も出さない。
+  </p>
+  <p>
+    増やしても届かない場合に「範囲を削る」提案をするかは、いったん保留にしてある。実体は「頻出度1の観点を出題範囲から外す」で、出題範囲を決める経路が <code>emphasis</code> と2つになる。しかも一度削ると、削ったことを忘れたまま受験日を迎えるおそれがある。解除の導線と現状表示をセットで設計してからでないと入れられない。
+  </p>
+
+  <h3>セッションの構成比</h3>
+
+  <p>
+    1セッション5枚を<b>復習3 : 新規2</b>で固定する。優先度順にそのまま5枚とると、しばらく空けたあとは復習だけで埋まって、道が一歩も進まない。
+  </p>
+  <p>
+    これは、日本史を頭から読み直しては挫折し、再開するたびにまた縄文時代から始めて、縄文時代にだけ詳しくなる現象と同じ形をしている。プログラミングを始めては一生 hello world を書き直すのも同じである。<b>戻ることそのものが悪いのではなく、戻る量を自分で決めさせるのが悪い。</b>枠のほうを先に決めておけば、何日空けても必ず新しい土地を踏む。
+  </p>
+  <p>
+    片方の列が枯れたらもう片方で埋める。優先度の判断自体は変えていない。配分だけを別に持っている。
   </p>
 
   <h2>3つの画面</h2>
@@ -780,7 +808,7 @@ tbody tr:last-child td { border-bottom: none; }
       <tbody>
         <tr>
           <td class="state-cell">今日</td>
-          <td>次の1観点と、本番予測の信号</td>
+          <td>次の1観点、今日ぶんの残り、本番予測の信号</td>
           <td>選択肢、分析指標</td>
         </tr>
         <tr>
@@ -798,13 +826,31 @@ tbody tr:last-child td { border-bottom: none; }
   </div>
 
   <p style="margin-top:20px;">
-    判定の入力はスワイプカード。1枚1観点を左右に振って「解けた / あやしい」を記録する。一覧にチェックボックスを並べる形は、前提1を形式的に満たしていても体験として自己申告に戻るため採らない。
+    判定の入力はスワイプカード。カードに出るのは観点の問いかけ（「〜できる？」）と前回からの日数だけで、問題文も答えも出ない。それを見てその場で思い出せたかを左右に振る。一覧にチェックボックスを並べる形は、体験として「やった気」に戻るため採らない。誤って振ったときのために、セッション中は1つ戻せる。
+  </p>
+
+  <h3>今日ぶん</h3>
+
+  <p>
+    終わりの来ない画面は、どれだけ進んでも安心には変わらない。5問やって戻ってきて、また「つぎはこれ」が出るなら、それは進捗ではなく賽の河原である。すごろくの比喩でいえば、<b>セーブポイントがない</b>。
+  </p>
+  <p>
+    そこで1日の目標を観点数で持ち、踏み終えたら今日タブを完了状態にする。目標は必要ペースから出して 5〜10 に収める。下限を1セッションぶんにそろえてあるので、「はじめる → 終わった」が一往復で完結する。
+  </p>
+  <p>
+    細部が2つある。目標は<b>その日の始まりの状態で決めて、日中は動かさない</b>。途中で復習が切れて目標が伸びると、終わったはずの今日ぶんが未達に戻ってしまうからである。そして1日の区切りは 0:00 ではなく <b>4:00</b> に置く。深夜に勉強して日付をまたぐ層が対象なので、23:50 に始めたセッションが分断されるのは理不尽でしかない。
+  </p>
+  <p>
+    達成の数え方は正誤を問わない。間違えた日も「やった」に数える。前提4と同じ考えで、頑張りのほうは取り消さない。
   </p>
 
   <h2>データ設計の要</h2>
 
   <p>
-    観点は単元より細かい「知識として定着すべき1つの粒度」で、<b>1観点 = 1問で判定できる</b>ところまで割る。ここが製品の本体であり、最大のコストでもある。
+    観点は単元より細かい「知識として定着すべき1つの粒度」で、<b>1観点 = その場で答えられるか1回で判定できる</b>ところまで割る。ここが製品の本体であり、最大のコストでもある。
+  </p>
+  <p>
+    観点体系の一次ソースは学習指導要領を想定している。公開されていて、全国共通で、出典を示せる。しかも「〜できるようにする」という能力の記述なので、カードの問いかけにほぼそのまま変換できる。<b>教材を持たないという選択が、ここで体系の作りやすさに返ってくる。</b>大学ごとの差は重み（0〜3）だけで持つ。
   </p>
   <p>
     設計上の賭けは、<b>観点体系そのものを全国共通にして、大学ごとの差を重み（0〜3）だけで持つ</b>という点にある。大学ごとに観点体系を作るとマッピングの作成コストが大学数に比例するが、この形なら「観点数 × 1回のタグ付け」＋「学部数 × 重み付け」に分解できる。頻出度は本来、過去問への観点タグ付けから作る。
@@ -834,12 +880,13 @@ tbody tr:last-child td { border-bottom: none; }
   <ul class="status">
     <li><span class="tag tag-done">実装済み</span><span>踏破と鮮度の分離、観点ごとの保持日数の予測、開放条件、志望校による絞り込み、受験日から逆算したペース計算、3画面とスワイプ判定</span></li>
     <li><span class="tag tag-done">実装済み</span><span>マップの並びを prereqIds から導出。依存の順序と表示の順序が一致した</span></li>
-    <li><span class="tag tag-done">実装済み</span><span>logic/ のテスト41件。暦日での判定、落としたあとの再定着、踏破率の単調性、本番までに薄れる観点の抽出を固定した</span></li>
-    <li><span class="tag tag-todo">未着手</span><span>観点マスタと志望校データの本番化（過去問への観点タグ付け）</span></li>
-    <li><span class="tag tag-todo">未着手</span><span>問題数の拡充。いまは1観点あたり2〜3問で、繰り返すと同じ問題が出る</span></li>
+    <li><span class="tag tag-done">実装済み</span><span>今日ぶんの単位と完了状態、セッションの構成比、反応時間による補正、スワイプの取り消し、不足時の差分表示</span></li>
+    <li><span class="tag tag-done">実装済み</span><span>logic/ のテスト66件。暦日での判定、落としたあとの再定着、踏破率の単調性、本番までに薄れる観点の抽出、ブランク後に新規が必ず入ること、今日ぶんの目標が日中に動かないことを固定した</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>観点マスタが30観点しかない。高校全課程まで広げるのが次の本体作業で、学習指導要領を一次ソースに科目単位で積む。中学課程はまだ入れない</span></li>
+    <li><span class="tag tag-todo">未着手</span><span>志望校データの本番化（過去問への観点タグ付けによる頻出度）</span></li>
     <li><span class="tag tag-todo">未着手</span><span>認証とサーバー同期。永続化は localStorage のみで端末を変えると消える</span></li>
-    <li><span class="tag tag-gap">未検証</span><span>保持日数の係数（間隔 × 2.2、忘却で × 0.6）は仮置き。実データで調整する前提の数字であって、根拠のある値ではない</span></li>
-    <li><span class="tag tag-gap">未実装</span><span>スワイプの取り消し。誤って振ると履歴が残り、全消し以外に戻す手段がない</span></li>
+    <li><span class="tag tag-gap">未検証</span><span>保持日数の係数（間隔 × 2.2、忘却で × 0.6、反応時間で ×0.9〜1.2）は仮置き。実データで調整する前提の数字であって、根拠のある値ではない</span></li>
+    <li><span class="tag tag-gap">未実装</span><span>ペースが足りないときに出題範囲を削る提案。設計してから入れる</span></li>
   </ul>
 
   <div class="note">

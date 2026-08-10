@@ -39,14 +39,25 @@ export function useStudyStore() {
     setState((prev) => ({ ...prev, target }));
   }, []);
 
-  const recordAttempt = useCallback((pointId: string, correct: boolean) => {
-    setState((prev) => ({
-      ...prev,
-      attempts: [
-        ...prev.attempts,
-        { pointId, correct, at: new Date().toISOString() },
-      ],
-    }));
+  const recordAttempt = useCallback(
+    (pointId: string, correct: boolean, latencyMs?: number) => {
+      setState((prev) => ({
+        ...prev,
+        attempts: [
+          ...prev.attempts,
+          { pointId, correct, at: new Date().toISOString(), latencyMs },
+        ],
+      }));
+    },
+    []
+  );
+
+  /**
+   * 直前の判定を取り消す。
+   * 誤って振ったときの逃げ道で、セッション中しか呼ばれない。
+   */
+  const undoLastAttempt = useCallback(() => {
+    setState((prev) => ({ ...prev, attempts: prev.attempts.slice(0, -1) }));
   }, []);
 
   const reset = useCallback(() => {
@@ -58,7 +69,7 @@ export function useStudyStore() {
     setState((prev) => ({ ...prev, attempts: buildDemoAttempts() }));
   }, []);
 
-  return { state, setTarget, recordAttempt, reset, seedDemo };
+  return { state, setTarget, recordAttempt, undoLastAttempt, reset, seedDemo };
 }
 
 function daysAgo(n: number): string {
@@ -75,8 +86,13 @@ function daysAgo(n: number): string {
 function buildDemoAttempts(): Attempt[] {
   const attempts: Attempt[] = [];
 
-  const record = (pointId: string, days: number, correct = true) => {
-    attempts.push({ pointId, correct, at: daysAgo(days) });
+  const record = (
+    pointId: string,
+    days: number,
+    correct = true,
+    latencyMs?: number
+  ) => {
+    attempts.push({ pointId, correct, at: daysAgo(days), latencyMs });
   };
 
   POINTS.forEach((point, i) => {
@@ -84,16 +100,16 @@ function buildDemoAttempts(): Attempt[] {
 
     if (ratio < 0.25) {
       // 早い時期にやったきり。すでに薄れている
-      record(point.id, 80);
-      record(point.id, 70);
+      record(point.id, 80, true, 12_000);
+      record(point.id, 70, true, 9_000);
     } else if (ratio < 0.4) {
       // 長い間隔で2回。いまは大丈夫に見えるが、いずれ薄れる
-      record(point.id, 40);
-      record(point.id, 6);
+      record(point.id, 40, true, 18_000);
+      record(point.id, 6, true, 30_000); // 難産だったので伸びが鈍い
     } else if (ratio < 0.5) {
-      // 最近きちんと間隔をあけた。しばらく持つ
-      record(point.id, 12);
-      record(point.id, 2);
+      // 最近きちんと間隔をあけた。即答できていて、しばらく持つ
+      record(point.id, 12, true, 6_000);
+      record(point.id, 2, true, 3_500);
     } else if (ratio < 0.58) {
       // 一度定着させたが、直近で落とした
       record(point.id, 30);

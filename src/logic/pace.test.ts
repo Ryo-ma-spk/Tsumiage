@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { buildStatuses } from "./mastery";
 import {
+  buildQueue,
+  dailyShortfall,
   examRiskPoints,
   prioritize,
   settledPoints,
   summarize,
+  summarizeToday,
   weakPoints,
+  type PaceSummary,
 } from "./pace";
 import type { Attempt, KnowledgePoint } from "../types";
 
@@ -22,9 +26,9 @@ function point(
     subjectId: "s",
     unit: "u",
     name: id,
+    ask: `${id} を説明できる？`,
     prereqIds,
     weight,
-    questions: [],
   };
 }
 
@@ -219,5 +223,187 @@ describe("prioritize — 何をやるかの決め方", () => {
     const order = prioritize(statuses, NOW).map((s) => s.point.id);
 
     expect(order).toEqual(["dropped", "touched", "new"]);
+  });
+});
+
+describe("buildQueue — 復習だけで埋めない", () => {
+  /** 一本道で n 個。すべて独立させて開放状態にしておく */
+  function chain(n: number): KnowledgePoint[] {
+    return Array.from({ length: n }, (_, i) => point(`p${i}`));
+  }
+
+  it("長く空けて復習が溜まっても、新規が必ず入る", () => {
+    const points = chain(10);
+    // p0〜p5 は昔に定着させたきり。全部とっくに薄れている
+    const attempts = points
+      .slice(0, 6)
+      .flatMap((p) => mastered(p.id, "2026-06-01", "2026-06-10"));
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    const queue = buildQueue(statuses, 5, NOW);
+    const fresh = queue.filter((p) => !attempts.some((a) => a.pointId === p.id));
+
+    // 優先度順にそのまま並べると、ここが 0 になっていた
+    expect(fresh.length).toBe(2);
+    expect(queue.length).toBe(5);
+  });
+
+  it("復習が枯れていれば新規で埋める", () => {
+    const points = chain(10);
+    const statuses = buildStatuses(points, [], null, NOW);
+
+    expect(buildQueue(statuses, 5, NOW).length).toBe(5);
+  });
+
+  it("新規が枯れていれば復習で埋める", () => {
+    const points = chain(6);
+    const attempts = points.flatMap((p) =>
+      mastered(p.id, "2026-06-01", "2026-06-10")
+    );
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(buildQueue(statuses, 5, NOW).length).toBe(5);
+  });
+
+  it("復習ばかりが頭に固まらないように混ぜる", () => {
+    const points = chain(10);
+    const attempts = points
+      .slice(0, 6)
+      .flatMap((p) => mastered(p.id, "2026-06-01", "2026-06-10"));
+    const statuses = buildStatuses(points, attempts, null, NOW);
+    const reviewIds = new Set(attempts.map((a) => a.pointId));
+
+    const kinds = buildQueue(statuses, 5, NOW).map((p) =>
+      reviewIds.has(p.id) ? "R" : "N"
+    );
+
+    expect(kinds).toEqual(["R", "R", "N", "R", "N"]);
+  });
+});
+
+describe("summarizeToday — 今日ぶん", () => {
+  function atTime(pointId: string, iso: string, correct = true): Attempt {
+    return { pointId, at: new Date(iso).toISOString(), correct };
+  }
+
+  const few = [point("a"), point("b"), point("c")];
+
+  it("受験日が遠いうちは下限の5に張り付く", () => {
+    expect(summarizeToday(few, [], null, EXAM, NOW).goal).toBe(5);
+  });
+
+  it("受験が近づくと目標が伸びる", () => {
+    const many = Array.from({ length: 60 }, (_, i) => point(`p${i}`));
+    const soon = "2026-08-20"; // 10日後
+
+    expect(summarizeToday(many, [], null, soon, NOW).goal).toBe(6);
+  });
+
+  it("目標は上限の10で止まる", () => {
+    const many = Array.from({ length: 300 }, (_, i) => point(`p${i}`));
+    const soon = "2026-08-20";
+
+    expect(summarizeToday(many, [], null, soon, NOW).goal).toBe(10);
+  });
+
+  it("日中に判定しても、その日の目標は動かない", () => {
+    const many = Array.from({ length: 60 }, (_, i) => point(`p${i}`));
+    const soon = "2026-08-20";
+
+    // 今日20個を定着させて、受験日まで持つ状態にする
+    const todayWork = many
+      .slice(0, 20)
+      .flatMap((p) => [
+        atTime(p.id, "2026-08-05T09:00:00"),
+        atTime(p.id, "2026-08-10T09:00:00"),
+      ]);
+
+    const before = summarizeToday(many, [], null, soon, NOW);
+    const after = summarizeToday(many, todayWork, null, soon, NOW);
+
+    // 必要ペース自体は下がっている（テストが空振りしていないことの確認）
+    const statuses = buildStatuses(many, todayWork, null, NOW);
+    expect(summarize(statuses, todayWork, soon, NOW).requiredPointsPerDay).
+      toBeLessThan(6);
+
+    // それでも今日の目標は据え置き。終わった今日ぶんが未達に戻らない
+    expect(after.goal).toBe(before.goal);
+  });
+
+  it("深夜の判定は前日ぶんに数える", () => {
+    // 4:00 で日を切るので、8/10 の 1:00 は 8/9 の続き
+    const lateNight = new Date("2026-08-10T02:00:00");
+    const attempts = [atTime("a", "2026-08-10T01:00:00")];
+
+    expect(summarizeToday(few, attempts, null, EXAM, lateNight).done).toBe(1);
+  });
+
+  it("4:00 を回れば新しい日として数え直す", () => {
+    const morning = new Date("2026-08-10T06:00:00");
+    const attempts = [atTime("a", "2026-08-10T03:00:00")];
+
+    expect(summarizeToday(few, attempts, null, EXAM, morning).done).toBe(0);
+  });
+
+  it("間違えた観点も「やった」に数える", () => {
+    const attempts = [atTime("a", "2026-08-10T09:00:00", false)];
+
+    expect(summarizeToday(few, attempts, null, EXAM, NOW).done).toBe(1);
+  });
+
+  it("同じ観点を何度振っても1つぶん", () => {
+    const attempts = [
+      atTime("a", "2026-08-10T09:00:00"),
+      atTime("a", "2026-08-10T10:00:00"),
+    ];
+
+    expect(summarizeToday(few, attempts, null, EXAM, NOW).done).toBe(1);
+  });
+
+  it("目標に届いたら完了になる", () => {
+    const many = Array.from({ length: 20 }, (_, i) => point(`p${i}`));
+    const attempts = many
+      .slice(0, 5)
+      .map((p) => atTime(p.id, "2026-08-10T09:00:00"));
+
+    const today = summarizeToday(many, attempts, null, EXAM, NOW);
+
+    expect(today.goal).toBe(5);
+    expect(today.completed).toBe(true);
+  });
+});
+
+describe("dailyShortfall", () => {
+  it("足りていれば 0", () => {
+    expect(
+      dailyShortfall({ requiredPointsPerDay: 2, actualPointsPerDay: 3 } as PaceSummary)
+    ).toBe(0);
+  });
+
+  it("不足ぶんを整数で返す", () => {
+    expect(
+      dailyShortfall({ requiredPointsPerDay: 4.2, actualPointsPerDay: 1.5 } as PaceSummary)
+    ).toBe(3);
+  });
+});
+
+describe("summarize — 始めたばかりのペースを信用しすぎない", () => {
+  it("初日に5観点やっても「1日5観点」とは読まない", () => {
+    const points = Array.from({ length: 40 }, (_, i) => point(`p${i}`));
+    // 今日はじめて、5観点を触っただけ
+    const attempts = points
+      .slice(0, 5)
+      .map((p) => at(p.id, "2026-08-10", true));
+
+    const summary = summarize(
+      buildStatuses(points, attempts, null, NOW),
+      attempts,
+      EXAM,
+      NOW
+    );
+
+    // 1日ぶんをそのまま日割りすると 5.0 になり、着地予測が 100% に張り付く
+    expect(summary.actualPointsPerDay).toBeLessThan(2);
+    expect(summary.projectedPct).toBeLessThan(100);
   });
 });

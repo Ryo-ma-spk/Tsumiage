@@ -13,9 +13,9 @@ function point(
     subjectId: "s",
     unit: "u",
     name: id,
+    ask: `${id} を説明できる？`,
     prereqIds,
     weight: 1,
-    questions: [],
     ...extra,
   };
 }
