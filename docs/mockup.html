@@ -227,69 +227,69 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
   background: var(--amber-pale); border-radius: 16px; padding: 12px 14px; margin: 0 0 16px;
 }
 
-/* ---------- マップ ---------- */
+/* ---------- マップ（謎解き型） ---------- */
 .map-top { display: flex; align-items: baseline; justify-content: space-between; }
 .map-top .num { font-family: var(--maru); font-size: 22px; font-weight: 800; }
 .map-top small { font-size: 12px; color: var(--ink-2); }
 
-/*
-  レーン式。依存関係は一本道ではなく、ほぼ独立した4本の流れと、
-  まれに架かる橋でできている。縦位置＝依存の深さ、横＝領域。
-  丸も橋も同じ座標系（viewBox 400 x 520）から置いているので必ず合う。
-*/
-.lanes-head { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 14px; }
-.lanes-head span { text-align: center; font-size: 11px; font-weight: 800; font-family: var(--maru); color: var(--ink-2); }
-.lanes-head span.late { color: var(--coral-d); }
-
-.lanes { position: relative; width: 100%; aspect-ratio: 400 / 520; margin-top: 4px; }
-.lanes > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.rail { stroke: var(--line); stroke-width: 13; stroke-linecap: round; }
-.rail.walked { stroke: #FFC08A; }
-.bridge { fill: none; stroke: var(--amber-d); stroke-width: 2.5; stroke-dasharray: 5 4; opacity: 0.85; }
-
-.nd {
-  position: absolute; width: 19px; height: 19px; border-radius: 50%;
-  transform: translate(-50%, -50%); background: var(--line);
+.sec-h {
+  display: flex; align-items: center; gap: 7px;
+  margin: 18px 0 8px; font-family: var(--maru); font-size: 13.5px; font-weight: 800;
 }
-.nd.done { background: var(--amber); }
-.nd.fade { background: var(--amber-pale); }
-.nd.now  {
-  width: 25px; height: 25px; background: var(--card);
-  border: 4px solid var(--amber); box-shadow: 0 0 0 5px var(--amber-pale);
+.sec-h .n { color: var(--ink-2); font-weight: 700; font-size: 12px; }
+
+/* いま踏めるもの */
+.open-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; margin-bottom: 7px; border-radius: 16px;
+  background: var(--card); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line);
+  font-size: 13.5px; font-weight: 700;
+}
+.open-item.next { border-color: var(--amber); box-shadow: 0 3px 0 var(--amber-pale); }
+.open-item .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--amber); flex: none; }
+.open-item .nm { flex: 1; }
+.open-item .badge {
+  padding: 3px 10px; border-radius: 999px; background: var(--amber); color: #fff;
+  font-size: 10.5px; font-weight: 800; font-family: var(--maru);
 }
 
-.now-card {
-  margin-top: 10px; padding: 13px 15px; border-radius: 18px;
-  background: var(--card); border: 2px solid var(--amber); box-shadow: 0 4px 0 var(--amber-pale);
+/* 鍵のかかった扉。必要なものを自分で提示する */
+.gate {
+  padding: 14px; margin-bottom: 9px; border-radius: 18px;
+  background: var(--card); border: 2px dashed var(--line-2);
 }
-.now-card .k { font-size: 10.5px; font-weight: 800; color: var(--amber-d); font-family: var(--maru); }
-.now-card .v { font-family: var(--maru); font-size: 17px; font-weight: 800; margin-top: 2px; }
-.now-card .m { font-size: 11.5px; color: var(--ink-2); margin-top: 3px; }
+.gate.near { border-style: solid; border-color: var(--gold); background: #FFFCF2; }
+.gate .ttl { display: flex; align-items: center; gap: 8px; font-family: var(--maru); font-size: 15px; font-weight: 800; }
+.gate .ttl .lk { font-size: 15px; }
+.gate .grade { font-size: 10.5px; color: var(--ink-2); font-weight: 700; margin-left: auto; }
+.keys { margin: 9px 0 0; padding: 0 0 0 4px; list-style: none; border-left: 3px solid var(--line); }
+.keys li { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px 11px; font-size: 12.5px; }
+.keys .ok { color: var(--green-d); font-weight: 800; }
+.keys .no { color: var(--ink-2); }
+.keys .k-nm { flex: 1; }
+.keys .k-gr { font-size: 10px; color: var(--ink-2); }
+.gate .left {
+  margin: 9px 0 0; font-size: 11.5px; font-weight: 800;
+  color: var(--gold-d); font-family: var(--maru);
+}
+.gate .left.far { color: var(--ink-2); }
 
-.bridge-note {
-  margin-top: 10px; padding: 11px 13px; border-radius: 14px;
-  background: var(--amber-pale); font-size: 11.5px; line-height: 1.65; color: #7A4600;
+/* 開いた瞬間 */
+.unlock { text-align: center; }
+.unlock .big { font-size: 52px; line-height: 1.1; }
+.unlock h2 { margin: 8px 0 2px; font-size: 24px; }
+.unlock .sub { font-size: 12.5px; color: var(--ink-2); margin: 0 0 18px; }
+.keyrow {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 8px; font-size: 13px; font-weight: 700;
 }
-
-/* 1レーンを開いたとき */
-.chain { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
-.link { display: flex; align-items: center; gap: 11px; }
-.ball {
-  width: 40px; height: 40px; border-radius: 50%; flex: none;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 800; font-family: var(--maru);
-  border: 3px solid var(--line-2); background: var(--card); color: var(--ink-2);
+.keyrow .kb {
+  padding: 8px 14px; border-radius: 13px;
+  background: var(--green-pale); color: var(--green-d); font-weight: 800;
 }
-.ball.done { background: var(--amber); border-color: var(--amber-d); color: #fff; }
-.ball.fade { background: var(--amber-pale); border-color: var(--amber); color: var(--amber-d); }
-.ball.now  { background: var(--card); border-color: var(--amber); color: var(--amber-d); box-shadow: 0 0 0 5px var(--amber-pale); }
-.ball.lock { background: var(--line); border-color: var(--line-2); }
-.link .t { font-size: 12.5px; line-height: 1.4; }
-.link .t small { display: block; font-size: 10.5px; color: var(--ink-2); }
-.link.on .t { font-weight: 800; }
-.bridge-in {
-  display: flex; align-items: center; gap: 7px; margin-left: 8px;
-  font-size: 11px; color: var(--amber-d); font-weight: 700;
+.cross-note {
+  margin: 16px 0 0; padding: 12px 14px; border-radius: 14px;
+  background: var(--amber-pale); color: #7A4600; font-size: 11.5px; line-height: 1.7;
 }
 
 /* ---------- じぶん ---------- */
@@ -337,7 +337,7 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
 <div class="head">
   <h1>Tsumiage — 画面モック</h1>
-  <p>ハードコードの見た目確認用。対象は中学生〜高校生。学習管理ツールの見た目にはせず、親しみは角丸と厚みで出し、文字は太いゴシックで強く保っている（丸ゴシックは「かわいい」側に振れすぎるので使わない）。主色はオレンジ1色に絞り、土台の文字色を寒色のスレートにして暖色一色にならないようにした。進捗は「積み上げたブロック」で表す ── 置いたブロックは外れず、忘れると色が薄くなるだけ。マップは一本道ではなくレーン式にした。実データの依存関係は、ほぼ独立した4本の流れと、まれに架かる4本の橋でできているため。</p>
+  <p>ハードコードの見た目確認用。対象は中学生〜高校生。学習管理ツールの見た目にはせず、親しみは角丸と厚みで出し、文字は太いゴシックで強く保っている（丸ゴシックは「かわいい」側に振れすぎるので使わない）。主色はオレンジ1色に絞り、土台の文字色を寒色のスレートにして暖色一色にならないようにした。進捗は「積み上げたブロック」で表す ── 置いたブロックは外れず、忘れると色が薄くなるだけ。マップは地図をやめ、謎解き型にした。鍵のかかった観点が「何がそろえば開くか」を自分で提示する。抽象的な点を並べるより、何と何がつながっているかが名前で読める。</p>
 </div>
 
 <div class="grid">
@@ -550,7 +550,7 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
   <!-- 8 -->
   <div class="frame-wrap">
-    <div class="frame-label"><b>マップ</b> — 一本道ではなく、4本のレーンと橋</div>
+    <div class="frame-label"><b>マップ</b> — 鍵のかかった扉が、必要なものを自分で教える</div>
     <div class="phone tall">
       <div class="body">
         <div class="map-top">
@@ -559,80 +559,42 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
         </div>
         <div class="meter"><i class="mid" style="width:58%"></i></div>
 
-        <div class="lanes-head">
-          <span>数と式</span><span>図形</span><span class="late">関数</span><span>データ</span>
+        <div class="sec-h">いま踏めるもの <span class="n">3</span></div>
+        <div class="open-item next">
+          <i class="dot"></i><span class="nm">二次方程式（因数分解）</span><span class="badge">つぎはこれ</span>
+        </div>
+        <div class="open-item"><i class="dot"></i><span class="nm">相似な図形と相似条件</span></div>
+        <div class="open-item"><i class="dot"></i><span class="nm">円周角の定理</span></div>
+
+        <div class="sec-h">あと1つで開く <span class="n">2</span></div>
+
+        <div class="gate near">
+          <div class="ttl"><span class="lk">🔑</span>三平方の定理<span class="grade">中3</span></div>
+          <ul class="keys">
+            <li><span class="ok">✓</span><span class="k-nm">相似の証明と辺の長さ</span><span class="k-gr">中3</span></li>
+            <li><span class="no">○</span><span class="k-nm">根号をふくむ式の計算</span><span class="k-gr">中3</span></li>
+          </ul>
+          <p class="left">あと1つ 踏めば開く</p>
         </div>
 
-        <div class="lanes">
-          <svg viewBox="0 0 400 520" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <marker id="bh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M0 0 L10 5 L0 10 z" fill="var(--amber-d)"></path>
-              </marker>
-            </defs>
-            <line class="rail" x1="50" y1="30" x2="50" y2="492"></line>
-            <line class="rail" x1="150" y1="30" x2="150" y2="492"></line>
-            <line class="rail" x1="250" y1="114" x2="250" y2="450"></line>
-            <line class="rail" x1="350" y1="30" x2="350" y2="198"></line>
-
-            <line class="rail walked" x1="50" y1="30" x2="50" y2="366"></line>
-            <line class="rail walked" x1="150" y1="30" x2="150" y2="240"></line>
-            <line class="rail walked" x1="250" y1="114" x2="250" y2="156"></line>
-            <line class="rail walked" x1="350" y1="30" x2="350" y2="198"></line>
-
-            <path class="bridge" d="M62 114 C 140 92, 180 92, 238 114" marker-end="url(#bh)"></path>
-            <path class="bridge" d="M62 240 C 140 218, 180 218, 238 240" marker-end="url(#bh)"></path>
-            <path class="bridge" d="M62 324 C 140 302, 180 302, 238 324" marker-end="url(#bh)"></path>
-            <path class="bridge" d="M62 408 C 100 392, 120 392, 138 408" marker-end="url(#bh)"></path>
-          </svg>
-
-          <i class="nd done" style="left:12.5%;top:5.8%"></i>
-          <i class="nd done" style="left:12.5%;top:13.8%"></i>
-          <i class="nd fade" style="left:12.5%;top:21.9%"></i>
-          <i class="nd done" style="left:12.5%;top:30%"></i>
-          <i class="nd done" style="left:12.5%;top:38.1%"></i>
-          <i class="nd fade" style="left:12.5%;top:46.2%"></i>
-          <i class="nd done" style="left:12.5%;top:54.2%"></i>
-          <i class="nd done" style="left:12.5%;top:62.3%"></i>
-          <i class="nd now"  style="left:12.5%;top:70.4%"></i>
-          <i class="nd" style="left:12.5%;top:78.5%"></i>
-          <i class="nd" style="left:12.5%;top:86.5%"></i>
-          <i class="nd" style="left:12.5%;top:94.6%"></i>
-
-          <i class="nd done" style="left:37.5%;top:5.8%"></i>
-          <i class="nd done" style="left:37.5%;top:13.8%"></i>
-          <i class="nd done" style="left:37.5%;top:21.9%"></i>
-          <i class="nd fade" style="left:37.5%;top:30%"></i>
-          <i class="nd done" style="left:37.5%;top:38.1%"></i>
-          <i class="nd done" style="left:37.5%;top:46.2%"></i>
-          <i class="nd" style="left:37.5%;top:54.2%"></i>
-          <i class="nd" style="left:37.5%;top:62.3%"></i>
-          <i class="nd" style="left:37.5%;top:70.4%"></i>
-          <i class="nd" style="left:37.5%;top:78.5%"></i>
-          <i class="nd" style="left:37.5%;top:86.5%"></i>
-          <i class="nd" style="left:37.5%;top:94.6%"></i>
-
-          <i class="nd done" style="left:62.5%;top:21.9%"></i>
-          <i class="nd fade" style="left:62.5%;top:30%"></i>
-          <i class="nd" style="left:62.5%;top:38.1%"></i>
-          <i class="nd" style="left:62.5%;top:46.2%"></i>
-          <i class="nd" style="left:62.5%;top:54.2%"></i>
-          <i class="nd" style="left:62.5%;top:62.3%"></i>
-          <i class="nd" style="left:62.5%;top:70.4%"></i>
-          <i class="nd" style="left:62.5%;top:78.5%"></i>
-          <i class="nd" style="left:62.5%;top:86.5%"></i>
-
-          <i class="nd done" style="left:87.5%;top:5.8%"></i>
-          <i class="nd done" style="left:87.5%;top:13.8%"></i>
-          <i class="nd fade" style="left:87.5%;top:21.9%"></i>
-          <i class="nd done" style="left:87.5%;top:30%"></i>
-          <i class="nd done" style="left:87.5%;top:38.1%"></i>
+        <div class="gate near">
+          <div class="ttl"><span class="lk">🔑</span>二次方程式の文章題<span class="grade">中3</span></div>
+          <ul class="keys">
+            <li><span class="ok">✓</span><span class="k-nm">連立方程式の文章題</span><span class="k-gr">中2</span></li>
+            <li><span class="no">○</span><span class="k-nm">平方完成と解の公式</span><span class="k-gr">中3</span></li>
+          </ul>
+          <p class="left">あと1つ 踏めば開く</p>
         </div>
 
-        <div class="now-card">
-          <div class="k">いまここ</div>
-          <div class="v">二次方程式（因数分解）</div>
-          <div class="m">数と式 ・ 中3　この先に 9個 つながっています</div>
+        <div class="sec-h">その先 <span class="n">20</span></div>
+
+        <div class="gate">
+          <div class="ttl"><span class="lk">🔒</span>y = ax² のグラフ<span class="grade">中3</span></div>
+          <ul class="keys">
+            <li><span class="no">○</span><span class="k-nm">一次関数の式とグラフ</span><span class="k-gr">中2</span></li>
+            <li><span class="no">○</span><span class="k-nm">二次方程式（因数分解）</span><span class="k-gr">中3</span></li>
+          </ul>
+          <p class="left far">あと2つ</p>
         </div>
       </div>
       <div class="nav">
@@ -645,33 +607,31 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
   <!-- 8b -->
   <div class="frame-wrap">
-    <div class="frame-label"><b>マップ</b> — レーンを開くと、中は一本の鎖</div>
+    <div class="frame-label"><b>開いた瞬間</b> — 学年をまたいで、工程としてつながる</div>
     <div class="phone tall">
-      <div class="body">
-        <div class="map-top">
-          <div><span class="num">関数</span> <small>2 / 10 個</small></div>
-          <span class="tag" style="background:var(--coral-pale);color:var(--coral-d)">遅れぎみ</span>
-        </div>
-        <div class="meter"><i class="no" style="width:20%"></i></div>
+      <div class="body mid">
+        <div class="unlock">
+          <div class="big">🔓</div>
+          <h2>ひらいた</h2>
+          <p class="sub">y = ax² のグラフ</p>
 
-        <div class="bridge-note">
-          このレーンは <b>数と式</b> から3本の橋を受けています。数と式が進むと、ここも自動で開きます。
-        </div>
+          <div class="keyrow">
+            <span class="kb">一次関数の式とグラフ</span>
+          </div>
+          <div class="keyrow">
+            <span class="kb">二次方程式（因数分解）</span>
+          </div>
+          <p class="sub" style="margin-top:12px">この2つがそろったので開きました</p>
 
-        <div class="chain">
-          <div class="bridge-in">↳ 数と式／文字式の計算 から</div>
-          <div class="link"><div class="ball done">✓</div><div class="t">比例と反比例<small>2週間もちます</small></div></div>
-          <div class="link"><div class="ball fade">↺</div><div class="t">座標とグラフ<small>薄れてきています</small></div></div>
-          <div class="link"><div class="ball lock">🔒</div><div class="t">一次関数の式とグラフ</div></div>
+          <p class="cross-note">
+            一次関数は <b>中2</b>、二次関数は <b>中3</b> で習います。
+            でも工程としてはひと続きなので、学年で切らずに、
+            <b>開いた直後にそのまま続けられる</b>順番で出します。
+          </p>
 
-          <div class="bridge-in">↳ 数と式／連立方程式 から</div>
-          <div class="link"><div class="ball lock">🔒</div><div class="t">一次関数の式を求める</div></div>
-          <div class="link"><div class="ball lock">🔒</div><div class="t">2直線の交点</div></div>
-          <div class="link"><div class="ball lock">🔒</div><div class="t">一次関数の利用</div></div>
-
-          <div class="bridge-in">↳ 数と式／二次方程式 から</div>
-          <div class="link"><div class="ball lock">🔒</div><div class="t">y = ax² のグラフ</div></div>
-          <div class="link"><div class="ball lock">🔒</div><div class="t">y = ax² の変域</div></div>
+          <div style="margin-top:20px">
+            <button class="btn">つづける</button>
+          </div>
         </div>
       </div>
       <div class="nav">
