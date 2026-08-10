@@ -76,6 +76,7 @@ body {
 }
 .body { flex: 1; padding: 18px 16px; display: flex; flex-direction: column; }
 .body.mid { justify-content: center; }
+.phone.tall { min-height: 800px; }
 
 h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
@@ -228,30 +229,50 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
 /* ---------- マップ ---------- */
 .map-top { display: flex; align-items: baseline; justify-content: space-between; }
-.map-top .num { font-family: var(--maru); font-size: 20px; font-weight: 800; }
+.map-top .num { font-family: var(--maru); font-size: 22px; font-weight: 800; }
 .map-top small { font-size: 12px; color: var(--ink-2); }
-.road { position: relative; flex: 1; margin-top: 12px; }
-.road svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.stops { position: relative; display: flex; flex-direction: column; gap: 14px; }
-.stop { display: flex; align-items: center; gap: 11px; }
-.stop.r { flex-direction: row-reverse; text-align: right; }
+
+/*
+  道と丸は同じ座標系（viewBox 300 x 620）に置く。
+  SVG の polyline が通る点と、丸の left/top は同じ値から出しているので必ず重なる。
+*/
+.road { position: relative; width: 100%; aspect-ratio: 300 / 620; margin-top: 10px; }
+.road > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.road .path { fill: none; stroke: var(--line); stroke-width: 15; stroke-linecap: round; stroke-linejoin: round; }
+.road .path.walked { stroke: #FFC08A; }  /* 通った道は残りより濃く */
+
+.stop { position: absolute; transform: translate(-50%, -50%); text-align: center; width: 96px; }
 .ball {
-  width: 50px; height: 50px; border-radius: 50%; flex: none;
+  width: 50px; height: 50px; border-radius: 50%; margin: 0 auto;
   display: flex; align-items: center; justify-content: center;
   font-size: 19px; font-weight: 800; font-family: var(--maru);
   border: 3px solid var(--line-2); background: var(--card); color: var(--ink-2);
 }
-.ball.done  { background: var(--amber); border-color: var(--amber-d); color: #fff; box-shadow: 0 4px 0 var(--amber-d); }
-.ball.fade  { background: var(--amber-pale); border-color: var(--amber); color: var(--amber-d); }
-.ball.now   { background: var(--card); border-color: var(--amber); color: var(--amber-d); box-shadow: 0 0 0 5px var(--amber-pale); }
-.ball.lock  { background: var(--line); border-color: var(--line-2); opacity: 0.8; }
-.stop .lbl { font-size: 12.5px; line-height: 1.4; }
-.stop .lbl small { display: block; font-size: 10.5px; color: var(--ink-2); }
+.ball.done { background: var(--amber); border-color: var(--amber-d); color: #fff; box-shadow: 0 4px 0 var(--amber-d); }
+.ball.fade { background: var(--amber-pale); border-color: var(--amber); color: var(--amber-d); }
+.ball.now  { background: var(--card); border-color: var(--amber); color: var(--amber-d); box-shadow: 0 0 0 6px var(--amber-pale); }
+.ball.lock { background: var(--line); border-color: var(--line-2); }
+.stop .lbl { font-size: 10.5px; line-height: 1.35; margin-top: 5px; color: var(--ink-2); }
+.stop.on .lbl { color: var(--ink); font-weight: 700; }
 .here {
   display: inline-block; margin-bottom: 3px; padding: 2px 9px; border-radius: 999px;
-  background: var(--amber); color: #fff; font-size: 10px; font-weight: 800; font-family: var(--maru);
+  background: var(--amber); color: #fff; font-size: 9.5px; font-weight: 800; font-family: var(--maru);
 }
-.chap { text-align: center; font-size: 11.5px; font-weight: 800; color: var(--ink-2); font-family: var(--maru); margin: 4px 0; }
+.chap {
+  position: absolute; transform: translateY(-50%);
+  font-size: 10.5px; font-weight: 800; color: var(--ink-2); font-family: var(--maru);
+}
+
+/* 全体表示。55個をひと続きの蛇行として並べる */
+.snake { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.snake .row { display: flex; gap: 8px; justify-content: center; }
+.snake .row:nth-child(even) { flex-direction: row-reverse; }
+.snake .d { width: 17px; height: 17px; border-radius: 50%; background: var(--line); flex: none; }
+.snake .d.done { background: var(--amber); }
+.snake .d.fade { background: var(--amber-pale); }
+.snake .d.now  { background: var(--card); border: 3px solid var(--amber); box-shadow: 0 0 0 4px var(--amber-pale); }
+.snake-note { text-align: center; font-size: 12px; color: var(--ink-2); margin: 16px 0 0; }
+.snake-note b { color: var(--ink); }
 
 /* ---------- じぶん ---------- */
 .me-top { font-size: 12px; color: var(--ink-2); }
@@ -511,8 +532,8 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
   <!-- 8 -->
   <div class="frame-wrap">
-    <div class="frame-label"><b>マップ</b> — 依存関係の順に一本道。すごろくの盤面</div>
-    <div class="phone">
+    <div class="frame-label"><b>マップ</b> — 依存関係の順に一本道。線がそのまま残りの距離</div>
+    <div class="phone tall">
       <div class="body">
         <div class="map-top">
           <div><span class="num">32</span> <small>/ 55 個</small></div>
@@ -521,18 +542,83 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
         <div class="meter"><i class="mid" style="width:58%"></i></div>
 
         <div class="road">
-          <svg viewBox="0 0 300 400" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M46 22 C 250 60, 60 110, 254 150 C 60 190, 250 240, 46 285 C 60 330, 200 350, 254 372"
-                  fill="none" stroke="#EFE0CB" stroke-width="12" stroke-linecap="round"></path>
+          <svg viewBox="0 0 300 620" preserveAspectRatio="none" aria-hidden="true">
+            <polyline class="path" points="66,45 150,118 234,191 150,264 66,337 150,410 234,483 150,556"></polyline>
+            <polyline class="path walked" points="66,45 150,118 234,191 150,264"></polyline>
           </svg>
-          <div class="stops">
-            <div class="chap">中3 平方根</div>
-            <div class="stop"><div class="ball done">✓</div><div class="lbl">平方根の意味と大小<small>2週間もちます</small></div></div>
-            <div class="stop r"><div class="ball fade">↺</div><div class="lbl">根号をふくむ式の計算<small>薄れてきています</small></div></div>
-            <div class="chap">中3 二次方程式</div>
-            <div class="stop"><div class="ball now">★</div><div class="lbl"><span class="here">いまここ</span>二次方程式（因数分解）</div></div>
-            <div class="stop r"><div class="ball lock">🔒</div><div class="lbl">平方完成と解の公式</div></div>
-            <div class="stop"><div class="ball lock">🔒</div><div class="lbl">二次方程式の文章題</div></div>
+
+          <div class="chap" style="left:4px; top:7.3%">中3 平方根</div>
+          <div class="stop" style="left:22%; top:7.3%">
+            <div class="ball done">✓</div><div class="lbl">平方根の<br>意味と大小</div>
+          </div>
+          <div class="stop" style="left:50%; top:19%">
+            <div class="ball done">✓</div><div class="lbl">根号をふくむ<br>式の計算</div>
+          </div>
+          <div class="stop" style="left:78%; top:30.8%">
+            <div class="ball fade">↺</div><div class="lbl">式の計算の<br>利用</div>
+          </div>
+
+          <div class="chap" style="left:4px; top:46%">中3 二次方程式</div>
+          <div class="stop on" style="left:50%; top:42.6%">
+            <span class="here">いまここ</span>
+            <div class="ball now">★</div><div class="lbl">二次方程式<br>（因数分解）</div>
+          </div>
+          <div class="stop" style="left:22%; top:54.4%">
+            <div class="ball lock">🔒</div><div class="lbl">平方完成と<br>解の公式</div>
+          </div>
+          <div class="stop" style="left:50%; top:66.1%">
+            <div class="ball lock">🔒</div><div class="lbl">二次方程式の<br>文章題</div>
+          </div>
+
+          <div class="chap" style="left:4px; top:77.9%">中3 相似</div>
+          <div class="stop" style="left:78%; top:77.9%">
+            <div class="ball lock">🔒</div><div class="lbl">相似な図形と<br>相似条件</div>
+          </div>
+          <div class="stop" style="left:50%; top:89.7%">
+            <div class="ball lock">🔒</div><div class="lbl">相似の証明と<br>辺の長さ</div>
+          </div>
+        </div>
+      </div>
+      <div class="nav">
+        <div><span class="em">⚡</span>今日</div>
+        <div class="on"><span class="em">🗺️</span>マップ</div>
+        <div><span class="em">🧱</span>じぶん</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8b -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>マップ（ひいて見る）</b> — 合格までの道のりが1画面に収まる</div>
+    <div class="phone tall">
+      <div class="body">
+        <div class="map-top">
+          <div><span class="num">32</span> <small>/ 55 個</small></div>
+          <span class="tag">数学</span>
+        </div>
+        <div class="meter"><i class="mid" style="width:58%"></i></div>
+
+        <div style="margin-top:16px">
+          <div class="snake">
+            <div class="row"><i class="d done"></i><i class="d done"></i><i class="d done"></i><i class="d done"></i><i class="d done"></i></div>
+            <div class="row"><i class="d fade"></i><i class="d fade"></i><i class="d done"></i><i class="d done"></i><i class="d done"></i></div>
+            <div class="row"><i class="d done"></i><i class="d done"></i><i class="d fade"></i><i class="d done"></i><i class="d done"></i></div>
+            <div class="row"><i class="d done"></i><i class="d done"></i><i class="d done"></i><i class="d fade"></i><i class="d fade"></i></div>
+            <div class="row"><i class="d done"></i><i class="d done"></i><i class="d done"></i><i class="d done"></i><i class="d done"></i></div>
+            <div class="row"><i class="d done"></i><i class="d done"></i><i class="d fade"></i><i class="d done"></i><i class="d done"></i></div>
+            <div class="row"><i class="d done"></i><i class="d done"></i><i class="d now"></i><i class="d"></i><i class="d"></i></div>
+            <div class="row"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div>
+            <div class="row"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div>
+            <div class="row"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div>
+            <div class="row"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div>
+          </div>
+
+          <p class="snake-note">中1 から 中3 まで <b>55観点</b>。<br>いまは <b>中3 二次方程式</b> のあたり</p>
+
+          <div class="legend" style="justify-content:center">
+            <span><i style="background:var(--amber)"></i>覚えている</span>
+            <span><i style="background:var(--amber-pale)"></i>薄れてきた</span>
+            <span><i style="background:var(--line)"></i>これから</span>
           </div>
         </div>
       </div>
