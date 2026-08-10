@@ -337,7 +337,7 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
 <div class="head">
   <h1>Tsumiage — 画面モック</h1>
-  <p>ハードコードの見た目確認用。対象は中学生〜高校生。学習管理ツールの見た目にはせず、親しみは角丸と厚みで出し、文字は太いゴシックで強く保っている（丸ゴシックは「かわいい」側に振れすぎるので使わない）。主色はオレンジ1色に絞り、土台の文字色を寒色のスレートにして暖色一色にならないようにした。進捗は「積み上げたブロック」で表す ── 置いたブロックは外れず、忘れると色が薄くなるだけ。マップは地図をやめ、謎解き型にした。鍵のかかった観点が「何がそろえば開くか」を自分で提示する。抽象的な点を並べるより、何と何がつながっているかが名前で読める。</p>
+  <p>ハードコードの見た目確認用。対象は中学生〜高校生。学習管理ツールの見た目にはせず、親しみは角丸と厚みで出し、文字は太いゴシックで強く保っている（丸ゴシックは「かわいい」側に振れすぎるので使わない）。主色はオレンジ1色に絞り、土台の文字色を寒色のスレートにして暖色一色にならないようにした。進捗は「積み上げたブロック」で表す ── 置いたブロックは外れず、忘れると色が薄くなるだけ。マップは地図をやめ、観点が「何を土台にしているか」を自分で提示する形にした。抽象的な点を並べるより、何と何がつながっているかが名前で読める。ロックはしない。どの順に覚えるかは本人の自由で、学習の順序を決めているのは学校や本人であってアプリではないため。土台の情報は禁止ではなく「ここが苦しいなら原因はこちらかも」という説明に使う。</p>
 </div>
 
 <div class="grid">
@@ -360,7 +360,7 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
         <div class="panel next">
           <span class="tag">つぎはこれ</span>
           <h2>正負の数の四則</h2>
-          <div class="why"><span>ここを踏むと、先の <b>32観点</b> に進めます</span></div>
+          <div class="why"><span>ここができると、先の <b>32個</b> がつながります</span></div>
           <div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
           <p class="pips-note">今日ぶん あと 3つ</p>
           <button class="btn">はじめる</button>
@@ -550,7 +550,7 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
   <!-- 8 -->
   <div class="frame-wrap">
-    <div class="frame-label"><b>マップ</b> — 鍵のかかった扉が、必要なものを自分で教える</div>
+    <div class="frame-label"><b>マップ</b> — 何と何がつながっているかを、名前で見せる</div>
     <div class="phone tall">
       <div class="body">
         <div class="map-top">
@@ -559,42 +559,45 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
         </div>
         <div class="meter"><i class="mid" style="width:58%"></i></div>
 
-        <div class="sec-h">いま踏めるもの <span class="n">3</span></div>
+        <div class="sec-h">いまやるといいもの <span class="n">3</span></div>
         <div class="open-item next">
           <i class="dot"></i><span class="nm">二次方程式（因数分解）</span><span class="badge">つぎはこれ</span>
         </div>
         <div class="open-item"><i class="dot"></i><span class="nm">相似な図形と相似条件</span></div>
         <div class="open-item"><i class="dot"></i><span class="nm">円周角の定理</span></div>
 
-        <div class="sec-h">あと1つで開く <span class="n">2</span></div>
+        <div class="sec-h">土台があと1つ <span class="n">2</span></div>
+        <p style="font-size:11px;color:var(--ink-2);margin:-2px 0 8px">
+          いまやってもOK。ただ、土台がそろってからのほうが早く終わります
+        </p>
 
         <div class="gate near">
-          <div class="ttl"><span class="lk">🔑</span>三平方の定理<span class="grade">中3</span></div>
+          <div class="ttl"><span class="lk">🧩</span>三平方の定理<span class="grade">中3</span></div>
           <ul class="keys">
             <li><span class="ok">✓</span><span class="k-nm">相似の証明と辺の長さ</span><span class="k-gr">中3</span></li>
             <li><span class="no">○</span><span class="k-nm">根号をふくむ式の計算</span><span class="k-gr">中3</span></li>
           </ul>
-          <p class="left">あと1つ 踏めば開く</p>
+          <p class="left">あと1つで土台がそろう</p>
         </div>
 
         <div class="gate near">
-          <div class="ttl"><span class="lk">🔑</span>二次方程式の文章題<span class="grade">中3</span></div>
+          <div class="ttl"><span class="lk">🧩</span>二次方程式の文章題<span class="grade">中3</span></div>
           <ul class="keys">
             <li><span class="ok">✓</span><span class="k-nm">連立方程式の文章題</span><span class="k-gr">中2</span></li>
             <li><span class="no">○</span><span class="k-nm">平方完成と解の公式</span><span class="k-gr">中3</span></li>
           </ul>
-          <p class="left">あと1つ 踏めば開く</p>
+          <p class="left">あと1つで土台がそろう</p>
         </div>
 
-        <div class="sec-h">その先 <span class="n">20</span></div>
+        <div class="sec-h">土台が2つ以上たりない <span class="n">20</span></div>
 
         <div class="gate">
-          <div class="ttl"><span class="lk">🔒</span>y = ax² のグラフ<span class="grade">中3</span></div>
+          <div class="ttl"><span class="lk">🧩</span>y = ax² のグラフ<span class="grade">中3</span></div>
           <ul class="keys">
             <li><span class="no">○</span><span class="k-nm">一次関数の式とグラフ</span><span class="k-gr">中2</span></li>
             <li><span class="no">○</span><span class="k-nm">二次方程式（因数分解）</span><span class="k-gr">中3</span></li>
           </ul>
-          <p class="left far">あと2つ</p>
+          <p class="left far">土台があと2つ</p>
         </div>
       </div>
       <div class="nav">
@@ -607,12 +610,12 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
 
   <!-- 8b -->
   <div class="frame-wrap">
-    <div class="frame-label"><b>開いた瞬間</b> — 学年をまたいで、工程としてつながる</div>
+    <div class="frame-label"><b>土台がそろった</b> — 学年をまたいで、工程としてつながる</div>
     <div class="phone tall">
       <div class="body mid">
         <div class="unlock">
-          <div class="big">🔓</div>
-          <h2>ひらいた</h2>
+          <div class="big">🧩</div>
+          <h2>土台がそろった</h2>
           <p class="sub">y = ax² のグラフ</p>
 
           <div class="keyrow">
@@ -621,7 +624,7 @@ h2, h3, .num, .btn, .chip { font-family: var(--maru); letter-spacing: 0.01em; }
           <div class="keyrow">
             <span class="kb">二次方程式（因数分解）</span>
           </div>
-          <p class="sub" style="margin-top:12px">この2つがそろったので開きました</p>
+          <p class="sub" style="margin-top:12px">この2つがそろいました</p>
 
           <p class="cross-note">
             一次関数は <b>中2</b>、二次関数は <b>中3</b> で習います。

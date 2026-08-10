@@ -90,7 +90,7 @@ export function MapScreen({ statuses, onStart }: Props) {
                   }
                   onClick={() => setSelected(s)}
                 >
-                  {s.locked ? (
+                  {s.needsFoundation && s.level === "untouched" ? (
                     <Lock size={20} />
                   ) : s.everMastered && s.needsReview ? (
                     <RotateCcw size={20} />
@@ -129,11 +129,12 @@ export function MapScreen({ statuses, onStart }: Props) {
               </p>
             )}
 
-            {selected.locked ? (
+            {selected.needsFoundation && (
               <p className="sheet-note">
-                先に前の観点を解けるようにする必要があります。
+                土台がまだです。ここが苦しいときは、先に前の観点を見直すと早いかもしれません。
               </p>
-            ) : (
+            )}
+            {(
               <button
                 className="btn-primary wide"
                 onClick={() => {
@@ -164,7 +165,8 @@ function offsetFor(index: number): number {
 }
 
 function nodeClass(s: PointStatus): string {
-  if (s.locked) return "locked";
+  // 土台が未達でも触れる。見た目だけ控えめにする
+  if (s.needsFoundation && s.level === "untouched") return "locked";
   if (s.everMastered && s.needsReview) return "review";
   if (s.everMastered) return "mastered";
   return s.level;

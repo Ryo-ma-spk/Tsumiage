@@ -78,7 +78,7 @@ function topologicalOrder(
  * 依存グラフを解析する。
  *
  * `points` は志望校で絞り込んだあとの集合を渡す。絞り込みで消えた先行観点は
- * 依存から除く（開放条件と同じ扱い。`isUnlocked` を参照）。
+ * 依存から除く（土台の判定と同じ扱い。`hasFoundation` を参照）。
  */
 export function analyzeGraph(points: KnowledgePoint[]): GraphInfo {
   const present = new Set(points.map((p) => p.id));

@@ -196,6 +196,21 @@ export function prioritize(
   const daysToStale = (s: PointStatus): number =>
     s.staleAt === null ? -1 : daysBetween(now, s.staleAt);
 
+  /**
+   * その観点の鍵（先行観点）を、最後に触った時刻。
+   *
+   * 直前に開けたばかりのものほど大きくなるので、これを優先すると
+   * 「開いた続きをそのままやる」順になる。
+   */
+  const lastSeen = new Map(
+    statuses.map((s) => [
+      s.point.id,
+      s.lastAttemptAt ? new Date(s.lastAttemptAt).getTime() : 0,
+    ])
+  );
+  const openedAt = (s: PointStatus): number =>
+    s.point.prereqIds.reduce((max, id) => Math.max(max, lastSeen.get(id) ?? 0), 0);
+
   const score = (s: PointStatus): number => {
     // 踏破したのに落ちている観点が最優先（積み上げを崩さない）
     if (s.everMastered && s.needsReview) return 0;
@@ -208,7 +223,8 @@ export function prioritize(
   };
 
   return statuses
-    .filter((s) => !s.locked && score(s) <= 4)
+    // 土台が未達でも候補から外さない。順番が下がるだけで、やりたい人はやれる
+    .filter((s) => score(s) <= 4)
     .sort((a, b) => {
       const diff = score(a) - score(b);
       if (diff !== 0) return diff;
@@ -219,7 +235,14 @@ export function prioritize(
         if (gap !== 0) return gap;
       }
 
-      // 新しく進むぶんは、道の手前から。先に長い道が伸びるほうを優先する
+      // 直前に開けた続きを先に出す。
+      // 深さ順だけで並べると全体を横なめする幅優先になり、
+      // 一次関数の翌日に平面図形が出て、二次関数はずっと先、という順になる。
+      // 工程がつながっているほうが学習効率が高いので、こちらを先に見る。
+      if (openedAt(a) !== openedAt(b)) return openedAt(b) - openedAt(a);
+
+      // まだ何も触っていないときはここに落ちる。道の手前から、
+      // 先に長い道が伸びるほうを優先する
       if (a.depth !== b.depth) return a.depth - b.depth;
       if (a.descendants !== b.descendants) return b.descendants - a.descendants;
       return b.weight - a.weight;
@@ -232,6 +255,27 @@ export function pickNext(
   now: Date = new Date()
 ): PointStatus | null {
   return prioritize(statuses, now)[0] ?? null;
+}
+
+/**
+ * 候補を、工程がつながる順に取り出す。
+ *
+ * 優先度順の上位から N 枚とるだけだと、1回のセッションの中で
+ * 一次関数と二次関数がばらばらの日に散る。直前に出したものを土台にする
+ * 観点が候補にあれば、それを次に continue する。
+ */
+function walkChain(candidates: PointStatus[], size: number): PointStatus[] {
+  const rest = [...candidates];
+  const out: PointStatus[] = [];
+
+  while (out.length < size && rest.length > 0) {
+    const prev = out[out.length - 1];
+    const next = prev
+      ? rest.findIndex((s) => s.point.prereqIds.includes(prev.point.id))
+      : -1;
+    out.push(rest.splice(next >= 0 ? next : 0, 1)[0]);
+  }
+  return out;
 }
 
 /**
@@ -257,7 +301,11 @@ export function buildQueue(
   const takeReview = Math.min(review.length, Math.max(reviewQuota, size - fresh.length));
   const takeFresh = Math.min(fresh.length, Math.max(freshQuota, size - takeReview));
 
-  const picked = { review: review.slice(0, takeReview), fresh: fresh.slice(0, takeFresh) };
+  const picked = {
+    review: review.slice(0, takeReview),
+    // 新しく進むぶんは、鎖がつながる順に取る
+    fresh: walkChain(fresh, takeFresh),
+  };
 
   // 復習だけが並ぶ入りにならないよう、残り枚数の多いほうから交互に出す
   const merged: PointStatus[] = [];
@@ -317,7 +365,7 @@ export function summarizeToday(
   const duePoints = openingStatuses.filter((s) => needsTouchBefore(s, examDate)).length;
   const perDay = daysLeft === 0 ? duePoints : duePoints / daysLeft;
 
-  // 依存関係が深いと、始めたばかりの人には数個しか開放されていない。
+  // 出せる数より大きな目標を出さない。
   // today の目標が実際に出せる数を超えると、達成しようのない残数が出続ける。
   const available = prioritize(openingStatuses, dayStart).length;
 
@@ -376,7 +424,7 @@ export function examRiskPoints(
 /** 何度も間違えている、まだ手の内に入っていない観点 */
 export function weakPoints(statuses: PointStatus[], limit = 5): PointStatus[] {
   return statuses
-    .filter((s) => !s.locked && !s.everMastered && s.level === "touched")
+    .filter((s) => !s.everMastered && s.level === "touched")
     .sort((a, b) => b.weight - a.weight)
     .slice(0, limit);
 }

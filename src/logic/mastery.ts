@@ -227,8 +227,8 @@ export function evaluate(
   };
 }
 
-/** 先行観点がすべて solved 以上なら開放 */
-function isUnlocked(
+/** 先行観点がすべて solved 以上なら、土台はできている */
+function hasFoundation(
   point: KnowledgePoint,
   levelById: Map<string, MasteryLevel>
 ): boolean {
@@ -260,7 +260,7 @@ export function weightOf(point: KnowledgePoint, faculty: Faculty | null): number
 }
 
 /**
- * 絞り込み済みの観点それぞれについて到達度・鮮度・開放状態・重みを計算する。
+ * 絞り込み済みの観点それぞれについて到達度・鮮度・土台の有無・重みを計算する。
  * 画面はすべてこの結果だけを見る。
  *
  * 並び順は観点マスタの記述順ではなく、依存関係から導いた順序になる。
@@ -298,7 +298,7 @@ export function buildStatuses(
 
   return evaluated.map((e) => ({
     ...e,
-    locked: !isUnlocked(e.point, levelById),
+    needsFoundation: !hasFoundation(e.point, levelById),
     weight: weightOf(e.point, faculty),
     depth: depthById.get(e.point.id) ?? 0,
     descendants: descendantsById.get(e.point.id) ?? 0,

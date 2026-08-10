@@ -186,11 +186,13 @@ describe("prioritize — 何をやるかの決め方", () => {
     expect(first.point.id).toBe("root1");
   });
 
-  it("ロックされている観点は候補に入らない", () => {
+  it("土台が未達でも候補から外さない。順番が下がるだけ", () => {
+    // 学習の順序を決めているのは学校や本人であって、このアプリではない。
+    // 授業で b をやっている人を a で止めるのは筋が違う
     const points = [point("a"), point("b", ["a"])];
     const statuses = buildStatuses(points, [], null, NOW);
 
-    expect(prioritize(statuses, NOW).map((s) => s.point.id)).toEqual(["a"]);
+    expect(prioritize(statuses, NOW).map((s) => s.point.id)).toEqual(["a", "b"]);
   });
 
   it("切れかけの定着観点は、未着手より先に出す", () => {
@@ -410,29 +412,20 @@ describe("summarize — 始めたばかりのペースを信用しすぎない",
 });
 
 describe("summarizeToday — 出せる数を超える目標を出さない", () => {
-  it("開放されている観点が少なければ、そこまでに切り下げる", () => {
-    // 一本道。まっさらな状態では先頭の1つしか開放されていない
-    const points = [
-      point("a"),
-      point("b", ["a"]),
-      point("c", ["b"]),
-      point("d", ["c"]),
-      point("e", ["d"]),
-      point("f", ["e"]),
-      point("g", ["f"]),
-    ];
+  it("出せる観点が少なければ、目標をその数まで切り下げる", () => {
+    // 5 のままだと、そもそも振れない残数が出続けて永久に未達になる
+    const points = [point("a"), point("b"), point("c")];
 
-    const today = summarizeToday(points, [], null, EXAM, NOW);
-
-    // 下限は5だが、そもそも1つしか振れない。5 のままだと永久に未達になる
-    expect(today.goal).toBe(1);
+    expect(summarizeToday(points, [], null, EXAM, NOW).goal).toBe(3);
   });
 
-  it("1つ振れば今日ぶんが完了する", () => {
-    const points = [point("a"), point("b", ["a"])];
-    const attempts = [
-      { pointId: "a", at: new Date("2026-08-10T09:00:00").toISOString(), correct: true },
-    ];
+  it("出せるぶんを振れば今日ぶんが完了する", () => {
+    const points = [point("a"), point("b"), point("c")];
+    const attempts = ["a", "b", "c"].map((id) => ({
+      pointId: id,
+      at: new Date("2026-08-10T09:00:00").toISOString(),
+      correct: true,
+    }));
 
     expect(summarizeToday(points, attempts, null, EXAM, NOW).completed).toBe(true);
   });
@@ -479,5 +472,85 @@ describe("summarize — 「まだ測れない」と「足りない」を混ぜ�
 
     expect(summary.measurable).toBe(true);
     expect(summary.actualPointsPerDay).toBe(0);
+  });
+});
+
+describe("prioritize — 開けた続きをそのまま出す", () => {
+  it("直前に触った観点の続きを先に出す", () => {
+    // 2本の鎖。a→b→c と x→y→z
+    const points = [
+      point("a"), point("b", ["a"]), point("c", ["b"]),
+      point("x"), point("y", ["x"]), point("z", ["y"]),
+    ];
+    // a も x も定着していて鮮度も残っている。ただし x のほうが直近
+    const attempts = [
+      ...mastered("a", "2026-07-20", "2026-08-05"),
+      ...mastered("x", "2026-08-01", "2026-08-09"),
+    ];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    // 深さ順だけで並べると b と y が同点で、配列順の b が先に出ていた
+    expect(prioritize(statuses, NOW)[0].point.id).toBe("y");
+  });
+
+  it("鎖を最後まで追ってから、次の鎖に移る", () => {
+    const points = [
+      point("a"), point("b", ["a"]), point("c", ["b"]), point("d", ["c"]),
+      point("x"), point("y", ["x"]),
+    ];
+    const byId = new Map(points.map((p) => [p.id, p]));
+    const attempts: Attempt[] = [];
+    const picked: string[] = [];
+
+    // 出てきたものを順に定着させていく
+    for (let i = 0; i < 4; i++) {
+      const next = prioritize(buildStatuses(points, attempts, null, NOW), NOW)[0];
+      if (!next) break;
+      picked.push(next.point.id);
+      attempts.push(
+        at(next.point.id, "2026-08-01", true),
+        at(next.point.id, "2026-08-10", true)
+      );
+    }
+
+    // 最初の1つは根のどちらか。そのあとは同じ鎖が続くはず
+    const chain = picked.filter((id) => ["a", "b", "c", "d"].includes(id));
+    expect(chain.length).toBeGreaterThanOrEqual(3);
+    // 直前の続きになっているか
+    const linked = picked.slice(1).filter((id, i) =>
+      byId.get(id)!.prereqIds.includes(picked[i])
+    );
+    expect(linked.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("復習のほうが工程の続きより優先される", () => {
+    // dropped は踏破後に落としている（score 0）。y は直前に開いた続き
+    const points = [point("dropped"), point("x"), point("y", ["x"])];
+    const attempts = [
+      ...mastered("dropped", "2026-06-01", "2026-06-10"),
+      at("dropped", "2026-08-08", false),
+      ...mastered("x", "2026-08-01", "2026-08-09"),
+    ];
+    const statuses = buildStatuses(points, attempts, null, NOW);
+
+    expect(prioritize(statuses, NOW)[0].point.id).toBe("dropped");
+  });
+});
+
+describe("buildQueue — セッションの中で工程をつなぐ", () => {
+  it("土台とその続きが同じセッションに並ぶ", () => {
+    // b は a を、c は b を土台にする。d と e は無関係
+    const points = [
+      point("a", [], 1), point("b", ["a"], 1), point("c", ["b"], 1),
+      point("d", [], 3), point("e", [], 3),
+    ];
+    const statuses = buildStatuses(points, [], null, NOW);
+
+    const ids = buildQueue(statuses, 5, NOW).map((p) => p.id);
+    const ia = ids.indexOf("a"), ib = ids.indexOf("b"), ic = ids.indexOf("c");
+
+    // 上位から順に取るだけだと、頻出度の高い d・e が間に割り込んでいた
+    expect(ib).toBe(ia + 1);
+    expect(ic).toBe(ib + 1);
   });
 });
