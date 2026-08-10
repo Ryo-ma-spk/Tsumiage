@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsumiage — 学習要項（中学数学）</title>
+<style>
+:root {
+  --paper:#FBF8F3; --card:#fff; --ink:#22303C; --ink-2:#66757F;
+  --line:#E7E3DC; --line-2:#D6D1C7; --amber:#FF8A1F; --amber-d:#D46800;
+  --amber-pale:#FFE7D1; --green-d:#1E9159;
+  --body:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#14181E; --card:#1B2027; --ink:#E8ECF2; --ink-2:#98A4B0;
+  --line:#2A313A; --line-2:#39414C; --amber:#FF9E45; --amber-d:#FFB870;
+  --amber-pale:#3A2A18; --green-d:#4CC196;
+}}
+:root[data-theme="dark"]{
+  --paper:#14181E; --card:#1B2027; --ink:#E8ECF2; --ink-2:#98A4B0;
+  --line:#2A313A; --line-2:#39414C; --amber:#FF9E45; --amber-d:#FFB870;
+  --amber-pale:#3A2A18; --green-d:#4CC196;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:48px 24px 90px;background:var(--paper);color:var(--ink);
+  font-family:var(--body);line-height:1.75;font-size:15px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:30px;margin:0 0 6px;letter-spacing:.02em}
+.lede{color:var(--ink-2);margin:0 0 8px;max-width:62ch}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:18px 0 30px}
+h2{font-size:22px;margin:52px 0 6px;padding-top:22px;border-top:2px solid var(--line)}
+h2 .cnt{font-size:13px;color:var(--ink-2);font-weight:400;margin-left:8px}
+h3{font-size:14px;margin:26px 0 6px;color:var(--amber-d);letter-spacing:.02em}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:12px 18px;min-width:120px}
+.stat b{display:block;font-size:24px;line-height:1.2}
+.stat small{font-size:11.5px;color:var(--ink-2)}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin-bottom:6px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px 9px 0;border-bottom:1px solid var(--line)}
+th{font-size:11px;color:var(--ink-2);font-weight:600;letter-spacing:.06em;white-space:nowrap}
+td.c,th.c{text-align:center;width:1%;white-space:nowrap;padding-right:8px}
+td.nm{font-weight:700;white-space:nowrap}
+td.ask{color:var(--ink-2);font-size:12.5px;min-width:24ch}
+td.w{color:var(--amber-d);letter-spacing:-1px}
+.key{display:inline-block;background:var(--card);border:1px solid var(--line-2);
+  border-radius:999px;padding:1px 10px;margin:1px 4px 1px 0;font-size:11.5px;white-space:nowrap}
+.key.far{border-color:var(--amber);color:var(--amber-d);font-weight:700}
+.key em{font-style:normal;font-size:9.5px;opacity:.8;margin-left:4px}
+.none{color:var(--ink-2);font-size:11.5px}
+.mx td.c{font-variant-numeric:tabular-nums}
+.mx td:first-child{font-weight:700}
+.cross li{margin-bottom:5px;font-size:13.5px}
+.cross b{color:var(--amber-d)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>学習要項 — 中学数学</h1>
+<p class="lede">Tsumiage が持っている観点マスタの全体。<code>src/data/curriculum.ts</code> から自動生成しているので、実装と必ず一致する。</p>
+
+<div class="note">
+領域の分け方と単元の並びは中学校学習指導要領（数学）の A／B／C／D に沿わせている。
+ただし<b>個々の観点への割り方・問いかけの文言・頻出度は開発用の作り物</b>で、
+実在の入試情報ではない。頻出度は本来、過去問への観点タグ付けから作る。
+</div>
+
+<div class="stats">
+  <div class="stat"><b>55</b><small>観点</small></div>
+  <div class="stat"><b>4</b><small>領域</small></div>
+  <div class="stat"><b>10</b><small>依存の最大の深さ</small></div>
+  <div class="stat"><b>20</b><small>学年をまたぐ依存</small></div>
+  <div class="stat"><b>4</b><small>領域をまたぐ依存</small></div>
+</div>
+
+<h2>構成</h2>
+<div class="table-wrap"><table class="mx">
+  <thead><tr><th></th><th class="c">A 数と式</th><th class="c">B 図形</th><th class="c">C 関数</th><th class="c">D データの活用</th><th class="c">計</th></tr></thead>
+  <tbody>
+  <tr><td>中1</td><td class="c">7</td><td class="c">4</td><td class="c">2</td><td class="c">2</td><td class="c">15</td></tr>
+  <tr><td>中2</td><td class="c">5</td><td class="c">7</td><td class="c">4</td><td class="c">3</td><td class="c">19</td></tr>
+  <tr><td>中3</td><td class="c">8</td><td class="c">8</td><td class="c">4</td><td class="c">1</td><td class="c">21</td></tr>
+  <tr><td>計</td><td class="c">20</td><td class="c">19</td><td class="c">10</td><td class="c">6</td><td class="c">55</td></tr>
+  </tbody>
+</table></div>
+
+<h2>領域をまたぐつながり <span class="cnt">4本</span></h2>
+<p class="lede">参考書の目次では章が違うので見えない依存。マップが目次の焼き直しか本当の依存関係かは、ここが引けているかで決まる。</p>
+<ul class="cross">
+  <li>A 数と式／<b>文字式の計算（同類項）</b>（中1） → C 関数／<b>比例と反比例</b>（中1）</li>
+  <li>A 数と式／<b>連立方程式（加減法・代入法）</b>（中2） → C 関数／<b>一次関数の式を求める</b>（中2）</li>
+  <li>A 数と式／<b>二次方程式（因数分解）</b>（中3） → C 関数／<b>y = ax² のグラフ</b>（中3）</li>
+  <li>A 数と式／<b>根号をふくむ式の計算</b>（中3） → B 図形／<b>三平方の定理</b>（中3）</li>
+</ul>
+
+<h2>学年をまたぐつながり <span class="cnt">20本</span></h2>
+<p class="lede">学年で切ると分断されるが、工程としてはひと続きになっているところ。</p>
+<ul class="cross">
+  <li><b>文字式の計算（同類項）</b>（中1） → <b>単項式と多項式の計算</b>（中2）</li>
+  <li><b>一元一次方程式</b>（中1） → <b>等式の変形</b>（中2）</li>
+  <li><b>一元一次方程式</b>（中1） → <b>連立方程式（加減法・代入法）</b>（中2）</li>
+  <li><b>一次方程式の文章題</b>（中1） → <b>連立方程式の文章題</b>（中2）</li>
+  <li><b>比例と反比例</b>（中1） → <b>一次関数の式とグラフ</b>（中2）</li>
+  <li><b>平面図形の基本と作図</b>（中1） → <b>平行線と角</b>（中2）</li>
+  <li><b>度数分布と代表値</b>（中1） → <b>四分位数と箱ひげ図</b>（中2）</li>
+  <li><b>相対度数と確率の見方</b>（中1） → <b>場合の数と確率</b>（中2）</li>
+  <li><b>単項式と多項式の計算</b>（中2） → <b>式の展開</b>（中3）</li>
+  <li><b>累乗と指数</b>（中1） → <b>平方根の意味と大小</b>（中3）</li>
+  <li><b>連立方程式の文章題</b>（中2） → <b>二次方程式の文章題</b>（中3）</li>
+  <li><b>一次関数の式とグラフ</b>（中2） → <b>y = ax² のグラフ</b>（中3）</li>
+  <li><b>一次関数の式を求める</b>（中2） → <b>変化の割合</b>（中3）</li>
+  <li><b>2直線の交点</b>（中2） → <b>放物線と直線の交点</b>（中3）</li>
+  <li><b>平行四辺形の性質と条件</b>（中2） → <b>相似な図形と相似条件</b>（中3）</li>
+  <li><b>直角三角形の合同条件</b>（中2） → <b>相似な図形と相似条件</b>（中3）</li>
+  <li><b>立体の体積と表面積</b>（中1） → <b>相似比と面積比・体積比</b>（中3）</li>
+  <li><b>おうぎ形の弧の長さと面積</b>（中1） → <b>円周角の定理</b>（中3）</li>
+  <li><b>立体の体積と表面積</b>（中1） → <b>空間図形への利用</b>（中3）</li>
+  <li><b>四分位数と箱ひげ図</b>（中2） → <b>標本調査</b>（中3）</li>
+</ul>
+
+
+<section class="area">
+  <h2>A 数と式 <span class="cnt">20観点</span></h2>
+  
+  <h3>中1 正負の数</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">正負の数の四則</td>
+      <td class="ask">負の数をふくむかけ算・わり算の符号を、迷わず決められる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="none">なし（出発点）</span></td>
+      <td class="c">0</td>
+      <td class="c">32</td>
+    </tr>
+<tr>
+      <td class="nm">累乗と指数</td>
+      <td class="ask">2³ と (−2)³ と −2³ を、それぞれ計算し分けられる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">正負の数の四則</span></td>
+      <td class="c">1</td>
+      <td class="c">7</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中1 文字と式</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">文字式の表し方</td>
+      <td class="ask">文字式で × と ÷ を省く書き方のルールを説明できる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">正負の数の四則</span></td>
+      <td class="c">1</td>
+      <td class="c">29</td>
+    </tr>
+<tr>
+      <td class="nm">文字式の計算（同類項）</td>
+      <td class="ask">同類項をまとめて、1次式の加減ができる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">文字式の表し方</span></td>
+      <td class="c">2</td>
+      <td class="c">28</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中1 方程式</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">一元一次方程式</td>
+      <td class="ask">移項して一次方程式を解ける？ 移項で符号が変わる理由を言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">文字式の計算（同類項）</span></td>
+      <td class="c">3</td>
+      <td class="c">11</td>
+    </tr>
+<tr>
+      <td class="nm">一次方程式の文章題</td>
+      <td class="ask">文章題で「何を x とおくか」を決めて、式を立てられる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">一元一次方程式</span></td>
+      <td class="c">4</td>
+      <td class="c">2</td>
+    </tr>
+<tr>
+      <td class="nm">比例式</td>
+      <td class="ask">a : b = c : d から ad = bc を導いて解ける？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">一元一次方程式</span></td>
+      <td class="c">4</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中2 式の計算</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">単項式と多項式の計算</td>
+      <td class="ask">多項式の加減と、単項式どうしの乗除ができる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">文字式の計算（同類項）<em>中1</em></span></td>
+      <td class="c">3</td>
+      <td class="c">21</td>
+    </tr>
+<tr>
+      <td class="nm">等式の変形</td>
+      <td class="ask">等式を、指定された文字について解ける？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">単項式と多項式の計算</span><span class="key far">一元一次方程式<em>中1</em></span></td>
+      <td class="c">4</td>
+      <td class="c">0</td>
+    </tr>
+<tr>
+      <td class="nm">文字式による説明</td>
+      <td class="ask">「連続する3つの整数の和は3の倍数」を、文字を使って説明できる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">単項式と多項式の計算</span></td>
+      <td class="c">4</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中2 連立方程式</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">連立方程式（加減法・代入法）</td>
+      <td class="ask">加減法と代入法を使い分けて、連立方程式を解ける？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">一元一次方程式<em>中1</em></span><span class="key">単項式と多項式の計算</span></td>
+      <td class="c">4</td>
+      <td class="c">7</td>
+    </tr>
+<tr>
+      <td class="nm">連立方程式の文章題</td>
+      <td class="ask">速さや割合の文章題で、2つの式を立てられる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">連立方程式（加減法・代入法）</span><span class="key far">一次方程式の文章題<em>中1</em></span></td>
+      <td class="c">5</td>
+      <td class="c">1</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 多項式</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">式の展開</td>
+      <td class="ask">(x + a)(x + b) と (a ± b)² と (a + b)(a − b) を、公式のまま展開できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">単項式と多項式の計算<em>中2</em></span></td>
+      <td class="c">4</td>
+      <td class="c">13</td>
+    </tr>
+<tr>
+      <td class="nm">因数分解</td>
+      <td class="ask">共通因数でくくってから、公式を使って因数分解できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">式の展開</span></td>
+      <td class="c">5</td>
+      <td class="c">8</td>
+    </tr>
+<tr>
+      <td class="nm">式の計算の利用</td>
+      <td class="ask">展開や因数分解を使って、数の計算を簡単にしたり整数の性質を説明できる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">因数分解</span></td>
+      <td class="c">6</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 平方根</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">平方根の意味と大小</td>
+      <td class="ask">√a の意味を説明できる？ 平方根の大小を比べられる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">累乗と指数<em>中1</em></span></td>
+      <td class="c">2</td>
+      <td class="c">6</td>
+    </tr>
+<tr>
+      <td class="nm">根号をふくむ式の計算</td>
+      <td class="ask">根号の乗除と、分母の有理化ができる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">平方根の意味と大小</span><span class="key">式の展開</span></td>
+      <td class="c">5</td>
+      <td class="c">5</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 二次方程式</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">二次方程式（因数分解）</td>
+      <td class="ask">因数分解を使って二次方程式を解ける？ AB = 0 なら A = 0 または B = 0 が言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">因数分解</span></td>
+      <td class="c">6</td>
+      <td class="c">6</td>
+    </tr>
+<tr>
+      <td class="nm">平方完成と解の公式</td>
+      <td class="ask">解の公式を書ける？ 平方完成からその公式が出ることを説明できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">二次方程式（因数分解）</span><span class="key">根号をふくむ式の計算</span></td>
+      <td class="c">7</td>
+      <td class="c">1</td>
+    </tr>
+<tr>
+      <td class="nm">二次方程式の文章題</td>
+      <td class="ask">面積や整数の文章題で二次方程式を立てて、出た解が問題に合うか吟味できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">平方完成と解の公式</span><span class="key far">連立方程式の文章題<em>中2</em></span></td>
+      <td class="c">8</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="area">
+  <h2>B 図形 <span class="cnt">19観点</span></h2>
+  
+  <h3>中1 平面図形</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">平面図形の基本と作図</td>
+      <td class="ask">垂直二等分線・角の二等分線・垂線を作図できる？ それぞれ何の性質を使うか言える？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="none">なし（出発点）</span></td>
+      <td class="c">0</td>
+      <td class="c">18</td>
+    </tr>
+<tr>
+      <td class="nm">おうぎ形の弧の長さと面積</td>
+      <td class="ask">おうぎ形の弧の長さと面積を、中心角の割合から出せる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">平面図形の基本と作図</span></td>
+      <td class="c">1</td>
+      <td class="c">4</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中1 空間図形</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">空間内の直線と平面</td>
+      <td class="ask">ねじれの位置を説明できる？ 投影図から立体を読み取れる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">平面図形の基本と作図</span></td>
+      <td class="c">1</td>
+      <td class="c">3</td>
+    </tr>
+<tr>
+      <td class="nm">立体の体積と表面積</td>
+      <td class="ask">角錐・円錐の体積が 1/3 になることを言える？ 球の体積と表面積の公式は？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">空間内の直線と平面</span><span class="key">おうぎ形の弧の長さと面積</span></td>
+      <td class="c">2</td>
+      <td class="c">2</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中2 平行と合同</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">平行線と角</td>
+      <td class="ask">同位角・錯角・対頂角を使って、角の大きさを求められる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">平面図形の基本と作図<em>中1</em></span></td>
+      <td class="c">1</td>
+      <td class="c">14</td>
+    </tr>
+<tr>
+      <td class="nm">多角形の内角と外角</td>
+      <td class="ask">n角形の内角の和が 180(n−2) になる理由を説明できる？ 外角の和は？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">平行線と角</span></td>
+      <td class="c">2</td>
+      <td class="c">0</td>
+    </tr>
+<tr>
+      <td class="nm">三角形の合同条件</td>
+      <td class="ask">三角形の合同条件を3つとも言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">平行線と角</span></td>
+      <td class="c">2</td>
+      <td class="c">12</td>
+    </tr>
+<tr>
+      <td class="nm">図形の証明の書き方</td>
+      <td class="ask">仮定と結論を分けて、合同を使った証明を筋道立てて書ける？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">三角形の合同条件</span></td>
+      <td class="c">3</td>
+      <td class="c">11</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中2 三角形と四角形</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">二等辺三角形と正三角形</td>
+      <td class="ask">二等辺三角形の性質と、その逆を証明できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">図形の証明の書き方</span></td>
+      <td class="c">4</td>
+      <td class="c">0</td>
+    </tr>
+<tr>
+      <td class="nm">直角三角形の合同条件</td>
+      <td class="ask">直角三角形の合同条件を2つ言える？ ふつうの合同条件との違いは？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">図形の証明の書き方</span></td>
+      <td class="c">4</td>
+      <td class="c">8</td>
+    </tr>
+<tr>
+      <td class="nm">平行四辺形の性質と条件</td>
+      <td class="ask">平行四辺形になるための条件を5つ挙げられる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">図形の証明の書き方</span></td>
+      <td class="c">4</td>
+      <td class="c">8</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 相似</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">相似な図形と相似条件</td>
+      <td class="ask">三角形の相似条件を3つ言える？ 合同条件との対応を説明できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">平行四辺形の性質と条件<em>中2</em></span><span class="key far">直角三角形の合同条件<em>中2</em></span></td>
+      <td class="c">5</td>
+      <td class="c">7</td>
+    </tr>
+<tr>
+      <td class="nm">相似の証明と辺の長さ</td>
+      <td class="ask">相似を使った証明を書ける？ 対応する辺の比から長さを出せる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">相似な図形と相似条件</span></td>
+      <td class="c">6</td>
+      <td class="c">5</td>
+    </tr>
+<tr>
+      <td class="nm">平行線と線分の比</td>
+      <td class="ask">中点連結定理を説明できる？ 平行線にはさまれた線分の比を出せる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">相似の証明と辺の長さ</span></td>
+      <td class="c">7</td>
+      <td class="c">1</td>
+    </tr>
+<tr>
+      <td class="nm">相似比と面積比・体積比</td>
+      <td class="ask">相似比が m : n のとき、面積比と体積比がどうなるか言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">平行線と線分の比</span><span class="key far">立体の体積と表面積<em>中1</em></span></td>
+      <td class="c">8</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 円</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">円周角の定理</td>
+      <td class="ask">円周角と中心角の関係を言える？ 定理の逆を使って4点が同一円周上にあると示せる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">相似な図形と相似条件</span><span class="key far">おうぎ形の弧の長さと面積<em>中1</em></span></td>
+      <td class="c">6</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 三平方の定理</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">三平方の定理</td>
+      <td class="ask">三平方の定理を書ける？ 逆を使って直角三角形だと示せる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">相似の証明と辺の長さ</span><span class="key far">根号をふくむ式の計算<em>中3</em></span></td>
+      <td class="c">7</td>
+      <td class="c">2</td>
+    </tr>
+<tr>
+      <td class="nm">平面図形への利用</td>
+      <td class="ask">特別な直角三角形の辺の比を言える？ 座標上の2点間の距離を出せる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">三平方の定理</span></td>
+      <td class="c">8</td>
+      <td class="c">1</td>
+    </tr>
+<tr>
+      <td class="nm">空間図形への利用</td>
+      <td class="ask">直方体の対角線や円錐の高さを、三平方の定理で出せる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">平面図形への利用</span><span class="key far">立体の体積と表面積<em>中1</em></span></td>
+      <td class="c">9</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="area">
+  <h2>C 関数 <span class="cnt">10観点</span></h2>
+  
+  <h3>中1 比例と反比例</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">比例と反比例</td>
+      <td class="ask">比例 y = ax と反比例 y = a/x を、式・表・グラフで行き来できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">文字式の計算（同類項）<em>中1</em></span></td>
+      <td class="c">3</td>
+      <td class="c">9</td>
+    </tr>
+<tr>
+      <td class="nm">座標とグラフ</td>
+      <td class="ask">座標平面に点をとって、比例・反比例のグラフをかける？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">比例と反比例</span></td>
+      <td class="c">4</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中2 一次関数</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">一次関数の式とグラフ</td>
+      <td class="ask">一次関数の傾きと切片が、グラフのどこに出るか言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">比例と反比例<em>中1</em></span></td>
+      <td class="c">4</td>
+      <td class="c">7</td>
+    </tr>
+<tr>
+      <td class="nm">一次関数の式を求める</td>
+      <td class="ask">2点の座標から一次関数の式を求められる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">一次関数の式とグラフ</span><span class="key far">連立方程式（加減法・代入法）<em>中2</em></span></td>
+      <td class="c">5</td>
+      <td class="c">4</td>
+    </tr>
+<tr>
+      <td class="nm">2直線の交点</td>
+      <td class="ask">2直線の交点の座標が連立方程式の解と同じになる理由を説明できる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">一次関数の式を求める</span></td>
+      <td class="c">6</td>
+      <td class="c">2</td>
+    </tr>
+<tr>
+      <td class="nm">一次関数の利用</td>
+      <td class="ask">動く点や水そうの問題で、変域ごとに式を立てられる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">2直線の交点</span></td>
+      <td class="c">7</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 関数 y=ax²</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">y = ax² のグラフ</td>
+      <td class="ask">y = ax² のグラフの形と、a の符号や大きさでどう変わるか言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">一次関数の式とグラフ<em>中2</em></span><span class="key far">二次方程式（因数分解）<em>中3</em></span></td>
+      <td class="c">7</td>
+      <td class="c">3</td>
+    </tr>
+<tr>
+      <td class="nm">y = ax² の変域</td>
+      <td class="ask">x の変域から y の変域を出せる？ 0 をまたぐときに注意がいる理由を言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">y = ax² のグラフ</span></td>
+      <td class="c">8</td>
+      <td class="c">2</td>
+    </tr>
+<tr>
+      <td class="nm">変化の割合</td>
+      <td class="ask">y = ax² の変化の割合を求められる？ 一次関数と違って一定でない理由を言える？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">y = ax² の変域</span><span class="key far">一次関数の式を求める<em>中2</em></span></td>
+      <td class="c">9</td>
+      <td class="c">1</td>
+    </tr>
+<tr>
+      <td class="nm">放物線と直線の交点</td>
+      <td class="ask">放物線と直線の交点を、連立して求められる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key">変化の割合</span><span class="key far">2直線の交点<em>中2</em></span></td>
+      <td class="c">10</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="area">
+  <h2>D データの活用 <span class="cnt">6観点</span></h2>
+  
+  <h3>中1 データの活用</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">度数分布と代表値</td>
+      <td class="ask">度数分布表からヒストグラムをかける？ 平均値・中央値・最頻値を使い分けられる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="none">なし（出発点）</span></td>
+      <td class="c">0</td>
+      <td class="c">5</td>
+    </tr>
+<tr>
+      <td class="nm">相対度数と確率の見方</td>
+      <td class="ask">回数を増やすと相対度数が一定の値に近づく、という見方を説明できる？</td>
+      <td class="c w">★</td>
+      <td class="keys"><span class="key">度数分布と代表値</span></td>
+      <td class="c">1</td>
+      <td class="c">2</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中2 データの活用</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">四分位数と箱ひげ図</td>
+      <td class="ask">四分位数を求めて箱ひげ図をかける？ ヒストグラムと何が違うか言える？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key far">度数分布と代表値<em>中1</em></span></td>
+      <td class="c">1</td>
+      <td class="c">1</td>
+    </tr>
+<tr>
+      <td class="nm">場合の数と確率</td>
+      <td class="ask">樹形図で場合の数を数え上げて、確率を求められる？</td>
+      <td class="c w">★★★</td>
+      <td class="keys"><span class="key far">相対度数と確率の見方<em>中1</em></span></td>
+      <td class="c">2</td>
+      <td class="c">1</td>
+    </tr>
+<tr>
+      <td class="nm">「少なくとも1つ」の確率</td>
+      <td class="ask">「少なくとも1つ」を、余事象を使って求められる？</td>
+      <td class="c w">★★</td>
+      <td class="keys"><span class="key">場合の数と確率</span></td>
+      <td class="c">3</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+
+  <h3>中3 標本調査</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>観点</th><th>カードに出る問いかけ</th><th class="c">頻出</th><th>土台</th><th class="c">深さ</th><th class="c">この先</th></tr></thead>
+    <tbody>
+    <tr>
+      <td class="nm">標本調査</td>
+      <td class="ask">全数調査と標本調査を使い分けられる？ 標本から母集団の数を推定できる？</td>
+      <td class="c w">★</td>
+      <td class="keys"><span class="key far">四分位数と箱ひげ図<em>中2</em></span></td>
+      <td class="c">2</td>
+      <td class="c">0</td>
+    </tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>
+</body>
+</html>
