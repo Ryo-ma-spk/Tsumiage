@@ -71,6 +71,17 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
 .legend{display:flex;flex-wrap:wrap;gap:11px;margin-top:9px;font-size:10.5px;color:var(--ink-2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 
+/* 手の届く分母。55 は見出しにしない ―― 同じ 3/55 が、上位には燃料に、
+   下位には壁になるため。見出しはいつも「いま埋めている単元」にする */
+.near{display:flex;align-items:center;gap:9px;margin-top:12px;padding-top:11px;
+  border-top:2px dashed var(--line)}
+.near .nu{font-size:12px;font-weight:800}
+.near .cells{display:flex;gap:4px}
+.near .nl{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--amber-d)}
+.near .nl.done{color:var(--green-d)}
+.c{width:14px;height:14px;border-radius:4px;background:var(--line)}
+.c.d{background:var(--amber)} .c.f{background:var(--amber-pale)} .c.g{background:var(--gold)}
+
 .sub1{font-size:11.5px;color:var(--ink-2);margin:9px 0 0;text-align:center;line-height:1.7}
 .sub1 b{color:var(--ink)}
 .sub1 .warn{color:var(--amber-d);font-weight:800}
@@ -165,6 +176,11 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
 .left-note{margin:10px 0 0;padding:11px 13px;border-radius:14px;background:var(--gold-pale);
   color:#6B4A00;font-size:11.5px;line-height:1.75}
 .left-note b{font-weight:800}
+/* 近い順に並べる。まだ手つかずのものを上に置くと、下位層には壁になる */
+.gh{margin:16px 0 6px;font-size:12px;font-weight:800;color:var(--ink-2)}
+.gh:first-of-type{margin-top:14px}
+.u.q{opacity:.55}
+.ellip{padding:7px 10px;font-size:11px;color:var(--ink-2)}
 
 /* ---- 単元を開く ---- */
 .item{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:15px;
@@ -233,23 +249,22 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
 <div class="grid">
 
 <!-- 1 -->
-<div class="fw"><div class="lbl"><b>今日</b> — 初日。鏡はまだ空</div>
+<div class="fw"><div class="lbl"><b>今日</b> — 初日。空きマスの壁を見せない</div>
 <div class="phone"><div class="body">
   <div class="mirror">
-    <div class="top"><span class="n">0</span><span class="of">/ 55 個</span><span class="cap">受験まで 184日</span></div>
-    <div class="strip">
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
+    <div class="top"><span class="n">0</span><span class="of">個 積んだ</span><span class="cap">受験まで 184日</span></div>
+    <div class="near">
+      <span class="nu">中1 正負の数</span>
+      <span class="cells"><i class="c"></i><i class="c"></i></span>
+      <span class="nl">2つで さいしょの🏅</span>
     </div>
   </div>
-  <p class="sub1">受験日の見込みは、同じ観点を日をあけてもう一度できたら出ます</p>
+  <p class="sub1">受験日の見込みは、同じところを日をあけてもう一度できたら出ます</p>
 
   <div class="panel next">
     <span class="tag">つぎはこれ</span>
     <h2>正負の数の四則</h2>
-    <div class="why">ここができると、先の 32個 がつながります</div>
+    <div class="why">ここは、この先いろんなところの土台になります</div>
     <div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i></div>
     <p class="pnote">今日ぶん あと 5つ</p>
     <button class="btn">はじめる</button>
@@ -259,23 +274,14 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
 </div></div>
 
 <!-- 2 -->
-<div class="fw"><div class="lbl"><b>今日</b> — 主役は積み上げ。ペースは1行に落とす</div>
+<div class="fw"><div class="lbl"><b>今日</b> — 上位も下位も同じ形。分母は手の届く単元</div>
 <div class="phone"><div class="body">
   <div class="mirror">
-    <div class="top"><span class="n">32</span><span class="of">/ 55 個</span><span class="cap">受験まで 96日</span></div>
-    <div class="strip">
-      <i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
-      <i class="b g"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i>
-      <i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i>
-    </div>
-    <div class="legend">
-      <span><i style="background:var(--amber)"></i>覚えている</span>
-      <span><i style="background:var(--gold)"></i>完璧</span>
-      <span><i style="background:var(--amber-pale)"></i>薄れてきた</span>
-      <span><i style="background:var(--line)"></i>これから</span>
+    <div class="top"><span class="n">32</span><span class="of">個 積んだ</span><span class="cap">受験まで 96日</span></div>
+    <div class="near">
+      <span class="nu">中3 三平方の定理</span>
+      <span class="cells"><i class="c f"></i><i class="c"></i><i class="c"></i></span>
+      <span class="nl">あと2つ</span>
     </div>
   </div>
   <p class="sub1">このままだと本番で <b>72%</b>。<span class="warn">1日あと1つ</span> 増やせば間に合います</p>
@@ -301,14 +307,11 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
     <p style="margin:0 0 16px;font-size:12.5px;color:var(--ink-2)">5つ積み上げました</p>
   </div>
   <div class="mirror">
-    <div class="top"><span class="n">32</span><span class="of">/ 55 個</span><span class="cap">きのうは 27個</span></div>
-    <div class="strip">
-      <i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i>
-      <i class="b g"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b f"></i><i class="b"></i><i class="b"></i><i class="b g"></i><i class="b"></i>
-      <i class="b new"></i><i class="b new"></i><i class="b new"></i><i class="b new"></i><i class="b new"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i><i class="b e"></i>
-      <i class="b e"></i><i class="b e"></i><i class="b e"></i>
+    <div class="top"><span class="n">32</span><span class="of">個 積んだ</span><span class="cap">きのうは 27個</span></div>
+    <div class="near">
+      <span class="nu">中2 平行と合同</span>
+      <span class="cells"><i class="c d"></i><i class="c d"></i><i class="c d"></i><i class="c d"></i></span>
+      <span class="nl done">🏅 そろった</span>
     </div>
   </div>
   <p style="text-align:center;margin:18px 0 0"><button class="btn-soft">まだやる</button></p>
@@ -421,42 +424,49 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
 </div></div></div>
 
 <!-- 10 -->
-<div class="fw"><div class="lbl"><b>マップ</b> — 55個ぜんぶ。空きが1つずつ見える</div>
+<div class="fw"><div class="lbl"><b>マップ</b> — 近い順に並べる。壁を上に置かない</div>
 <div class="phone tall"><div class="body">
   <div style="display:flex;align-items:baseline;justify-content:space-between">
-    <div><span style="font-size:24px;font-weight:800">32</span> <small style="color:var(--ink-2)">/ 55 個</small></div>
-    <span class="tag">🏅 9 / 21 単元</span>
+    <div><span style="font-size:24px;font-weight:800">🏅 9</span>
+      <small style="color:var(--ink-2)">単元そろった</small></div>
+    <span class="tag">32 個</span>
   </div>
-  <div class="meter" style="margin-top:8px"><i style="width:58%"></i></div>
 
+  <div class="gh">もうすぐそろう</div>
+  <div class="dex">
+    <div class="u near"><span class="un">中2 三角形と四角形</span><span class="cells"><i class="c d"></i><i class="c g"></i><i class="c"></i></span><span class="ct">2/3</span><span class="st">✨</span></div>
+    <div class="u near"><span class="un">中3 多項式</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c"></i></span><span class="ct">2/3</span><span class="st">✨</span></div>
+  </div>
+  <div class="left-note">
+    ✨ <b>あと1つずつ</b>です<br>
+    三角形と四角形 …… 平行四辺形の性質と条件<br>
+    多項式 …… 式の計算の利用
+  </div>
+
+  <div class="gh">いま埋めている</div>
+  <div class="dex">
+    <div class="u"><span class="un">中3 三平方の定理</span><span class="cells"><i class="c f"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
+    <div class="u"><span class="un">中2 一次関数</span><span class="cells"><i class="c d"></i><i class="c f"></i><i class="c"></i><i class="c"></i></span><span class="ct">2/4</span><span class="st"></span></div>
+    <div class="u"><span class="un">中1 空間図形</span><span class="cells"><i class="c d"></i><i class="c"></i></span><span class="ct">1/2</span><span class="st"></span></div>
+    <div class="u"><span class="un">中2 データの活用</span><span class="cells"><i class="c d"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
+    <div class="u"><span class="un">中3 二次方程式</span><span class="cells"><i class="c d"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
+  </div>
+
+  <div class="gh">そろった <span style="color:var(--green-d)">9</span></div>
   <div class="dex">
     <div class="u done"><span class="un">中1 正負の数</span><span class="cells"><i class="c d"></i><i class="c g"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
     <div class="u done"><span class="un">中1 文字と式</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
     <div class="u done"><span class="un">中1 方程式</span><span class="cells"><i class="c d"></i><i class="c f"></i><i class="c d"></i></span><span class="ct">3/3</span><span class="st">🏅</span></div>
-    <div class="u done"><span class="un">中1 比例と反比例</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
-    <div class="u done"><span class="un">中1 平面図形</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
-    <div class="u"><span class="un">中1 空間図形</span><span class="cells"><i class="c d"></i><i class="c"></i></span><span class="ct">1/2</span><span class="st"></span></div>
-    <div class="u done"><span class="un">中1 データの活用</span><span class="cells"><i class="c d"></i><i class="c f"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
-    <div class="u done"><span class="un">中2 式の計算</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c g"></i></span><span class="ct">3/3</span><span class="st">🏅</span></div>
-    <div class="u done"><span class="un">中2 連立方程式</span><span class="cells"><i class="c d"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
-    <div class="u"><span class="un">中2 一次関数</span><span class="cells"><i class="c d"></i><i class="c f"></i><i class="c"></i><i class="c"></i></span><span class="ct">2/4</span><span class="st"></span></div>
     <div class="u done"><span class="un">中2 平行と合同</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c d"></i><i class="c d"></i></span><span class="ct">4/4</span><span class="st">🏅</span></div>
-    <div class="u near"><span class="un">中2 三角形と四角形</span><span class="cells"><i class="c d"></i><i class="c g"></i><i class="c"></i></span><span class="ct">2/3</span><span class="st">✨</span></div>
-    <div class="u"><span class="un">中2 データの活用</span><span class="cells"><i class="c d"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
-    <div class="u near"><span class="un">中3 多項式</span><span class="cells"><i class="c d"></i><i class="c d"></i><i class="c"></i></span><span class="ct">2/3</span><span class="st">✨</span></div>
     <div class="u done"><span class="un">中3 平方根</span><span class="cells"><i class="c g"></i><i class="c d"></i></span><span class="ct">2/2</span><span class="st">🏅</span></div>
-    <div class="u"><span class="un">中3 二次方程式</span><span class="cells"><i class="c d"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
-    <div class="u"><span class="un">中3 関数 y=ax²</span><span class="cells"><i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i></span><span class="ct">0/4</span><span class="st"></span></div>
-    <div class="u"><span class="un">中3 相似</span><span class="cells"><i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i></span><span class="ct">0/4</span><span class="st"></span></div>
-    <div class="u"><span class="un">中3 円</span><span class="cells"><i class="c"></i></span><span class="ct">0/1</span><span class="st"></span></div>
-    <div class="u"><span class="un">中3 三平方の定理</span><span class="cells"><i class="c f"></i><i class="c"></i><i class="c"></i></span><span class="ct">1/3</span><span class="st"></span></div>
-    <div class="u"><span class="un">中3 標本調査</span><span class="cells"><i class="c"></i></span><span class="ct">0/1</span><span class="st"></span></div>
+    <div class="ellip">ほか 4単元</div>
   </div>
 
-  <div class="left-note">
-    ✨ <b>あと1つ</b>で終わる単元が2つあります<br>
-    中2 三角形と四角形 …… 平行四辺形の性質と条件<br>
-    中3 多項式 …… 式の計算の利用
+  <div class="gh">まだ手をつけていない <span style="color:var(--ink-2)">5</span></div>
+  <div class="dex">
+    <div class="u q"><span class="un">中3 関数 y=ax²</span><span class="cells"><i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i></span><span class="ct">0/4</span><span class="st"></span></div>
+    <div class="u q"><span class="un">中3 相似</span><span class="cells"><i class="c"></i><i class="c"></i><i class="c"></i><i class="c"></i></span><span class="ct">0/4</span><span class="st"></span></div>
+    <div class="ellip">ほか 3単元</div>
   </div>
 </div>
 <div class="nav"><div><span class="e">⚡</span>今日</div><div class="on"><span class="e">🗺️</span>マップ</div><div><span class="e">🧱</span>じぶん</div></div>
@@ -494,7 +504,7 @@ body{margin:0;padding:44px 24px 90px;background:var(--page);color:var(--page-ink
 
   <div class="sec">
     <h3>ここができると開くもの</h3>
-    <p class="nt">先につながっている観点</p>
+    <p class="nt">ここが土台になっているところ</p>
     <ul class="lst">
       <li><span class="n2">y = ax² のグラフ</span><span class="t2">中3</span></li>
     </ul>
