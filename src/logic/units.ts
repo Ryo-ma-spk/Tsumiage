@@ -20,6 +20,13 @@ export interface UnitSummary {
   remaining: number;
   /** まだ1つも手をつけていない */
   untouched: boolean;
+  /**
+   * 覚えたはずだが、いま忘れかけている数。
+   *
+   * 「ぜんぶ覚えた」単元でもここは動く。覚えた事実（減らない）と
+   * いま覚えているか（動く）は別の軸なので、ラベルを混ぜない。
+   */
+  fading: number;
 }
 
 /** 観点の並び順（依存から導いた順）を保ったまま、単元ごとにまとめる */
@@ -39,11 +46,15 @@ export function summarizeUnits(statuses: PointStatus[]): UnitSummary[] {
   return order.map((unit) => {
     const points = byUnit.get(unit) ?? [];
     const done = points.filter((s) => s.everMastered).length;
+    const fading = points.filter(
+      (s) => s.everMastered && (s.needsReview || s.freshness < 0.35)
+    ).length;
     return {
       unit,
       points,
       total: points.length,
       done,
+      fading,
       complete: done === points.length && points.length > 0,
       remaining: points.length - done,
       untouched: points.every((s) => s.lastAttemptAt === null),

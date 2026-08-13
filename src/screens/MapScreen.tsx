@@ -40,15 +40,16 @@ export function MapScreen({ statuses, onStart }: Props) {
     <div className="screen">
       <div className="dex-head">
         <div>
-          <span className="n">🏅 {done}</span> <small>単元そろった</small>
+          <span className="n">{builtCount(statuses)}</span> <small>覚えた</small>
         </div>
-        <span className="tag">{builtCount(statuses)} 個</span>
+        <span className="tag">
+          {done} / {units.length} 単元 ぜんぶ
+        </span>
       </div>
 
-      <Group title="もうすぐそろう" units={dex.near} kind="near" onOpen={setOpen} />
+      <Group title="あと1つ" units={dex.near} kind="near" onOpen={setOpen} />
       {dex.near.length > 0 && (
         <p className="dex-note">
-          ✨ <b>あと1つずつ</b>です<br />
           {dex.near.map((u) => {
             const left = u.points.find((s) => !s.everMastered);
             return (
@@ -61,15 +62,15 @@ export function MapScreen({ statuses, onStart }: Props) {
         </p>
       )}
 
-      <Group title="いま埋めている" units={dex.active} onOpen={setOpen} />
+      <Group title="とちゅう" units={dex.active} onOpen={setOpen} />
       <Group
-        title={`そろった ${dex.complete.length}`}
+        title={`ぜんぶ覚えた ${dex.complete.length}`}
         units={dex.complete}
         kind="complete"
         onOpen={setOpen}
       />
       <Group
-        title={`まだ手をつけていない ${dex.untouched.length}`}
+        title={`まだ ${dex.untouched.length}`}
         units={dex.untouched}
         kind="untouched"
         onOpen={setOpen}
@@ -110,7 +111,7 @@ function Group({
               {u.done}/{u.total}
             </span>
             <span className="unit-seal">
-              {u.complete ? "🏅" : u.remaining === 1 ? "✨" : ""}
+              {u.complete ? "✓" : ""}
             </span>
           </button>
         ))}
@@ -182,7 +183,7 @@ function UnitDetail({
 
       {unit.points.some((s) => s.needsFoundation) && (
         <p className="dex-note" style={{ background: "var(--amber-pale)", color: "#7A4600" }}>
-          土台がまだでも、いまやってOKです。ただ、そろってからのほうが早く終わります。
+          土台がまだでも、いまやって大丈夫です。ただ、先に土台をやったほうが早く終わります。
         </p>
       )}
     </div>
@@ -195,11 +196,11 @@ function stateLabel(s: PointStatus): string {
     if (s.level === "solved") return "あと1回";
     return "まだ";
   }
-  if (s.needsReview) return "薄れている";
+  if (s.needsReview) return "忘れかけ";
   if (s.staleAt) {
     const left = Math.max(0, daysBetween(new Date(), s.staleAt));
-    if (left >= 14) return `${Math.round(left / 7)}週間もちます`;
+    if (left >= 14) return `${Math.round(left / 7)}週間もつ見込み`;
     return `あと${left}日`;
   }
-  return "積んだ";
+  return "覚えた";
 }

@@ -7,7 +7,6 @@ import {
   prioritize,
   settledPoints,
   summarize,
-  summarizeToday,
   pickAudit,
   suspectedMisconceptions,
   weakPoints,
@@ -285,98 +284,6 @@ describe("buildQueue — 復習だけで埋めない", () => {
   });
 });
 
-describe("summarizeToday — 今日ぶん", () => {
-  function atTime(pointId: string, iso: string, correct = true): Attempt {
-    return { pointId, at: new Date(iso).toISOString(), correct };
-  }
-
-  // 目標の下限(5)を下回らないよう、開放済みの観点を6つ用意しておく
-  const few = ["a", "b", "c", "d", "e", "f"].map((id) => point(id));
-
-  it("受験日が遠いうちは下限の5に張り付く", () => {
-    expect(summarizeToday(few, [], null, EXAM, NOW).goal).toBe(5);
-  });
-
-  it("受験が近づくと目標が伸びる", () => {
-    const many = Array.from({ length: 60 }, (_, i) => point(`p${i}`));
-    const soon = "2026-08-20"; // 10日後
-
-    expect(summarizeToday(many, [], null, soon, NOW).goal).toBe(6);
-  });
-
-  it("目標は上限の10で止まる", () => {
-    const many = Array.from({ length: 300 }, (_, i) => point(`p${i}`));
-    const soon = "2026-08-20";
-
-    expect(summarizeToday(many, [], null, soon, NOW).goal).toBe(10);
-  });
-
-  it("日中に判定しても、その日の目標は動かない", () => {
-    const many = Array.from({ length: 60 }, (_, i) => point(`p${i}`));
-    const soon = "2026-08-20";
-
-    // 今日20個を定着させて、受験日まで持つ状態にする
-    const todayWork = many
-      .slice(0, 20)
-      .flatMap((p) => [
-        atTime(p.id, "2026-08-05T09:00:00"),
-        atTime(p.id, "2026-08-10T09:00:00"),
-      ]);
-
-    const before = summarizeToday(many, [], null, soon, NOW);
-    const after = summarizeToday(many, todayWork, null, soon, NOW);
-
-    // 必要ペース自体は下がっている（テストが空振りしていないことの確認）
-    const statuses = buildStatuses(many, todayWork, null, NOW);
-    expect(summarize(statuses, todayWork, soon, NOW).requiredPointsPerDay).
-      toBeLessThan(6);
-
-    // それでも今日の目標は据え置き。終わった今日ぶんが未達に戻らない
-    expect(after.goal).toBe(before.goal);
-  });
-
-  it("深夜の判定は前日ぶんに数える", () => {
-    // 4:00 で日を切るので、8/10 の 1:00 は 8/9 の続き
-    const lateNight = new Date("2026-08-10T02:00:00");
-    const attempts = [atTime("a", "2026-08-10T01:00:00")];
-
-    expect(summarizeToday(few, attempts, null, EXAM, lateNight).done).toBe(1);
-  });
-
-  it("4:00 を回れば新しい日として数え直す", () => {
-    const morning = new Date("2026-08-10T06:00:00");
-    const attempts = [atTime("a", "2026-08-10T03:00:00")];
-
-    expect(summarizeToday(few, attempts, null, EXAM, morning).done).toBe(0);
-  });
-
-  it("間違えた観点も「やった」に数える", () => {
-    const attempts = [atTime("a", "2026-08-10T09:00:00", false)];
-
-    expect(summarizeToday(few, attempts, null, EXAM, NOW).done).toBe(1);
-  });
-
-  it("同じ観点を何度振っても1つぶん", () => {
-    const attempts = [
-      atTime("a", "2026-08-10T09:00:00"),
-      atTime("a", "2026-08-10T10:00:00"),
-    ];
-
-    expect(summarizeToday(few, attempts, null, EXAM, NOW).done).toBe(1);
-  });
-
-  it("目標に届いたら完了になる", () => {
-    const many = Array.from({ length: 20 }, (_, i) => point(`p${i}`));
-    const attempts = many
-      .slice(0, 5)
-      .map((p) => atTime(p.id, "2026-08-10T09:00:00"));
-
-    const today = summarizeToday(many, attempts, null, EXAM, NOW);
-
-    expect(today.goal).toBe(5);
-    expect(today.completed).toBe(true);
-  });
-});
 
 describe("dailyShortfall", () => {
   it("足りていれば 0", () => {
@@ -413,25 +320,6 @@ describe("summarize — 始めたばかりのペースを信用しすぎない",
   });
 });
 
-describe("summarizeToday — 出せる数を超える目標を出さない", () => {
-  it("出せる観点が少なければ、目標をその数まで切り下げる", () => {
-    // 5 のままだと、そもそも振れない残数が出続けて永久に未達になる
-    const points = [point("a"), point("b"), point("c")];
-
-    expect(summarizeToday(points, [], null, EXAM, NOW).goal).toBe(3);
-  });
-
-  it("出せるぶんを振れば今日ぶんが完了する", () => {
-    const points = [point("a"), point("b"), point("c")];
-    const attempts = ["a", "b", "c"].map((id) => ({
-      pointId: id,
-      at: new Date("2026-08-10T09:00:00").toISOString(),
-      correct: true,
-    }));
-
-    expect(summarizeToday(points, attempts, null, EXAM, NOW).completed).toBe(true);
-  });
-});
 
 describe("summarize — 「まだ測れない」と「足りない」を混ぜない", () => {
   const points = Array.from({ length: 20 }, (_, i) => point(`p${i}`));

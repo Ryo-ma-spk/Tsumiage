@@ -58,9 +58,9 @@ export function StatsScreen({
       <div className="mirror" style={{ marginTop: 12 }}>
         <div className="mirror-top">
           <span className="mirror-n">{built}</span>
-          <span className="mirror-of">個 積んだ</span>
+          <span className="mirror-of">覚えた</span>
           <span className="mirror-cap">
-            🏅 {sealed} / {units.length} 単元
+            {sealed} / {units.length} 単元 ぜんぶ
           </span>
         </div>
         <div className="strip">
@@ -75,11 +75,11 @@ export function StatsScreen({
           </span>
           <span>
             <i style={{ background: "var(--amber-pale)" }} />
-            薄れてきた {faded}
+            忘れかけ {faded}
           </span>
           <span>
             <i style={{ background: "var(--line)" }} />
-            これから {statuses.length - built}
+            まだ {statuses.length - built}
           </span>
         </div>
       </div>
@@ -91,21 +91,21 @@ export function StatsScreen({
         </div>
         <div className="duo-cell">
           <b>{statuses.length - built}</b>
-          <small>まだ入っていない</small>
+          <small>まだ覚えていない</small>
         </div>
       </div>
 
       {misconceptions.length > 0 && (
         <section className="block">
-          <h3>🔍 勘違いかも</h3>
+          <h3>覚えちがい</h3>
           <p className="block-note">
-            覚えたつもりだったけれど、確認で外したところ
+            覚えているつもりでしたが、確認したら違っていたところ
           </p>
           <ul className="point-list">
             {misconceptions.map((s) => (
               <li key={s.point.id} className="misconception">
                 <span className="point-name">{s.point.name}</span>
-                <span className="point-tag hot">もう一度</span>
+                <span className="point-tag hot">確認する</span>
               </li>
             ))}
           </ul>
@@ -113,8 +113,8 @@ export function StatsScreen({
       )}
 
       <section className="block">
-        <h3>そろそろ薄れそう</h3>
-        <p className="block-note">この順で戻ってきます</p>
+        <h3>そろそろ忘れそう</h3>
+        <p className="block-note">この順で出てきます</p>
         {atRisk.length === 0 ? (
           <p className="empty">いまのところなし</p>
         ) : (
@@ -143,6 +143,6 @@ function staleHot(s: PointStatus): boolean {
 }
 
 function staleLabel(s: PointStatus): string {
-  if (staleHot(s)) return "いま薄れてる";
+  if (staleHot(s)) return "忘れかけ";
   return `あと${daysBetween(new Date(), s.staleAt as string)}日`;
 }

@@ -7,7 +7,7 @@ import { MapScreen } from "./screens/MapScreen";
 import { StatsScreen } from "./screens/StatsScreen";
 import { useStudyStore } from "./hooks/useStudyStore";
 import { buildStatuses } from "./logic/mastery";
-import { pickAudit, pickNext, summarize, summarizeToday } from "./logic/pace";
+import { pickAudit, pickNext, summarize } from "./logic/pace";
 import { CHECKABLE_IDS, CHECKS, POINTS, findFaculty } from "./data/curriculum";
 import type { KnowledgePoint } from "./types";
 import "./app.css";
@@ -35,11 +35,6 @@ export default function App() {
   const summary = useMemo(
     () => summarize(statuses, state.attempts, examDate),
     [statuses, state.attempts, examDate]
-  );
-
-  const today = useMemo(
-    () => summarizeToday(POINTS, state.attempts, faculty, examDate),
-    [state.attempts, faculty, examDate]
   );
 
   const next = useMemo(() => pickNext(statuses), [statuses]);
@@ -105,7 +100,6 @@ export default function App() {
             <TodayScreen
               statuses={statuses}
               summary={summary}
-              today={today}
               next={next}
               onStart={start}
             />

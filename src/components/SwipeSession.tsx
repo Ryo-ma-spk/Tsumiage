@@ -164,31 +164,22 @@ export function SwipeSession({
             <span className="ar">→</span>
             <i style={{ background: "var(--line)" }} />
           </div>
-          <h2>1つ、まだだった</h2>
+          <h2>覚えちがい</h2>
           <div className="fix-name">{missed.point.name}</div>
 
           <div className="fix-ans">
-            <div className="k">えらんだの</div>
+            <div className="k">選んだの</div>
             <div className="picked">{missed.picked}</div>
             <div className="k" style={{ marginTop: 9 }}>
-              ほんとうは
+              正しくは
             </div>
             <div className="right">{missed.right}</div>
           </div>
 
           <p className="fix-note">
-            {missed.wasBuilt ? (
-              <>
-                <b>逆で覚えていました。</b>
-                ここは積んだことになっていた場所なので、放っておくと
-                いちばん出てこなくなるところでした。見つかってよかったやつです。
-              </>
-            ) : (
-              <>
-                <b>逆で覚えていました。</b>
-                こういうのは自分では気づけないので、たまに確認しています。
-              </>
-            )}
+            {missed.wasBuilt
+              ? "「覚えた」に入っていましたが、逆でした。このままだと、いちばん出てこないところになります。"
+              : "逆で覚えていたようです。自分では気づけないので、ときどき確認しています。"}
           </p>
 
           <button className="btn-primary" onClick={() => setMissed(null)}>
@@ -225,8 +216,8 @@ export function SwipeSession({
 
         {followUp.length > 0 && (
           <p className="done-followup">
-            🤔 と 🔍 の{followUp.length}つは、教科書や問題集で当たり直しておくと、
-            次に出てきたとき戻せます。
+            できなかった{followUp.length}つは、教科書や問題集で確認しておくと、
+            次に出てきたときに戻せます。
           </p>
         )}
 
@@ -267,7 +258,7 @@ export function SwipeSession({
         /* ---- 確認カード。テストではなく、鏡のゆがみを見ている ---- */
         <>
           <div className="check-head">
-            🔍 たまに、ほんとうに合っているか見ています
+            ときどき、答えと突き合わせています
           </div>
           <p className="check-q">{check.prompt}</p>
           <div className="check-opts">
@@ -307,15 +298,15 @@ export function SwipeSession({
 
           {/* 上スワイプと同じ向きに置いて、位置で意味が分かるようにする */}
           <button className="btn-perfect" onClick={() => commit(true, { perfect: true })}>
-            ⭐️ 完璧
+            ★ 完璧
           </button>
 
           <div className="session-actions">
             <button className="round-btn ng" onClick={() => commit(false)}>
-              <span className="em">🤔</span>あやしい
+              <span className="em">✗</span>あやしい
             </button>
             <button className="round-btn ok" onClick={() => commit(true)}>
-              <span className="em">👍</span>できた
+              <span className="em">✓</span>できた
             </button>
           </div>
 
@@ -323,10 +314,10 @@ export function SwipeSession({
             {results.length > 0 ? (
               <button className="btn-undo" onClick={undo}>
                 <Undo2 size={15} />
-                1つもどす
+                取り消す
               </button>
             ) : (
-              <p className="session-hint">左右・上にスワイプでもOK</p>
+              <p className="session-hint">左右・上にスワイプでも判定できます</p>
             )}
           </div>
         </>
@@ -336,12 +327,12 @@ export function SwipeSession({
 }
 
 function resultEmoji(r: Result): string {
-  if (r.audit) return "🔍";
-  if (!r.correct) return "🤔";
-  return r.perfect ? "⭐️" : "👍";
+  if (r.audit) return r.correct ? "✓" : "✗";
+  if (!r.correct) return "✗";
+  return r.perfect ? "★" : "✓";
 }
 function resultLabel(r: Result): string {
-  if (r.audit) return r.correct ? "合ってた" : "まだだった";
+  if (r.audit) return r.correct ? "合っていた" : "覚えちがい";
   if (!r.correct) return "あやしい";
   return r.perfect ? "完璧" : "できた";
 }

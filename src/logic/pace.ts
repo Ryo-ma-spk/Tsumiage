@@ -1,5 +1,5 @@
-import type { Attempt, Faculty, KnowledgePoint, PointStatus } from "../types";
-import { buildStatuses, daysBetween } from "./mastery";
+import type { Attempt, KnowledgePoint, PointStatus } from "../types";
+import { daysBetween } from "./mastery";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -29,14 +29,6 @@ export const SESSION_SIZE = 5;
  * 枠のほうを先に決めておく。
  */
 export const SESSION_REVIEW_SLOTS = 3;
-
-/** 1日の区切りにする時刻。深夜に勉強する層がいるので 0:00 では切らない */
-export const DAY_START_HOUR = 4;
-
-/** 今日ぶんの下限。1セッションぶんは必ず出す */
-export const TODAY_MIN_POINTS = 5;
-/** 今日ぶんの上限。これ以上は1日で積んでも続かない */
-export const TODAY_MAX_POINTS = 10;
 
 export interface PaceSummary {
   /** 出題範囲の重み合計 */
@@ -382,69 +374,6 @@ export function suspectedMisconceptions(
   return statuses.filter(
     (s) => s.everMastered && lastAuditResult.get(s.point.id) === false
   );
-}
-
-/** その時刻が属する「学習日」の始まり */
-export function studyDayStart(now: Date = new Date()): Date {
-  const d = new Date(now);
-  if (d.getHours() < DAY_START_HOUR) d.setDate(d.getDate() - 1);
-  d.setHours(DAY_START_HOUR, 0, 0, 0);
-  return d;
-}
-
-export interface TodaySummary {
-  /** 今日踏む観点の目標数 */
-  goal: number;
-  /** 今日すでに触った観点の数 */
-  done: number;
-  completed: boolean;
-}
-
-/**
- * 今日ぶんの目標と進み具合。
- *
- * 目標は「その日の始まりの状態」から出して、日中は動かさない。
- * 途中で復習が切れて目標が伸びると、終わったはずの今日ぶんが
- * 未達に戻ってしまうため。
- *
- * 達成の数え方は正誤を問わない。間違えた日も「やった」に数える。
- */
-export function summarizeToday(
-  points: KnowledgePoint[],
-  attempts: Attempt[],
-  faculty: Faculty | null,
-  examDate: string,
-  now: Date = new Date()
-): TodaySummary {
-  const dayStart = studyDayStart(now);
-  const dayStartMs = dayStart.getTime();
-
-  // 今日の判定を混ぜずに、その日の始まりの状態だけで目標を決める
-  const before = attempts.filter((a) => new Date(a.at).getTime() < dayStartMs);
-  const openingStatuses = buildStatuses(points, before, faculty, dayStart);
-  const inScope = new Set(openingStatuses.map((s) => s.point.id));
-
-  const daysLeft = daysUntilExam(examDate, dayStart);
-  const duePoints = openingStatuses.filter((s) => needsTouchBefore(s, examDate)).length;
-  const perDay = daysLeft === 0 ? duePoints : duePoints / daysLeft;
-
-  // 出せる数より大きな目標を出さない。
-  // today の目標が実際に出せる数を超えると、達成しようのない残数が出続ける。
-  const available = prioritize(openingStatuses, dayStart).length;
-
-  const goal = Math.min(
-    TODAY_MAX_POINTS,
-    Math.max(TODAY_MIN_POINTS, Math.ceil(perDay)),
-    available
-  );
-
-  const touchedToday = new Set(
-    attempts
-      .filter((a) => new Date(a.at).getTime() >= dayStartMs && inScope.has(a.pointId))
-      .map((a) => a.pointId)
-  );
-
-  return { goal, done: touchedToday.size, completed: touchedToday.size >= goal };
 }
 
 /**

@@ -207,6 +207,9 @@ button {
 .near-left.done {
   color: var(--green-d);
 }
+.near-left.fading {
+  color: var(--amber-d);
+}
 
 .cell {
   width: 14px;
