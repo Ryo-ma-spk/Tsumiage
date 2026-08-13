@@ -1,11 +1,9 @@
-import { BarChart3, Map, Zap } from "lucide-react";
-
 export type Tab = "today" | "map" | "me";
 
-const TABS: { id: Tab; label: string; Icon: typeof Zap }[] = [
-  { id: "today", label: "今日", Icon: Zap },
-  { id: "map", label: "マップ", Icon: Map },
-  { id: "me", label: "じぶん", Icon: BarChart3 },
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: "today", label: "今日", icon: "⚡" },
+  { id: "map", label: "マップ", icon: "🗺️" },
+  { id: "me", label: "じぶん", icon: "🧱" },
 ];
 
 interface Props {
@@ -16,14 +14,21 @@ interface Props {
 export function BottomNav({ active, onChange }: Props) {
   return (
     <nav className="bottom-nav">
-      {TABS.map(({ id, label, Icon }) => (
+      {TABS.map((t) => (
         <button
-          key={id}
-          className={`nav-item ${active === id ? "is-active" : ""}`}
-          onClick={() => onChange(id)}
+          key={t.id}
+          className={active === t.id ? "active" : ""}
+          onClick={() => onChange(t.id)}
         >
-          <Icon size={22} />
-          <span>{label}</span>
+          <span
+            style={{
+              fontSize: 18,
+              filter: active === t.id ? "none" : "grayscale(1) opacity(0.45)",
+            }}
+          >
+            {t.icon}
+          </span>
+          {t.label}
         </button>
       ))}
     </nav>

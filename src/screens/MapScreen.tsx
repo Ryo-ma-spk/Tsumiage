@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Check, Lock, RotateCcw } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import type { KnowledgePoint, PointStatus } from "../types";
-import { SUBJECTS } from "../data/curriculum";
-import { LEVEL_LABEL, daysBetween } from "../logic/mastery";
+import { buildDex, completedUnitCount, summarizeUnits, type UnitSummary } from "../logic/units";
+import { builtCount } from "../logic/units";
+import { daysBetween } from "../logic/mastery";
+import { cellClass } from "../components/pointVisual";
 
 interface Props {
   statuses: PointStatus[];
@@ -10,164 +12,194 @@ interface Props {
 }
 
 /**
- * 観点の依存関係をそのまま1本道として見せる画面。
- * 並び順は `buildStatuses` が依存関係から導いた順序をそのまま使う。
+ * マップ。地図の形にせず、単元ごとの図鑑にする。
  *
- * 「あと何%」は数字ではなく、残っている道の長さで伝える。
- * 一度通ったマスは、鮮度が切れても通ったままにする。
+ * 並びは「もうすぐそろう → いま埋めている → そろった → まだ手つかず」。
+ * 記述順に並べると、始めたばかりの人には空のマスが先に来て壁になる。
  */
 export function MapScreen({ statuses, onStart }: Props) {
-  const available = SUBJECTS.filter((s) =>
-    statuses.some((st) => st.point.subjectId === s.id)
-  );
-  const [subjectId, setSubjectId] = useState(available[0]?.id ?? "");
-  const [selected, setSelected] = useState<PointStatus | null>(null);
+  const [open, setOpen] = useState<string | null>(null);
+  const units = summarizeUnits(statuses);
 
-  const subject = available.find((s) => s.id === subjectId) ?? available[0];
-  const points = statuses.filter((s) => s.point.subjectId === subject?.id);
-
-  const walked = points.filter((s) => s.everMastered);
-  const pct = points.length === 0 ? 0 : (walked.length / points.length) * 100;
-
-  // 単元ごとに区切って表示する（並び自体は依存順のまま）
-  const units: { unit: string; items: PointStatus[] }[] = [];
-  for (const s of points) {
-    const last = units[units.length - 1];
-    if (last && last.unit === s.point.unit) last.items.push(s);
-    else units.push({ unit: s.point.unit, items: [s] });
+  const opened = units.find((u) => u.unit === open);
+  if (opened) {
+    return (
+      <UnitDetail
+        unit={opened}
+        statuses={statuses}
+        onBack={() => setOpen(null)}
+        onStart={onStart}
+      />
+    );
   }
 
-  let row = 0;
+  const dex = buildDex(units);
+  const done = completedUnitCount(units);
 
   return (
     <div className="screen">
-      <div className="subject-chips">
-        {available.map((s) => (
+      <div className="dex-head">
+        <div>
+          <span className="n">🏅 {done}</span> <small>単元そろった</small>
+        </div>
+        <span className="tag">{builtCount(statuses)} 個</span>
+      </div>
+
+      <Group title="もうすぐそろう" units={dex.near} kind="near" onOpen={setOpen} />
+      {dex.near.length > 0 && (
+        <p className="dex-note">
+          ✨ <b>あと1つずつ</b>です<br />
+          {dex.near.map((u) => {
+            const left = u.points.find((s) => !s.everMastered);
+            return (
+              <span key={u.unit}>
+                {u.unit} …… {left?.point.name}
+                <br />
+              </span>
+            );
+          })}
+        </p>
+      )}
+
+      <Group title="いま埋めている" units={dex.active} onOpen={setOpen} />
+      <Group
+        title={`そろった ${dex.complete.length}`}
+        units={dex.complete}
+        kind="complete"
+        onOpen={setOpen}
+      />
+      <Group
+        title={`まだ手をつけていない ${dex.untouched.length}`}
+        units={dex.untouched}
+        kind="untouched"
+        onOpen={setOpen}
+      />
+    </div>
+  );
+}
+
+function Group({
+  title,
+  units,
+  kind = "",
+  onOpen,
+}: {
+  title: string;
+  units: UnitSummary[];
+  kind?: string;
+  onOpen: (unit: string) => void;
+}) {
+  if (units.length === 0) return null;
+  return (
+    <>
+      <div className="dex-group">{title}</div>
+      <div className="dex-list">
+        {units.map((u) => (
           <button
-            key={s.id}
-            className={`chip ${s.id === subject?.id ? "is-active" : ""}`}
-            style={
-              s.id === subject?.id
-                ? { background: s.color, borderColor: s.color }
-                : { borderColor: `${s.color}66`, color: s.color }
-            }
-            onClick={() => setSubjectId(s.id)}
+            key={u.unit}
+            className={`unit-row ${kind}`}
+            onClick={() => onOpen(u.unit)}
           >
-            {s.name}
+            <span className="unit-name">{u.unit}</span>
+            <span className="unit-cells">
+              {u.points.map((s) => (
+                <i key={s.point.id} className={`cell ${cellClass(s)}`} />
+              ))}
+            </span>
+            <span className="unit-count">
+              {u.done}/{u.total}
+            </span>
+            <span className="unit-seal">
+              {u.complete ? "🏅" : u.remaining === 1 ? "✨" : ""}
+            </span>
           </button>
         ))}
       </div>
+    </>
+  );
+}
 
-      <div className="map-progress">
-        <div className="map-progress-track">
-          <div
-            className="map-progress-fill"
-            style={{ width: `${pct}%`, background: subject?.color }}
-          />
-        </div>
-        <div className="map-progress-text">
-          {walked.length} / {points.length} 観点
-          <strong>{Math.round(pct)}%</strong>
-        </div>
+/** 単元を開いたとき。何を土台にしているかを名前で出す */
+function UnitDetail({
+  unit,
+  statuses,
+  onBack,
+  onStart,
+}: {
+  unit: UnitSummary;
+  statuses: PointStatus[];
+  onBack: () => void;
+  onStart: (points: KnowledgePoint[]) => void;
+}) {
+  const byId = new Map(statuses.map((s) => [s.point.id, s]));
+
+  return (
+    <div className="screen">
+      <button className="btn-ghost" onClick={onBack}>
+        <ChevronLeft size={14} style={{ verticalAlign: -2 }} /> もどる
+      </button>
+
+      <div className="unit-detail-head" style={{ marginTop: 14 }}>
+        <span className="t">{unit.unit}</span>
+        <span className="tag">
+          {unit.done} / {unit.total}
+        </span>
+      </div>
+      <div className="meter">
+        <i style={{ width: `${(unit.done / unit.total) * 100}%` }} />
       </div>
 
-      <div className="path">
-        {units.map(({ unit, items }, unitIndex) => (
-          <div key={`${unit}-${unitIndex}`} className="path-unit">
-            <div className="unit-title">{unit}</div>
-            {items.map((s) => (
-              <div
-                key={s.point.id}
-                className="path-row"
-                style={{ transform: `translateX(${offsetFor(row++)}px)` }}
-              >
-                <button
-                  className={`node ${nodeClass(s)}`}
-                  style={
-                    s.everMastered
-                      ? { background: subject?.color, borderColor: subject?.color }
-                      : undefined
-                  }
-                  onClick={() => setSelected(s)}
-                >
-                  {s.needsFoundation && s.level === "untouched" ? (
-                    <Lock size={20} />
-                  ) : s.everMastered && s.needsReview ? (
-                    <RotateCcw size={20} />
-                  ) : s.everMastered ? (
-                    <Check size={22} />
-                  ) : (
-                    <span className="node-weight">{"★".repeat(s.weight)}</span>
-                  )}
-                </button>
-                <div className="node-label">{s.point.name}</div>
+      <div style={{ marginTop: 15 }}>
+        {unit.points.map((s) => (
+          <div key={s.point.id}>
+            <button
+              className="point-row"
+              style={{ width: "100%" }}
+              onClick={() => onStart([s.point])}
+            >
+              <i className={`dot ${cellClass(s)}`} />
+              <span className="nm">{s.point.name}</span>
+              <span className="tg">{stateLabel(s)}</span>
+            </button>
+            {s.point.prereqIds.length > 0 && (
+              <div className="foundation">
+                {s.point.prereqIds.map((id) => {
+                  const k = byId.get(id);
+                  if (!k) return null;
+                  const ok = k.everMastered;
+                  return (
+                    <div key={id}>
+                      {ok ? <span className="ok">✓</span> : "○"} {k.point.name}{" "}
+                      <span className="gr">{k.point.unit.slice(0, 2)}</span>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+            )}
           </div>
         ))}
       </div>
 
-      {selected && (
-        <div className="sheet-backdrop" onClick={() => setSelected(null)}>
-          <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-handle" />
-            <div className="sheet-unit">{selected.point.unit}</div>
-            <h3>{selected.point.name}</h3>
-            <div className="sheet-tags">
-              <span className={`tag ${nodeClass(selected)}`}>
-                {selected.everMastered && selected.needsReview
-                  ? "薄れている"
-                  : LEVEL_LABEL[selected.level]}
-              </span>
-              <span className="tag">頻出度 {"★".repeat(selected.weight)}</span>
-              <span className="tag">正答 {selected.correctCount} 回</span>
-            </div>
-
-            {selected.everMastered && (
-              <p className="sheet-note walked">
-                通過済み。{freshnessNote(selected)}
-              </p>
-            )}
-
-            {selected.needsFoundation && (
-              <p className="sheet-note">
-                土台がまだです。ここが苦しいときは、先に前の観点を見直すと早いかもしれません。
-              </p>
-            )}
-            {(
-              <button
-                className="btn-primary wide"
-                onClick={() => {
-                  onStart([selected.point]);
-                  setSelected(null);
-                }}
-              >
-                この観点をやる
-              </button>
-            )}
-          </div>
-        </div>
+      {unit.points.some((s) => s.needsFoundation) && (
+        <p className="dex-note" style={{ background: "var(--amber-pale)", color: "#7A4600" }}>
+          土台がまだでも、いまやってOKです。ただ、そろってからのほうが早く終わります。
+        </p>
       )}
     </div>
   );
 }
 
-function freshnessNote(status: PointStatus): string {
-  if (status.staleAt === null) return "いまは取りこぼしています";
-  const left = daysBetween(new Date(), status.staleAt);
-  if (left <= 0) return "そろそろ薄れている頃です";
-  return `あと${left}日は覚えている見込みです`;
-}
-
-/** 一本道に見せるための左右の振れ幅 */
-function offsetFor(index: number): number {
-  return Math.round(Math.sin(index * 0.9) * 46);
-}
-
-function nodeClass(s: PointStatus): string {
-  // 土台が未達でも触れる。見た目だけ控えめにする
-  if (s.needsFoundation && s.level === "untouched") return "locked";
-  if (s.everMastered && s.needsReview) return "review";
-  if (s.everMastered) return "mastered";
-  return s.level;
+function stateLabel(s: PointStatus): string {
+  if (!s.everMastered) {
+    if (s.level === "touched") return "あやしい";
+    if (s.level === "solved") return "あと1回";
+    return "まだ";
+  }
+  if (s.needsReview) return "薄れている";
+  if (s.staleAt) {
+    const left = Math.max(0, daysBetween(new Date(), s.staleAt));
+    if (left >= 14) return `${Math.round(left / 7)}週間もちます`;
+    return `あと${left}日`;
+  }
+  return "積んだ";
 }

@@ -40,12 +40,24 @@ export function useStudyStore() {
   }, []);
 
   const recordAttempt = useCallback(
-    (pointId: string, correct: boolean, latencyMs?: number, perfect?: boolean) => {
+    (
+      pointId: string,
+      correct: boolean,
+      latencyMs?: number,
+      opts?: { perfect?: boolean; audit?: boolean }
+    ) => {
       setState((prev) => ({
         ...prev,
         attempts: [
           ...prev.attempts,
-          { pointId, correct, at: new Date().toISOString(), latencyMs, perfect },
+          {
+            pointId,
+            correct,
+            at: new Date().toISOString(),
+            latencyMs,
+            perfect: opts?.perfect || undefined,
+            audit: opts?.audit || undefined,
+          },
         ],
       }));
     },

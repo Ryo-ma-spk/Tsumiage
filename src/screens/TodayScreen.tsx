@@ -1,8 +1,18 @@
-import { Play } from "lucide-react";
 import type { KnowledgePoint, PointStatus } from "../types";
-import { buildQueue, dailyShortfall, type PaceSummary, type TodaySummary } from "../logic/pace";
+import {
+  buildQueue,
+  dailyShortfall,
+  type PaceSummary,
+  type TodaySummary,
+} from "../logic/pace";
 import { daysBetween } from "../logic/mastery";
-import { SUBJECT_BY_ID } from "../data/curriculum";
+import {
+  builtCount,
+  focusUnit,
+  summarizeUnits,
+  type UnitSummary,
+} from "../logic/units";
+import { cellClass } from "../components/pointVisual";
 
 interface Props {
   statuses: PointStatus[];
@@ -14,94 +24,70 @@ interface Props {
 
 /**
  * 今日やることを1つだけ出す画面。
- * 選択肢を並べない。決めるのはアプリ側の仕事。
  *
- * 今日ぶんを踏み終えたら、はっきり終わりだと言い切る。
- * 終わりが来ないと、どれだけ進んでも安心には変わらない。
+ * いちばん大きいのは「積んだ数」。受験日の見込みは1行に落とす。
+ * このアプリの性格は「自分が覚えたことの可視化」であって、
+ * 間に合うかどうかの予測は主役ではないため。
  */
 export function TodayScreen({ statuses, summary, today, next, onStart }: Props) {
   const queue = buildQueue(statuses);
-  const subject = next ? SUBJECT_BY_ID.get(next.point.subjectId) : undefined;
+  const units = summarizeUnits(statuses);
+  const focus = focusUnit(units, next);
+  const built = builtCount(statuses);
   const shortfall = dailyShortfall(summary);
-
-  const signal = !summary.measurable
-    ? { text: "まだ測っていません", tone: "idle" }
-    : summary.projectedPct >= 95
-    ? { text: "間に合う", tone: "good" }
-    : summary.projectedPct >= 75
-    ? { text: "きわどい", tone: "warn" }
-    : { text: "このままだと足りない", tone: "bad" };
 
   return (
     <div className="screen">
-      <header className="today-head">
-        <div className="countdown">
-          受験まで <strong>{summary.daysLeft}</strong> 日
-        </div>
-        <div className={`signal ${signal.tone}`}>
-          {summary.measurable ? (
-            <span className="signal-pct">
-              {Math.round(summary.projectedPct)}%
-            </span>
-          ) : (
-            <span className="signal-pct signal-pct-idle">—</span>
-          )}
-          <span className="signal-text">{signal.text}</span>
-        </div>
-        <p className="signal-sub">
-          {!summary.measurable
-            ? "同じ観点を、日をあけてもう一度できたら見込みが出せます"
-            : shortfall > 0
-            ? `1日あと ${shortfall}つ 増やせば間に合います`
-            : "今のペースのまま受験日を迎えたときに、覚えている見込みの割合"}
-        </p>
-      </header>
+      <Mirror
+        built={built}
+        focus={focus}
+        caption={`受験まで ${summary.daysLeft}日`}
+      />
+
+      <p className="signal-line">
+        {!summary.measurable
+          ? "受験日の見込みは、同じところを日をあけてもう一度できたら出ます"
+          : shortfall > 0
+          ? `このままだと本番で ${Math.round(summary.projectedPct)}%。` +
+            `1日あと${shortfall}つ 増やせば間に合います`
+          : `このままだと本番で ${Math.round(summary.projectedPct)}%。間に合います`}
+      </p>
 
       {!next ? (
-        <section className="next-card">
-          <h2 className="next-name">今日ぶんは終わりました</h2>
+        <section className="panel next-card">
+          <h2 className="next-name">ぜんぶ そろっています</h2>
           <p className="next-reason">
-            出題範囲はすべて、受験日まで持つ見込みです。
+            いまのところ、受験日まで持つ見込みです。
           </p>
         </section>
       ) : today.completed ? (
-        <section className="next-card done">
-          <h2 className="next-name">今日ぶん、終わりました</h2>
-          <div className="today-dots" aria-hidden>
-            {Array.from({ length: today.goal }, (_, i) => (
-              <span key={i} className="today-dot filled" />
-            ))}
+        <section className="panel next-card">
+          <div className="done-hero">
+            <div className="em">🧱</div>
+            <h2>今日ぶん、おわり</h2>
+            <p>{today.goal}つ積み上げました</p>
+            <button className="btn-ghost" onClick={() => onStart(queue)}>
+              まだやる
+            </button>
           </div>
-          <p className="next-reason">ここまで {Math.round(summary.progressPct)}% 踏破</p>
-
-          <button className="btn-ghost" onClick={() => onStart(queue)}>
-            まだやる
-          </button>
         </section>
       ) : (
-        <section className="next-card">
-          <div className="next-label">つぎはこれ</div>
-          <div className="next-subject" style={{ color: subject?.color }}>
-            {subject?.name} ・ {next.point.unit}
-          </div>
+        <section className="panel next-card">
+          <span className="tag">つぎはこれ</span>
           <h2 className="next-name">{next.point.name}</h2>
           <div className="next-reason">{reasonFor(next)}</div>
 
-          <div className="today-dots" aria-hidden>
+          <div className="pips" aria-hidden>
             {Array.from({ length: today.goal }, (_, i) => (
-              <span
-                key={i}
-                className={`today-dot ${i < today.done ? "filled" : ""}`}
-              />
+              <span key={i} className={`pip ${i < today.done ? "on" : ""}`} />
             ))}
           </div>
-          <p className="today-remain">
+          <p className="pips-note">
             今日ぶん あと {Math.max(0, today.goal - today.done)}つ
           </p>
 
-          <button className="btn-primary wide" onClick={() => onStart(queue)}>
-            <Play size={20} />
-            {queue.length}問はじめる
+          <button className="btn-primary" onClick={() => onStart(queue)}>
+            はじめる
           </button>
         </section>
       )}
@@ -109,25 +95,69 @@ export function TodayScreen({ statuses, summary, today, next, onStart }: Props) 
   );
 }
 
+/**
+ * 積んだ数と、いま埋めている単元。
+ *
+ * 分母に全体（55個）を置かない。同じ 3/55 が、上位層には燃料になり
+ * 下位層には壁になるため。分母はいつも手の届く単元にする。
+ */
+export function Mirror({
+  built,
+  focus,
+  caption,
+}: {
+  built: number;
+  focus: UnitSummary | null;
+  caption: string;
+}) {
+  return (
+    <div className="mirror">
+      <div className="mirror-top">
+        <span className="mirror-n">{built}</span>
+        <span className="mirror-of">個 積んだ</span>
+        <span className="mirror-cap">{caption}</span>
+      </div>
+
+      {focus && (
+        <div className="near">
+          <span className="near-unit">{focus.unit}</span>
+          <span className="near-cells">
+            {focus.points.map((s) => (
+              <i key={s.point.id} className={`cell ${cellClass(s)}`} />
+            ))}
+          </span>
+          <span className={`near-left ${focus.complete ? "done" : ""}`}>
+            {focus.complete
+              ? "🏅 そろった"
+              : built === 0
+              ? `${focus.remaining}つで さいしょの🏅`
+              : `あと${focus.remaining}つ`}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function reasonFor(status: PointStatus): string {
   if (status.everMastered && status.needsReview) {
-    return "一度は思い出せていた観点。取り戻すのは早い";
+    return "一度は思い出せていたところ。取り戻すのは早い";
   }
-  if (status.level === "touched") return "前回つまずいた観点";
-  if (status.level === "solved") return "あと1回で定着";
+  if (status.level === "touched") return "前回つまずいたところ";
+  if (status.level === "solved") return "あと1回で自分のものになります";
 
   if (status.level === "mastered" && status.staleAt) {
     const left = Math.max(0, daysBetween(new Date(), status.staleAt));
     return `あと${left}日で薄れる見込み。いま戻すと長く持ちます`;
   }
 
-  // 先が大きく開く観点は、頻出であることより「進める」ほうが効く
+  if (status.needsFoundation) {
+    return "土台がまだですが、やってもOKです";
+  }
   if (status.descendants >= 3) {
-    return `ここを踏むと、先の${status.descendants}観点に進めます`;
+    return "ここは、この先いろんなところの土台になります";
   }
-  if (status.weight >= 3) return "志望校でよく出る観点";
-  if (status.descendants > 0) {
-    return `ここを踏むと、先の${status.descendants}観点に進めます`;
-  }
-  return "まだ手をつけていない観点";
+  if (status.weight >= 3) return "志望校でよく出るところ";
+  return "まだ手をつけていないところ";
 }
