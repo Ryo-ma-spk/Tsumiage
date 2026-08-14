@@ -310,3 +310,47 @@ describe("「完璧」は保持を伸ばすだけで、忘却からは外さな�
     expect(evaluate(attempts, NOW).level).toBe("touched");
   });
 });
+
+describe("毎日ひらく人が損をしない", () => {
+  it("毎日やっても、3日またげば定着する", () => {
+    // 直近2回の間隔で見ていたころ、この人は永久に solved のままだった。
+    // 毎日やれば直前との間隔はいつも1日になるため
+    const daily = evaluate(
+      [
+        at("2026-08-01", true),
+        at("2026-08-02", true),
+        at("2026-08-03", true),
+        at("2026-08-04", true),
+      ],
+      NOW
+    );
+
+    expect(daily.level).toBe("mastered");
+  });
+
+  it("3日あけて2回だけの人と、同じ日に定着する", () => {
+    const sparse = evaluate([at("2026-08-01", true), at("2026-08-04", true)], NOW);
+    const daily = evaluate(
+      [at("2026-08-01", true), at("2026-08-02", true), at("2026-08-04", true)],
+      NOW
+    );
+
+    expect(sparse.everMastered).toBe(true);
+    expect(daily.everMastered).toBe(true);
+    expect(daily.firstMasteredAt).toBe(sparse.firstMasteredAt);
+  });
+
+  it("2日しかまたいでいなければ、何回やっても定着しない", () => {
+    const result = evaluate(
+      [
+        at("2026-08-01", true),
+        at("2026-08-01 20:00", true),
+        at("2026-08-02", true),
+        at("2026-08-03", true),
+      ],
+      NOW
+    );
+
+    expect(result.level).toBe("solved");
+  });
+});

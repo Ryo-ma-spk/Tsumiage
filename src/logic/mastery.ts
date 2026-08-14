@@ -97,12 +97,22 @@ export interface Evaluation {
   correctCount: number;
 }
 
-/** 直前の正答から数えて、この正答で定着に届くか */
+/**
+ * この正答で定着に届くか。
+ *
+ * 見るのは「連続正答の最初から最後まで何日またいだか」。
+ * 直前の1回との間隔で見ていたころは、**毎日開く人が永久に定着しなかった**。
+ * 毎日やれば直前との間隔はいつも1日なので、条件を満たしようがない。
+ * いちばん熱心な人がいちばん損をする判定になっていた。
+ *
+ * 3日以上またいで2回以上できていれば、時間をまたいで保持できている。
+ * 途中で何回やったかは問わない。
+ */
 function reachesMastery(streak: Attempt[]): boolean {
   if (streak.length < MASTERED_CORRECT_COUNT) return false;
+  const first = streak[0];
   const last = streak[streak.length - 1];
-  const prev = streak[streak.length - 2];
-  return daysBetween(prev.at, last.at) >= MASTERED_SPAN_DAYS;
+  return daysBetween(first.at, last.at) >= MASTERED_SPAN_DAYS;
 }
 
 /**
